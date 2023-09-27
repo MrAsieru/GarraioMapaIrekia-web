@@ -1,0 +1,27 @@
+<ion-content>
+  <ion-list *ngIf="paradas.length > 0">
+    <ion-list-header>
+      <ion-label>Paradas</ion-label>
+    </ion-list-header>
+    <ion-item *ngFor="let p of paradas">
+      <ion-avatar slot="start">
+        <ion-img src="https://i.pravatar.cc/300?u=a"></ion-img>
+      </ion-avatar>
+      <ion-label>
+        <h2>{{p.stop_name}}</h2>
+        <h2 *ngIf="p.platform_code != null">[{{p.platform_code}}]</h2>
+      </ion-label>
+    </ion-item>
+  </ion-list>
+  <ion-list *ngIf="lineas.length > 0">
+    <ion-list-header>
+      <ion-label><b>Lineas</b></ion-label>
+    </ion-list-header>
+    <ion-item *ngFor="let l of lineas">
+      <ion-chip [ngStyle]="{'background': l.route_color, 'color': l.route_text_color}">{{l.route_id}}</ion-chip>
+      <ion-label>
+        <h2>{{l.name}}</h2>
+      </ion-label>
+    </ion-item>
+  </ion-list>
+</ion-content>
