@@ -1,6 +1,8 @@
-export class Route {
+import { Agency } from "./agency.model";
+
+export interface Route {
     route_id: string;
-    agency?: string;
+    agency?: Agency;
     name: Name;
     desc?: string;
     type?: number;
@@ -10,12 +12,12 @@ export class Route {
     network_id?: string;
 }
 
-export class Name {
-    short: string;
-    long: string;
+export interface Name {
+    short?: string;
+    long?: string;
 }
 
-export class RouteColor {
+export interface RouteColor {
     color: string;
     text: string;
 }

@@ -1,0 +1,18 @@
+<ion-header>
+  <h2 *ngIf="linea">{{linea.name.short}}{{(linea.name.short && linea.name.long) ? ' - ' : ''}}{{linea.name.long}}</h2>
+  <h2 *ngIf="parada">{{parada.name}}{{(parada.platform_code) ? '['+parada.platform_code+']' : ''}}</h2>
+</ion-header>
+<ion-content class="ion-padding">
+  <ion-content *ngIf="linea">
+    <strong>Descripción:</strong> {{linea.desc}}<br/>
+    <strong>Tipo:</strong> {{linea.type}}<br/>
+    <strong>Agencia:</strong> <a href="${linea.agency?.url}">{{linea.agency?.name}}</a><br/>
+    <strong>Red:</strong> {{linea.network_id}}
+  </ion-content>
+  <ion-content *ngIf="parada">
+    <strong>Código:</strong> {{parada.code}}<br/>
+    <strong>Descripción:</strong> {{parada.desc}}<br/>
+    <strong>Zona:</strong> {{parada.zone_id}}<br/>
+    <strong>Tipo:</strong> {{parada.location_type}}<br/>
+    <strong>Acceso en silla de ruedas:</strong> {{parada.wheelchair_boarding}}<br/>
+</ion-content>

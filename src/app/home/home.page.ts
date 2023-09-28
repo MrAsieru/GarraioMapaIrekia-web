@@ -1,21 +1,25 @@
 import { Component, OnInit } from '@angular/core';
 import { IonicModule, ModalController } from '@ionic/angular';
-import maplibregl from 'maplibre-gl';
-import { ModalClickComponent } from '../modal-click/modal-click.component';
-import { ShapeVectorProperties } from 'src/models/shape.model';
-import { StopVectorProperties } from 'src/models/stop.model';
+import maplibregl, { PointLike } from 'maplibre-gl';
+import { ModalListaLineasParadasComponent } from '../modal-lista-lineasparadas/modal-lista-lineasparadas.component';
+import { ShapeVectorProperties } from 'src/app/models/shape.model';
+import { StopVectorProperties } from 'src/app/models/stop.model';
+import { BehaviorSubject, Subject } from 'rxjs';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-home',
   templateUrl: 'home.page.html',
-  styleUrls: ['home.page.scss'],
   standalone: true,
   imports: [IonicModule],
 })
 export class HomePage implements OnInit {
+  modalListaLineasParadasDatos: BehaviorSubject<{lineas: ShapeVectorProperties[], paradas: StopVectorProperties[]}> | null;
   constructor(private modalCtrl: ModalController) {}
 
   ngOnInit() {
+    this.modalListaLineasParadasDatos = null;
+
     var map = new maplibregl.Map({
       container: 'map',
       style: {
@@ -45,7 +49,7 @@ export class HomePage implements OnInit {
       map.resize();
       map.addSource('bizkaibus_source', {
         type: 'vector',
-        tiles: ['http://192.168.1.10:3000/bizkaibus/{z}/{x}/{y}'],
+        tiles: [environment.tilesUrl+'/bizkaibus/{z}/{x}/{y}'],
         maxzoom: 18
       });
 
@@ -107,7 +111,9 @@ export class HomePage implements OnInit {
       // });
 
       map.on('click', (e) => {
-        const features = map.queryRenderedFeatures(e.point);
+        const ne: PointLike = [e.point.x + 10, e.point.y - 10];
+        const sw: PointLike = [e.point.x - 10, e.point.y + 10];
+        const features = map.queryRenderedFeatures([ne, sw]);
 
         var lineas: ShapeVectorProperties[] = [];
         features?.filter(f => f.layer.id === 'bizkaibus_lineas').map(f => f.properties as ShapeVectorProperties).forEach(f => {
@@ -126,13 +132,23 @@ export class HomePage implements OnInit {
   }
 
   async mostrarModal(lineas: ShapeVectorProperties[], paradas: StopVectorProperties[]) {
-    const modal = await this.modalCtrl.create({
-      component: ModalClickComponent,
-      mode: 'md',
-      initialBreakpoint: 0.25,
-      breakpoints: [0, 0.25, 0.5, 0.75],
-      componentProps: { lineas: lineas, paradas: paradas }
-    });
-    modal.present();
+    if (this.modalListaLineasParadasDatos === null) {
+      this.modalListaLineasParadasDatos = new BehaviorSubject<{lineas: ShapeVectorProperties[], paradas: StopVectorProperties[]}>({lineas: lineas, paradas: paradas});
+      const modal = await this.modalCtrl.create({
+        component: ModalListaLineasParadasComponent,
+        mode: 'md',
+        initialBreakpoint: 0.25,
+        backdropDismiss: false,
+        backdropBreakpoint: 0.5,
+        breakpoints: [0, 0.25, 0.5, 0.75, 1],
+        componentProps: { datos: this.modalListaLineasParadasDatos.asObservable() }
+      });
+      modal.present();
+      modal.onDidDismiss().then(() => {
+        this.modalListaLineasParadasDatos = null;
+      });
+    } else {
+      this.modalListaLineasParadasDatos.next({lineas: lineas, paradas: paradas});
+    }
   }
 }
