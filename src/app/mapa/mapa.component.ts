@@ -167,12 +167,12 @@ export class MapaComponent implements OnInit {
       const features = this.map.queryRenderedFeatures([ne, sw]);
 
       var lineas: ShapeVectorProperties[] = [];
-      features?.filter(f => f.layer.id === 'bizkaibus_lineas').map(f => f.properties as ShapeVectorProperties).forEach(f => {
+      features?.filter(f => f.layer.id.endsWith("_lineas")).map(f => f.properties as ShapeVectorProperties).forEach(f => {
         if (!lineas.some(l => l.route_id === f.route_id)) {
           lineas.push(f);
         }
       });
-      var paradas: StopVectorProperties[] = features?.filter(f => f.layer.id === 'bizkaibus_paradas').map(f => f.properties as StopVectorProperties);
+      var paradas: StopVectorProperties[] = features?.filter(f => f.layer.id.endsWith("_paradas")).map(f => f.properties as StopVectorProperties);
       console.log(lineas)
       console.log(paradas)
 
