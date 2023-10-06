@@ -18,6 +18,6 @@ export interface Name {
 }
 
 export interface RouteColor {
-    color: string;
-    text: string;
+    color?: string;
+    text?: string;
 }

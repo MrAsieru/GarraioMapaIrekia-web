@@ -1,5 +1,35 @@
-<ion-content>
-  <div id="container">
-    <div id='map' style="height: 100vh;"></div>
-  </div>
+<ion-menu contentId="home-content">
+  <ion-header>
+    <ion-toolbar>
+      <ion-title>Filtrar líneas</ion-title>
+    </ion-toolbar>
+  </ion-header>
+  <ion-content class="ion-padding">
+    <ion-checkbox #chkbox_home_menu_agencias labelPlacement="end" justify="start" [checked]="agenciasCheckboxChecked" [indeterminate]="agenciasCheckboxIndeterminate" (ionChange)="agenciaTodosCheckboxClick($event, $any($event).detail)" (click)="$event.stopPropagation()">Mostrar todas</ion-checkbox>
+    <ion-accordion-group [multiple]="true">
+      <ion-accordion *ngFor="let agencia of listaAgenciasLineas" [value]="agencia.agency_id">
+        <ion-item slot="header" color="light">
+          <ion-checkbox labelPlacement="end" justify="start" [checked]="agencia.mostrar" [value]="agencia.agency_id" (ionChange)="agenciaCheckboxClick($event, $any($event).detail)" (click)="$event.stopPropagation()">{{agencia.name}}</ion-checkbox>
+        </ion-item>
+        <div class="ion-padding" slot="content">
+          <ion-list>
+            <ion-item *ngFor="let linea of agencia.routes">
+              <ion-label>{{linea.name.short}}{{(linea.name.short && linea.name.long) ? ' - ' : ''}}{{linea.name.long}}</ion-label>
+              <ion-button fill="clear">
+                <ion-icon slot="icon-only" src="assets/icon/linea.svg" [style.color]="(linea.color?.color) ? '#'+linea.color?.color : 'black'" (click)="mostrarLinea($event, linea)"></ion-icon>
+              </ion-button>
+            </ion-item>
+          </ion-list>
+        </div>
+      </ion-accordion>
+    </ion-accordion-group>
+  </ion-content>
+</ion-menu>
+<ion-content id="home-content">
+  <ion-fab slot="fixed" vertical="top" horizontal="start">
+    <ion-fab-button size="small" (click)="abrirMenu()">
+      <ion-icon src="assets/icon/linea.svg"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+  <app-mapa></app-mapa>
 </ion-content>

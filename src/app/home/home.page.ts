@@ -1,154 +1,74 @@
-import { Component, OnInit } from '@angular/core';
-import { IonicModule, ModalController } from '@ionic/angular';
-import maplibregl, { PointLike } from 'maplibre-gl';
-import { ModalListaLineasParadasComponent } from '../modal-lista-lineasparadas/modal-lista-lineasparadas.component';
-import { ShapeVectorProperties } from 'src/app/models/shape.model';
-import { StopVectorProperties } from 'src/app/models/stop.model';
-import { BehaviorSubject, Subject } from 'rxjs';
-import { environment } from 'src/environments/environment';
+import { Component, ElementRef, EventEmitter, OnInit, Output, ViewChild } from '@angular/core';
+import { CheckboxChangeEventDetail, IonCheckbox, IonicModule, MenuController } from '@ionic/angular';
+import { MapaComponent } from '../mapa/mapa.component';
+import { AgencyRoutes } from '../models/agency.model';
+import { CommonModule } from '@angular/common';
+import { Route } from '../models/route.model';
+import { AgenciesService } from '../services/agencies.service';
+
 
 @Component({
   selector: 'app-home',
   templateUrl: 'home.page.html',
   standalone: true,
-  imports: [IonicModule],
+  imports: [CommonModule, IonicModule, MapaComponent],
 })
-export class HomePage implements OnInit {
-  modalListaLineasParadasDatos: BehaviorSubject<{lineas: ShapeVectorProperties[], paradas: StopVectorProperties[]}> | null;
-  constructor(private modalCtrl: ModalController) {}
+export class HomePage implements OnInit {  
+  @ViewChild(MapaComponent) mapa: MapaComponent;
+  @ViewChild('chkbox_home_menu_agencias', { read: ElementRef }) agenciasCheckbox: IonCheckbox;
+  agenciasCheckboxChecked: boolean = true;
+  agenciasCheckboxIndeterminate: boolean = false;
+
+  constructor(private menuCtrl: MenuController, private agenciesService: AgenciesService) {}
+
+  listaAgenciasLineas: AgencyRoutes[] = [];
 
   ngOnInit() {
-    this.modalListaLineasParadasDatos = null;
-
-    var map = new maplibregl.Map({
-      container: 'map',
-      style: {
-        'version': 8,
-        'sources': {
-          "osm_source": {
-            "type": "raster",
-            "tiles": ["https://a.tile.openstreetmap.org/{z}/{x}/{y}.png"],
-            "tileSize": 256,
-            "attribution": "&copy; OpenStreetMap Contributors",
-            "maxzoom": 19
-          }
-        },
-        'layers': [
-          {
-            'id': 'osm',
-            'type': 'raster',
-            'source': 'osm_source'
-          }
-        ]
-      },
-      center: [-3, 43.1], // starting position [lng, lat]
-      zoom: 9
+    this.agenciesService.getAgenciesRoutes().subscribe((agencies) => {
+      this.listaAgenciasLineas = agencies;
+      this.listaAgenciasLineas.forEach(agencia => agencia.mostrar = true);
     });
-
-    map.on('load', function () {
-      map.resize();
-      map.addSource('bizkaibus_source', {
-        type: 'vector',
-        tiles: [environment.tilesUrl+'/bizkaibus/{z}/{x}/{y}'],
-        maxzoom: 18
-      });
-
-      const images = [{url:'assets/icon/favicon.png',id:'bus'}]
-      Promise.all(
-        images.map(img => new Promise<void>((resolve, reject) => {
-          map.loadImage(img.url, function (error, res) {
-            if (error) throw error;
-            map.addImage(img.id, res!)
-            resolve();
-          })
-        }))
-      ).then(() => {
-        map.addLayer({
-          'id': 'bizkaibus_paradas', // Nombre de la capa
-          'type': 'symbol',
-          'source': 'bizkaibus_source', // Nombre de la fuente
-          'source-layer': 'paradas', // Nombre de la capa de la fuente
-          'layout': {
-            'icon-image': 'bus'
-          }
-        });
-      });
-
-        
-      map.addLayer({
-        'id': 'bizkaibus_lineas', // Nombre de la capa
-        'type': 'line',
-        'source': 'bizkaibus_source', // Nombre de la fuente
-        'source-layer': 'lineas', // Nombre de la capa de la fuente
-        'layout': {
-          'line-join': 'round',
-          'line-cap': 'round'
-        },
-        'paint': {
-          'line-color': ['get', 'route_color'],
-          'line-width': 2
-        }
-      });
-    });
-
-      // When a click event occurs on a feature in the places layer, open a popup at the
-      // location of the feature, with description HTML from its properties.
-      // map.on('click', 'bizkaibus_lineas', function (e) {
-      //   console.log(e)
-      //   var coordinates = e.features?.[0].geometry.bbox;
-      //   var lineas = e.features?.map(f => f.properties['name']);
-      //   console.log(lineas)
-      // });
-      
-      // // Change the cursor to a pointer when the mouse is over the places layer.
-      // map.on('mouseenter', 'mi-capa', function () {
-      //   map.getCanvas().style.cursor = 'pointer';
-      // });
-      
-      // // Change it back to a pointer when it leaves.
-      // map.on('mouseleave', 'mi-capa', function () {
-      //   map.getCanvas().style.cursor = '';
-      // });
-
-      map.on('click', (e) => {
-        const ne: PointLike = [e.point.x + 10, e.point.y - 10];
-        const sw: PointLike = [e.point.x - 10, e.point.y + 10];
-        const features = map.queryRenderedFeatures([ne, sw]);
-
-        var lineas: ShapeVectorProperties[] = [];
-        features?.filter(f => f.layer.id === 'bizkaibus_lineas').map(f => f.properties as ShapeVectorProperties).forEach(f => {
-          if (!lineas.some(l => l.route_id === f.route_id)) {
-            lineas.push(f);
-          }
-        });
-        var paradas: StopVectorProperties[] = features?.filter(f => f.layer.id === 'bizkaibus_paradas').map(f => f.properties as StopVectorProperties);
-        console.log(lineas)
-        console.log(paradas)
-
-        if (lineas.length + paradas.length > 0) {
-          this.mostrarModal(lineas, paradas)
-        }
-      });
   }
 
-  async mostrarModal(lineas: ShapeVectorProperties[], paradas: StopVectorProperties[]) {
-    if (this.modalListaLineasParadasDatos === null) {
-      this.modalListaLineasParadasDatos = new BehaviorSubject<{lineas: ShapeVectorProperties[], paradas: StopVectorProperties[]}>({lineas: lineas, paradas: paradas});
-      const modal = await this.modalCtrl.create({
-        component: ModalListaLineasParadasComponent,
-        mode: 'md',
-        initialBreakpoint: 0.25,
-        backdropDismiss: false,
-        backdropBreakpoint: 0.5,
-        breakpoints: [0, 0.25, 0.5, 0.75, 1],
-        componentProps: { datos: this.modalListaLineasParadasDatos.asObservable() }
-      });
-      modal.present();
-      modal.onDidDismiss().then(() => {
-        this.modalListaLineasParadasDatos = null;
-      });
+  abrirMenu() {
+    this.menuCtrl.open();
+  }
+
+  agenciaCheckboxClick(event: Event, details: CheckboxChangeEventDetail<string>) {
+    event.stopPropagation();
+    console.log(details);
+    let index = this.listaAgenciasLineas.findIndex(agencia => agencia.agency_id === details.value);
+    this.listaAgenciasLineas[index].mostrar = details.checked;
+    if (this.listaAgenciasLineas.every(agencia => agencia.mostrar)) {
+      console.log("Todos true");
+      this.agenciasCheckboxChecked = true;
+      this.agenciasCheckboxIndeterminate = false;
+    } else if (this.listaAgenciasLineas.every(agencia => !agencia.mostrar)) {
+      console.log("Todos false");
+      this.agenciasCheckboxChecked = false;
+      this.agenciasCheckboxIndeterminate = false;
     } else {
-      this.modalListaLineasParadasDatos.next({lineas: lineas, paradas: paradas});
+      console.log("Algunos true y otros false");
+      this.agenciasCheckboxChecked = false;
+      this.agenciasCheckboxIndeterminate = true;
     }
+
+    // Enviar datos al mapa
+    this.mapa.filtrarCapas(this.listaAgenciasLineas.map(agencia => ({"agency_id": agencia.agency_id, "mostrar": agencia.mostrar})));
+  }
+
+  agenciaTodosCheckboxClick(event: Event, details: CheckboxChangeEventDetail<string>) {
+    event.stopPropagation();
+    console.log(details);
+    this.listaAgenciasLineas.forEach(agencia => agencia.mostrar = details.checked);    
+
+    // Enviar datos al mapa
+    this.mapa.filtrarCapas(this.listaAgenciasLineas.map(agencia => ({"agency_id": agencia.agency_id, "mostrar": agencia.mostrar})));
+  }
+
+  mostrarLinea(event: Event, linea: Route) {
+    event.stopPropagation();
+    console.log("Mostrar linea: ", linea);
+
   }
 }

@@ -4,8 +4,8 @@
 
 export const environment = {
   production: false,
-  apiBaseUrl: 'http://192.168.1.10:8080',
-  tilesUrl: 'http://192.168.1.10:3000'
+  apiBaseUrl: 'http://localhost:8000',
+  tilesUrl: 'http://tile.mrasieru.eus'
 };
 
 /*
