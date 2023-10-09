@@ -2,22 +2,15 @@ import { Agency } from "./agency.model";
 
 export interface Route {
     route_id: string;
+    agency_id: string;
     agency?: Agency;
-    name: Name;
+    short_name?: string;
+    long_name?: string;
     desc?: string;
     type?: number;
     url?: string;
-    color?: RouteColor;
+    color?: string;
+    text_color?: string;
     sort_order?: number;
     network_id?: string;
-}
-
-export interface Name {
-    short?: string;
-    long?: string;
-}
-
-export interface RouteColor {
-    color?: string;
-    text?: string;
 }

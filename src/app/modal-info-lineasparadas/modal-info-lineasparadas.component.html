@@ -1,5 +1,5 @@
 <ion-header>
-  <h2 *ngIf="linea">{{linea.name.short}}{{(linea.name.short && linea.name.long) ? ' - ' : ''}}{{linea.name.long}}</h2>
+  <h2 *ngIf="linea">{{linea.short_name}}{{(linea.short_name && linea.long_name) ? ' - ' : ''}}{{linea.long_name}}</h2>
   <h2 *ngIf="parada">{{parada.name}}{{(parada.platform_code) ? '['+parada.platform_code+']' : ''}}</h2>
 </ion-header>
 <ion-content class="ion-padding">

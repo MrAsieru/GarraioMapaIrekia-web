@@ -3,7 +3,8 @@ export class Stop {
     code?: string;
     name?: string;
     desc?: string;
-    coords?: Coords;
+    coords_lat?: number;
+    coords_lon?: number;
     zone_id?: string;
     url?: string;
     location_type?: number;
@@ -14,14 +15,9 @@ export class Stop {
     platform_code?: string;
 }
 
-export class Coords {
-    lat: number;
-    lon: number;
-}
-
 export class StopVectorProperties {
     stop_id: string;
-    stop_name: string;
+    name: string;
     zone_id: string;
     location_type: number;
     parent_station: string;

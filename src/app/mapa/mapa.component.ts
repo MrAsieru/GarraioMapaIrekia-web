@@ -130,7 +130,7 @@ export class MapaComponent implements OnInit {
                     'line-cap': 'round'
                   },
                   'paint': {
-                    'line-color': ['get', 'route_color'],
+                    'line-color': ['get', 'color'],
                     'line-width': 2
                   }
                 });
