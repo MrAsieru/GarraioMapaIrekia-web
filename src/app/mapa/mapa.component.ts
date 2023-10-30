@@ -3,11 +3,15 @@ import { IonicModule, ModalController } from '@ionic/angular';
 import maplibregl, { PointLike } from 'maplibre-gl';
 import { ModalListaLineasParadasComponent } from '../modal-lista-lineasparadas/modal-lista-lineasparadas.component';
 import { ShapeVectorProperties } from 'src/app/models/shape.model';
-import { StopVectorProperties } from 'src/app/models/stop.model';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { StopVectorProperties } from 'src/app/models/parada.model';
+import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { TileCatalogService } from '../services/tile-catalog.service';
 import { Catalog, TileSet } from '../models/tileset.model';
+import { PosicionRespuesta, PosicionesFechas, PosicionesViajes } from '../models/posicion.model';
+import { PosicionesService } from '../services/posiciones.service';
+import moment, { Moment } from 'moment';
+import { AgenciasService } from '../services/agencias.service';
 
 @Component({
   selector: 'app-mapa',
@@ -55,8 +59,11 @@ export class MapaComponent implements OnInit {
     '3': 'parada', // Generic Node
     '4': 'parada', // Boarding Area
   };
-  
-  constructor(private modalCtrl: ModalController, private tileCatalogService: TileCatalogService) {}
+
+  listaPosiciones: PosicionesViajes | undefined = undefined // Llave: idViaje, Valor: Lista de fechas y posiciones
+  listaMarkers: {[key: string]: maplibregl.Marker} = {}
+
+  constructor(private modalCtrl: ModalController, private tileCatalogService: TileCatalogService, private posicionesService: PosicionesService, private agenciasService: AgenciasService) {}
 
   ngOnInit() {
     this.modalListaLineasParadasDatos = null;
@@ -89,6 +96,25 @@ export class MapaComponent implements OnInit {
     });
 
     let tilesets = this.getTilesetsInfo();
+
+    this.agenciasService.getAgencias().subscribe((agencias) => {
+      // Descargar posiciones de este minuto
+      this.descargarPosiciones(agencias.map(a => a.idAgencia));
+
+      // Descargar proximas posiciones cada minuto en el segundo 30
+      let segundos = moment().seconds();
+      let timeout: number;
+      if (segundos > 30) {
+        timeout = 60 - segundos;
+        this.descargarPosiciones(agencias.map(a => a.idAgencia));
+      } else {
+        timeout = 30 - segundos;
+      }
+      setTimeout(() => {
+        // Si hace falta sincronizar usar this.cadaMinuto
+        setInterval(() => this.descargarPosiciones(agencias.map(a => a.idAgencia)), 60000);
+      }, timeout)
+    });
 
     this.map.on('load', () => {
       this.map.resize();
@@ -160,6 +186,28 @@ export class MapaComponent implements OnInit {
           });
         });
       });
+
+      // Actualizar posiciones en el mapa mediante marker cada segundo
+      setInterval(() => {
+        if (this.listaPosiciones !== undefined) {
+          Object.keys(this.listaPosiciones).forEach((idViaje) => {
+            let marker = this.listaMarkers[idViaje];
+
+            if (marker === undefined) {
+              marker = new maplibregl.Marker().setLngLat([0,0]).setPopup(new maplibregl.Popup().setHTML(`<h1>${idViaje}</h1>`)).addTo(this.map);
+              this.listaMarkers[idViaje] = marker;
+            }
+
+            let posicion = this.listaPosiciones![idViaje][moment().milliseconds(0).toISOString()];
+            console.log(`idViaje: ${idViaje} fecha: ${moment().milliseconds(0).toISOString()} posicion: ${posicion}`)
+            if (posicion !== undefined) {
+              marker.setLngLat([posicion.lon, posicion.lat]);
+            }
+          });
+        }            
+      }, 1000);
+
+
     });
     this.map.on('click', (e) => {
       const ne: PointLike = [e.point.x + 10, e.point.y - 10];
@@ -228,5 +276,81 @@ export class MapaComponent implements OnInit {
         this.map.setLayoutProperty(layer.id, 'visibility', agencia.mostrar ? 'visible' : 'none');
       });
     });
+  }
+
+  cadaMinuto(callback: () => void) {
+    // https://stackoverflow.com/a/53892053
+    var timerFunc = function () {
+        // get the current time rounded down to a whole second (with a 10% margin)
+        var now = 1000 * Math.floor(Date.now() / 1000 + 0.1);
+        // run the callback
+        callback();
+        // wait for the next whole minute
+        setTimeout(timerFunc, now + 60000 - Date.now());
+    };
+    timerFunc();
+  }
+
+  descargarPosiciones(agencias: string[]) {
+    let endpoint: Observable<PosicionRespuesta>;
+    if (this.listaPosiciones === undefined) {
+      this.listaPosiciones = {};
+      endpoint = this.posicionesService.getPosicionesActuales(agencias);
+    } else {
+      endpoint = this.posicionesService.getPosicionesProximoMinuto(agencias);
+    }
+
+    endpoint.subscribe((posiciones) => {
+      posiciones.agencias.forEach((agencia) => {
+        agencia.viajes.forEach((viaje) => {
+          if (this.listaPosiciones![viaje.idViaje] === undefined) {
+            this.listaPosiciones![viaje.idViaje] = {};
+          }
+          let posiciones_decodificadas = this.decodificarPosiciones(moment(posiciones.fecha), viaje.posiciones);
+          Object.keys(posiciones_decodificadas).forEach((fecha) => {
+            this.listaPosiciones![viaje.idViaje][fecha] = posiciones_decodificadas[fecha];
+          });
+        });
+      });
+      console.log(this.listaPosiciones)
+    });
+  }
+
+  decodificarPosiciones(fechaInicial: Moment, posiciones: string): PosicionesFechas {
+    // Formato: lat|lon|proximoOrdenParada~lat|lon|proximoOrdenParada~...
+    // ~: separa posiciones, |: separa lat, lon y proximoOrdenParada, @: datos vacios
+    let PRECISION_COORDENADAS = 6;
+
+    let posiciones_decodificadas: PosicionesFechas = {};
+    let posiciones_separadas = posiciones.split("~");
+
+    let latAnterior: number | undefined = undefined;
+    let lonAnterior: number | undefined = undefined;
+    let lat: number;
+    let lon: number;
+
+    let i = 0;
+    posiciones_separadas.forEach((posicion) => {
+      let posicion_separada = posicion.split("|");
+      if (posicion_separada[0] !== '@' && posicion_separada[1] !== '@' && posicion_separada[2] !== '@') {
+        if (latAnterior === undefined || lonAnterior === undefined) {
+          lat = parseFloat(posicion_separada[0]);
+          lon = parseFloat(posicion_separada[1]);
+        } else {
+          lat = latAnterior + (parseFloat(posicion_separada[0]) / Math.pow(10, PRECISION_COORDENADAS));
+          lon = lonAnterior + (parseFloat(posicion_separada[1]) / Math.pow(10, PRECISION_COORDENADAS));
+        }
+        latAnterior = lat;
+        lonAnterior = lon;
+        let proximoOrdenParada = parseInt(posicion_separada[2]);
+        let fecha = fechaInicial.clone().add(i++, 'seconds').milliseconds(0).toISOString();
+        posiciones_decodificadas[fecha] = {lat: lat, lon: lon, proximoOrdenParada: proximoOrdenParada};
+
+        latAnterior = lat;
+        lonAnterior = lon;
+      }
+    });
+
+    return posiciones_decodificadas;
   }
 }

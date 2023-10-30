@@ -1,10 +1,10 @@
 import { Component, ElementRef, EventEmitter, OnInit, Output, ViewChild } from '@angular/core';
 import { CheckboxChangeEventDetail, IonCheckbox, IonicModule, MenuController } from '@ionic/angular';
 import { MapaComponent } from '../mapa/mapa.component';
-import { AgencyRoutes } from '../models/agency.model';
+import { AgencyRoutes } from '../models/agencia.model';
 import { CommonModule } from '@angular/common';
-import { Route } from '../models/route.model';
-import { AgenciesService } from '../services/agencies.service';
+import { Linea } from '../models/linea.model';
+import { AgenciasService } from '../services/agencias.service';
 
 
 @Component({
@@ -19,12 +19,12 @@ export class HomePage implements OnInit {
   agenciasCheckboxChecked: boolean = true;
   agenciasCheckboxIndeterminate: boolean = false;
 
-  constructor(private menuCtrl: MenuController, private agenciesService: AgenciesService) {}
+  constructor(private menuCtrl: MenuController, private agenciesService: AgenciasService) {}
 
   listaAgenciasLineas: AgencyRoutes[] = [];
 
   ngOnInit() {
-    this.agenciesService.getAgenciesRoutes().subscribe((agencies) => {
+    this.agenciesService.getAgenciasLineas().subscribe((agencies) => {
       this.listaAgenciasLineas = agencies;
       this.listaAgenciasLineas.forEach(agencia => agencia.mostrar = true);
     });
@@ -37,7 +37,7 @@ export class HomePage implements OnInit {
   agenciaCheckboxClick(event: Event, details: CheckboxChangeEventDetail<string>) {
     event.stopPropagation();
     console.log(details);
-    let index = this.listaAgenciasLineas.findIndex(agencia => agencia.agency_id === details.value);
+    let index = this.listaAgenciasLineas.findIndex(agencia => agencia.idAgencia === details.value);
     this.listaAgenciasLineas[index].mostrar = details.checked;
     if (this.listaAgenciasLineas.every(agencia => agencia.mostrar)) {
       console.log("Todos true");
@@ -54,7 +54,7 @@ export class HomePage implements OnInit {
     }
 
     // Enviar datos al mapa
-    this.mapa.filtrarCapas(this.listaAgenciasLineas.map(agencia => ({"agency_id": agencia.agency_id, "mostrar": agencia.mostrar})));
+    this.mapa.filtrarCapas(this.listaAgenciasLineas.map(agencia => ({"agency_id": agencia.idAgencia, "mostrar": agencia.mostrar})));
   }
 
   agenciaTodosCheckboxClick(event: Event, details: CheckboxChangeEventDetail<string>) {
@@ -63,10 +63,10 @@ export class HomePage implements OnInit {
     this.listaAgenciasLineas.forEach(agencia => agencia.mostrar = details.checked);    
 
     // Enviar datos al mapa
-    this.mapa.filtrarCapas(this.listaAgenciasLineas.map(agencia => ({"agency_id": agencia.agency_id, "mostrar": agencia.mostrar})));
+    this.mapa.filtrarCapas(this.listaAgenciasLineas.map(agencia => ({"agency_id": agencia.idAgencia, "mostrar": agencia.mostrar})));
   }
 
-  mostrarLinea(event: Event, linea: Route) {
+  mostrarLinea(event: Event, linea: Linea) {
     event.stopPropagation();
     console.log("Mostrar linea: ", linea);
 

@@ -1,18 +1,18 @@
 <ion-header>
-  <h2 *ngIf="linea">{{linea.short_name}}{{(linea.short_name && linea.long_name) ? ' - ' : ''}}{{linea.long_name}}</h2>
-  <h2 *ngIf="parada">{{parada.name}}{{(parada.platform_code) ? '['+parada.platform_code+']' : ''}}</h2>
+  <h2 *ngIf="linea">{{linea.nombreCorto}}{{(linea.nombreCorto && linea.nombreLargo) ? ' - ' : ''}}{{linea.nombreLargo}}</h2>
+  <h2 *ngIf="parada">{{parada.nombre}}{{(parada.codigoPlataforma) ? '['+parada.codigoPlataforma+']' : ''}}</h2>
 </ion-header>
 <ion-content class="ion-padding">
   <ion-content *ngIf="linea">
-    <strong>Descripción:</strong> {{linea.desc}}<br/>
-    <strong>Tipo:</strong> {{linea.type}}<br/>
-    <strong>Agencia:</strong> <a href="${linea.agency?.url}">{{linea.agency?.name}}</a><br/>
-    <strong>Red:</strong> {{linea.network_id}}
+    <strong>Descripción:</strong> {{linea.descripcion}}<br/>
+    <strong>Tipo:</strong> {{linea.tipo}}<br/>
+    <strong>Agencia:</strong> <a href="${linea.agency?.url}">{{linea.agencia?.nombre}}</a><br/>
+    <strong>Red:</strong> {{linea.idRed}}
   </ion-content>
   <ion-content *ngIf="parada">
-    <strong>Código:</strong> {{parada.code}}<br/>
-    <strong>Descripción:</strong> {{parada.desc}}<br/>
-    <strong>Zona:</strong> {{parada.zone_id}}<br/>
-    <strong>Tipo:</strong> {{parada.location_type}}<br/>
-    <strong>Acceso en silla de ruedas:</strong> {{parada.wheelchair_boarding}}<br/>
+    <strong>Código:</strong> {{parada.codigo}}<br/>
+    <strong>Descripción:</strong> {{parada.descripcion}}<br/>
+    <strong>Zona:</strong> {{parada.idZona}}<br/>
+    <strong>Tipo:</strong> {{parada.tipo}}<br/>
+    <strong>Acceso en silla de ruedas:</strong> {{parada.accesibilidad}}<br/>
 </ion-content>

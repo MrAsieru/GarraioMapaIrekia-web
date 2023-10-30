@@ -7,14 +7,14 @@
   <ion-content class="ion-padding">
     <ion-checkbox #chkbox_home_menu_agencias labelPlacement="end" justify="start" [checked]="agenciasCheckboxChecked" [indeterminate]="agenciasCheckboxIndeterminate" (ionChange)="agenciaTodosCheckboxClick($event, $any($event).detail)" (click)="$event.stopPropagation()">Mostrar todas</ion-checkbox>
     <ion-accordion-group [multiple]="true">
-      <ion-accordion *ngFor="let agencia of listaAgenciasLineas" [value]="agencia.agency_id">
+      <ion-accordion *ngFor="let agencia of listaAgenciasLineas" [value]="agencia.idAgencia">
         <ion-item slot="header" color="light">
-          <ion-checkbox labelPlacement="end" justify="start" [checked]="agencia.mostrar" [value]="agencia.agency_id" (ionChange)="agenciaCheckboxClick($event, $any($event).detail)" (click)="$event.stopPropagation()">{{agencia.name}}</ion-checkbox>
+          <ion-checkbox labelPlacement="end" justify="start" [checked]="agencia.mostrar" [value]="agencia.idAgencia" (ionChange)="agenciaCheckboxClick($event, $any($event).detail)" (click)="$event.stopPropagation()">{{agencia.nombre}}</ion-checkbox>
         </ion-item>
         <div class="ion-padding" slot="content">
           <ion-list>
-            <ion-item *ngFor="let linea of agencia.routes">
-              <ion-label>{{linea.short_name}}{{(linea.short_name && linea.long_name) ? ' - ' : ''}}{{linea.long_name}}</ion-label>
+            <ion-item *ngFor="let linea of agencia.lineas">
+              <ion-label>{{linea.nombreCorto}}{{(linea.nombreCorto && linea.nombreLargo) ? ' - ' : ''}}{{linea.nombreLargo}}</ion-label>
               <ion-button fill="clear">
                 <ion-icon slot="icon-only" src="assets/icon/linea.svg" [style.color]="(linea.color) ? linea.color : 'black'" (click)="mostrarLinea($event, linea)"></ion-icon>
               </ion-button>

@@ -1,6 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { Route } from '../models/route.model';
-import { Stop } from '../models/stop.model';
+import { Linea } from '../models/linea.model';
+import { Parada } from '../models/parada.model';
 import { IonicModule } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 
@@ -11,7 +11,7 @@ import { CommonModule } from '@angular/common';
   imports: [IonicModule, CommonModule],
 })
 export class ModalInfoLineasparadasComponent {
-  @Input("linea") linea: Route;
-  @Input("parada") parada: Stop;
+  @Input("linea") linea: Linea;
+  @Input("parada") parada: Parada;
   constructor() {}
 }
