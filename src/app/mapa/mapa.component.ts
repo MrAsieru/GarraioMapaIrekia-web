@@ -313,6 +313,18 @@ export class MapaComponent implements OnInit {
         });
       });
       console.log(this.listaPosiciones)
+
+      // Eliminar posiciones antiguas
+      Object.keys(this.listaPosiciones!).forEach((idViaje) => {
+        Object.keys(this.listaPosiciones![idViaje]).forEach((fecha) => {
+          if (moment(fecha).isBefore(moment(posiciones.fecha).subtract(1, 'minute'))) {
+            delete this.listaPosiciones![idViaje][fecha];
+          }
+        });
+        if (Object.keys(this.listaPosiciones![idViaje]).length === 0) {
+          delete this.listaPosiciones![idViaje];
+        }
+      });
     });
   }
 
