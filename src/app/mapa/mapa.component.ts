@@ -143,9 +143,9 @@ export class MapaComponent implements OnInit {
           // Añadir las lineas
           tilesets.forEach((tileset) => {
             tileset.vector_layers.forEach((layer) => {
-              if (layer.id === 'lineas') {
+              if (layer.id.endsWith("lineas")) {
                 this.map.addLayer({
-                  'id': `${tileset.id}_${layer.id}`, // Nombre de la capa
+                  'id': `${layer.id}`, // Nombre de la capa
                   'type': 'line',
                   'source': `${tileset.id}_source`, // Nombre de la fuente
                   'source-layer': `${layer.id}`, // Nombre de la capa de la fuente
@@ -167,9 +167,9 @@ export class MapaComponent implements OnInit {
           // Añadir las paradas (para que estén por encima de las lineas)
           tilesets.forEach((tileset) => {
             tileset.vector_layers.forEach((layer) => {
-              if (layer.id === 'paradas') {
+              if (layer.id.endsWith("paradas")) {
                 this.map.addLayer({
-                  'id': `${tileset.id}_${layer.id}`, // Nombre de la capa
+                  'id': `${layer.id}`, // Nombre de la capa
                   'type': 'symbol',
                   'source': `${tileset.id}_source`, // Nombre de la fuente
                   'source-layer': `${layer.id}`, // Nombre de la capa de la fuente
@@ -199,7 +199,6 @@ export class MapaComponent implements OnInit {
             }
 
             let posicion = this.listaPosiciones![idViaje][moment().milliseconds(0).toISOString()];
-            console.log(`idViaje: ${idViaje} fecha: ${moment().milliseconds(0).toISOString()} posicion: ${posicion}`)
             if (posicion !== undefined) {
               marker.setLngLat([posicion.lon, posicion.lat]);
             }
@@ -272,7 +271,7 @@ export class MapaComponent implements OnInit {
     agencias.forEach((agencia) => {
       // Ahora se usa el ID del feed en vez de todo agency_id
       //TODO: Cambiar esto para que se use el agency_id
-      this.map.getStyle().layers?.filter((layer) => layer.id.startsWith(agencia.agency_id.split("_")[0])).forEach((layer) => {
+      this.map.getStyle().layers?.filter((layer) => layer.id.startsWith(agencia.agency_id)).forEach((layer) => {
         this.map.setLayoutProperty(layer.id, 'visibility', agencia.mostrar ? 'visible' : 'none');
       });
     });
