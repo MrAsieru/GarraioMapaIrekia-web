@@ -54,7 +54,7 @@ export class HomePage implements OnInit {
     }
 
     // Enviar datos al mapa
-    this.mapa.filtrarCapas(this.listaAgenciasLineas.map(agencia => ({"agency_id": agencia.idAgencia, "mostrar": agencia.mostrar})));
+    this.mapa.filtrarAgencias(this.listaAgenciasLineas.map(agencia => ({"idAgencia": agencia.idAgencia, "mostrar": agencia.mostrar})));
   }
 
   agenciaTodosCheckboxClick(event: Event, details: CheckboxChangeEventDetail<string>) {
@@ -63,7 +63,7 @@ export class HomePage implements OnInit {
     this.listaAgenciasLineas.forEach(agencia => agencia.mostrar = details.checked);    
 
     // Enviar datos al mapa
-    this.mapa.filtrarCapas(this.listaAgenciasLineas.map(agencia => ({"agency_id": agencia.idAgencia, "mostrar": agencia.mostrar})));
+    this.mapa.filtrarAgencias(this.listaAgenciasLineas.map(agencia => ({"idAgencia": agencia.idAgencia, "mostrar": agencia.mostrar})));
   }
 
   mostrarLinea(event: Event, linea: Linea) {

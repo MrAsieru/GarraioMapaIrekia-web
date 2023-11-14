@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { IonicModule, ModalController } from '@ionic/angular';
-import maplibregl, { PointLike } from 'maplibre-gl';
+import maplibregl, { GeoJSONSource, PointLike } from 'maplibre-gl';
 import { ModalListaLineasParadasComponent } from '../modal-lista-lineasparadas/modal-lista-lineasparadas.component';
 import { ShapeVectorProperties } from 'src/app/models/shape.model';
 import { StopVectorProperties } from 'src/app/models/parada.model';
@@ -12,6 +12,9 @@ import { PosicionRespuesta, PosicionesFechas, PosicionesViajes } from '../models
 import { PosicionesService } from '../services/posiciones.service';
 import moment, { Moment } from 'moment';
 import { AgenciasService } from '../services/agencias.service';
+import { TiempoRealService } from '../services/tiemporeal.service';
+import { transit_realtime } from 'gtfs-realtime-bindings';
+import { FeedsService } from '../services/feeds.service';
 
 @Component({
   selector: 'app-mapa',
@@ -48,9 +51,10 @@ export class MapaComponent implements OnInit {
   //   '12': 'train' // Monorail
   // };
 
-  iconos_paradas = [
+  iconos = [
     {id: 'parada', url: 'assets/map/parada.png'},
     {id: 'entrada', url: 'assets/map/entrada.png'},
+    {id: 'vehiculo_tr', url: 'assets/map/tiemporeal.png'}
   ];
   tipos_paradas = { // Tipos de parada
     '0': 'parada', // Stop or Platform
@@ -63,7 +67,15 @@ export class MapaComponent implements OnInit {
   listaPosiciones: PosicionesViajes | undefined = undefined // Llave: idViaje, Valor: Lista de fechas y posiciones
   listaMarkers: {[key: string]: maplibregl.Marker} = {}
 
-  constructor(private modalCtrl: ModalController, private tileCatalogService: TileCatalogService, private posicionesService: PosicionesService, private agenciasService: AgenciasService) {}
+  private listaAgencias: {idAgencia: string; mostrar: boolean;}[] = [];
+  private listaFeedTiempoReal: string[] = [];
+
+  constructor(private modalCtrl: ModalController, 
+    private tileCatalogService: TileCatalogService, 
+    private posicionesService: PosicionesService, 
+    private agenciasService: AgenciasService,
+    private tiemporealService: TiempoRealService,
+    private feedsService: FeedsService) {}
 
   ngOnInit() {
     this.modalListaLineasParadasDatos = null;
@@ -120,7 +132,7 @@ export class MapaComponent implements OnInit {
       this.map.resize();
       
       Promise.all(
-        this.iconos_paradas.map(img => new Promise<void>((resolve, reject) => {
+        this.iconos.map(img => new Promise<void>((resolve, reject) => {
           this.map.loadImage(img.url, (error, res) => {
             if (error) throw error;
             this.map.addImage(img.id, res!)
@@ -184,6 +196,11 @@ export class MapaComponent implements OnInit {
               }   
             });
           });
+
+          // Asegurarse de que las capas de tiempo real están por encima
+          tilesets.map(t => t.id?.split("_")[0]!).filter(t => this.listaFeedTiempoReal.includes(t)).forEach((feed) => {
+            this.map.moveLayer(`${feed}_posiciones_tr`);
+          });
         });
       });
 
@@ -227,6 +244,79 @@ export class MapaComponent implements OnInit {
         this.mostrarModal(lineas, paradas)
       }
     });
+
+    this.feedsService.getFeedsTiempoReal().subscribe((feeds) => {
+      this.listaFeedTiempoReal = feeds.map(f => f.idFeed);
+      this.tiemporealService.actualizar_feeds(this.listaFeedTiempoReal);
+    });
+
+    this.tiemporealService.tiempoReal.subscribe((tiempoReal) => {
+      console.log(tiempoReal);
+      // Añadir posiciones al mapa
+      if (tiempoReal !== undefined) {
+        // Comprobar si existe la capa idAgencia_posiciones_tr
+        if (this.map.getLayer(`${tiempoReal.idFeed}_posiciones_tr`) === undefined) {
+          this.map.addSource(`${tiempoReal.idFeed}_posiciones_tr`, {
+            'type': 'geojson',
+            'data': {
+              'type': 'FeatureCollection',
+              'features': []
+            }
+          });
+          this.map.addLayer({
+            'id': `${tiempoReal.idFeed}_posiciones_tr`, // Nombre de la capa
+            'type': 'symbol',
+            'source': `${tiempoReal.idFeed}_posiciones_tr`, // Nombre de la fuente
+            'maxzoom': this.configuracion.maxzoom,
+            'minzoom': 0,
+            'layout': {
+              'icon-image': 'vehiculo_tr',
+              'icon-allow-overlap': true,
+              'icon-size': 0.5,
+              'icon-anchor': 'bottom'
+            }
+          });
+        }
+
+        let geojson: GeoJSON.FeatureCollection<GeoJSON.Point> = {
+          'type': 'FeatureCollection',
+          'features': []
+        };
+
+        tiempoReal.entidades.forEach((entidad: transit_realtime.IFeedEntity) => {
+          if (entidad.vehicle) {
+            geojson.features.push({
+              'type': 'Feature',
+              'geometry': {
+                'type': 'Point',
+                'coordinates': [entidad.vehicle.position!.longitude, entidad.vehicle.position!.latitude]
+              },
+              'properties': {
+                ...(entidad.vehicle?.trip?.tripId && {'idViaje': entidad.vehicle?.trip?.tripId}),
+                ...(entidad.vehicle?.trip?.routeId && {'idLinea': entidad.vehicle?.trip?.routeId}),
+                ...(entidad.vehicle?.trip?.directionId && {'direccion': entidad.vehicle?.trip?.directionId}),
+                ...(entidad.vehicle?.trip?.scheduleRelationship && {'relacionHorario': entidad.vehicle?.trip?.scheduleRelationship}),
+                ...(entidad.vehicle?.vehicle?.label && {'etiqueta': entidad.vehicle?.vehicle?.label}),
+                ...(entidad.vehicle?.vehicle?.licensePlate && {'matricula': entidad.vehicle?.vehicle?.licensePlate}),
+                // ...(entidad.vehicle?.vehicle?. && {'accesibilidad': entidad.vehicle?.trip?.routeId}),
+                ...(entidad.vehicle?.position?.bearing && {'rumbo': entidad.vehicle?.position?.bearing}),
+                ...(entidad.vehicle?.position?.odometer && {'odometro': entidad.vehicle?.position?.odometer}),
+                ...(entidad.vehicle?.position?.speed && {'velocidad': entidad.vehicle?.position?.speed}),
+                ...(entidad.vehicle?.currentStopSequence && {'secuenciaParada': entidad.vehicle?.currentStopSequence}),
+                ...(entidad.vehicle?.stopId && {'idParada': entidad.vehicle?.stopId}),
+                ...(entidad.vehicle?.currentStatus && {'estadoActual': entidad.vehicle?.currentStatus}),
+                ...(entidad.vehicle?.timestamp && {'timestamp': entidad.vehicle?.timestamp}),
+                ...(entidad.vehicle?.congestionLevel && {'congestion': entidad.vehicle?.congestionLevel}),
+                ...(entidad.vehicle?.occupancyStatus && {'ocupacion': entidad.vehicle?.occupancyStatus}),
+                ...(entidad.vehicle?.occupancyPercentage && {'ocupacionPorcentaje': entidad.vehicle?.occupancyPercentage}),
+              }
+            });
+          }
+        });
+
+        (this.map.getSource(`${tiempoReal.idFeed}_posiciones_tr`) as GeoJSONSource).setData(geojson);
+      }
+    });
   }
 
   async mostrarModal(lineas: ShapeVectorProperties[], paradas: StopVectorProperties[]) {
@@ -266,15 +356,23 @@ export class MapaComponent implements OnInit {
     });
   }
 
-  filtrarCapas(agencias: {agency_id: string; mostrar: boolean;}[]) {
+  filtrarAgencias(agencias: {idAgencia: string; mostrar: boolean;}[]) {
     console.log(agencias);
+    this.listaAgencias = agencias;
     agencias.forEach((agencia) => {
-      // Ahora se usa el ID del feed en vez de todo agency_id
-      //TODO: Cambiar esto para que se use el agency_id
-      this.map.getStyle().layers?.filter((layer) => layer.id.startsWith(agencia.agency_id)).forEach((layer) => {
+      // idAgencia_paradas y idAgencia_lineas
+      this.map.getStyle().layers?.filter((layer) => layer.id.startsWith(agencia.idAgencia)).forEach((layer) => {
         this.map.setLayoutProperty(layer.id, 'visibility', agencia.mostrar ? 'visible' : 'none');
       });
     });
+
+    // idFeed_posiciones_tr
+    [... new Set(agencias.map(a => a.idAgencia.split("_")[0]))].forEach((feed) => {
+      this.map.setLayoutProperty(`${feed}_posiciones_tr`, 'visibility', agencias.filter(a => a.idAgencia.split("_")[0] == feed).every(a => !a.mostrar) ? 'none' : 'visible');
+    });
+
+    // Actualizar suscripciones feeds tiempo real
+    this.tiemporealService.actualizar_feeds([... new Set(agencias.filter(a => a.mostrar).map(a => a.idAgencia.split("_")[0]).filter((feed) => this.listaFeedTiempoReal.includes(feed)))]);
   }
 
   cadaMinuto(callback: () => void) {
