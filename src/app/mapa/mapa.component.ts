@@ -6,7 +6,7 @@ import { ShapeVectorProperties } from 'src/app/models/shape.model';
 import { StopVectorProperties } from 'src/app/models/parada.model';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { environment } from 'src/environments/environment';
-import { TileCatalogService } from '../services/tile-catalog.service';
+import { TileService } from '../services/tile.service';
 import { Catalog, TileSet } from '../models/tileset.model';
 import { PosicionRespuesta, PosicionesFechas, PosicionesViajes } from '../models/posicion.model';
 import { PosicionesService } from '../services/posiciones.service';
@@ -15,12 +15,13 @@ import { AgenciasService } from '../services/agencias.service';
 import { TiempoRealService } from '../services/tiemporeal.service';
 import { transit_realtime } from 'gtfs-realtime-bindings';
 import { FeedsService } from '../services/feeds.service';
+import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-mapa',
   templateUrl: './mapa.component.html',
   standalone: true,
-  imports: [IonicModule],
+  imports: [IonicModule, RouterModule],
 })
 export class MapaComponent implements OnInit {
   configuracion = {
@@ -54,6 +55,7 @@ export class MapaComponent implements OnInit {
   iconos = [
     {id: 'parada', url: 'assets/map/parada.png'},
     {id: 'entrada', url: 'assets/map/entrada.png'},
+    {id: 'vehiculo', url: 'assets/map/bus.png'},
     {id: 'vehiculo_tr', url: 'assets/map/tiemporeal.png'}
   ];
   tipos_paradas = { // Tipos de parada
@@ -64,14 +66,15 @@ export class MapaComponent implements OnInit {
     '4': 'parada', // Boarding Area
   };
 
-  listaPosiciones: PosicionesViajes | undefined = undefined // Llave: idViaje, Valor: Lista de fechas y posiciones
-  listaMarkers: {[key: string]: maplibregl.Marker} = {}
+  listaPosiciones: Map<string, GeoJSON.FeatureCollection<GeoJSON.Point>> | undefined = undefined; // Llave: idViaje, Valor: Lista de fechas y posiciones
+
 
   private listaAgencias: {idAgencia: string; mostrar: boolean;}[] = [];
   private listaFeedTiempoReal: string[] = [];
+  private listaFeaturesTiempoReal: Map<string, Array<GeoJSON.Feature<GeoJSON.Point>>> = new Map();
 
   constructor(private modalCtrl: ModalController, 
-    private tileCatalogService: TileCatalogService, 
+    private tileService: TileService, 
     private posicionesService: PosicionesService, 
     private agenciasService: AgenciasService,
     private tiemporealService: TiempoRealService,
@@ -107,8 +110,6 @@ export class MapaComponent implements OnInit {
       zoom: 9
     });
 
-    let tilesets = this.getTilesetsInfo();
-
     this.agenciasService.getAgencias().subscribe((agencias) => {
       // Descargar posiciones de este minuto
       this.descargarPosiciones(agencias.map(a => a.idAgencia));
@@ -130,7 +131,26 @@ export class MapaComponent implements OnInit {
 
     this.map.on('load', () => {
       this.map.resize();
+
+      // Añadir fuentes
+      this.map.addSource("posiciones", {
+        'type': 'geojson',
+        'data': {
+          'type': 'FeatureCollection',
+          'features': []
+        }
+      });
+
+      this.map.addSource("posiciones_tr", {
+        'type': 'geojson',
+        'data': {
+          'type': 'FeatureCollection',
+          'features': []
+        }
+      });
+
       
+
       Promise.all(
         this.iconos.map(img => new Promise<void>((resolve, reject) => {
           this.map.loadImage(img.url, (error, res) => {
@@ -140,87 +160,86 @@ export class MapaComponent implements OnInit {
           })
         }))
       ).then(() => {
-        tilesets.then((tilesets) => {
-          // Añadir las fuentes
-          tilesets.forEach((tileset) => {
-            console.log("maxzoom: "+tileset.maxzoom+" minzoom: "+tileset.minzoom)
-            this.map.addSource(`${tileset.id}_source`, {
-              type: 'vector',
-              tiles: [environment.tilesUrl+'/'+tileset.id+'/{z}/{x}/{y}'],
-              maxzoom: tileset.maxzoom,
-              minzoom: tileset.minzoom
-            });
+        this.tileService.getTileset().subscribe((tileset) => {
+          this.map.addSource("tiles_source", {
+            type: 'vector',
+            tiles: [environment.tilesUrl+'/tiles/{z}/{x}/{y}'],
+            maxzoom: tileset.maxzoom,
+            minzoom: tileset.minzoom,
+            bounds: [tileset.bounds[0], tileset.bounds[1], tileset.bounds[2], tileset.bounds[3]],
+            scheme: 'xyz'
           });
 
-          // Añadir las lineas
-          tilesets.forEach((tileset) => {
-            tileset.vector_layers.forEach((layer) => {
-              if (layer.id.endsWith("lineas")) {
-                this.map.addLayer({
-                  'id': `${layer.id}`, // Nombre de la capa
-                  'type': 'line',
-                  'source': `${tileset.id}_source`, // Nombre de la fuente
-                  'source-layer': `${layer.id}`, // Nombre de la capa de la fuente
-                  'maxzoom': this.configuracion.maxzoom,
-                  'minzoom': layer.minzoom,
-                  'layout': {
-                    'line-join': 'round',
-                    'line-cap': 'round'
-                  },
-                  'paint': {
-                    'line-color': ['get', 'color'],
-                    'line-width': 2
-                  }
-                });
-              }         
-            });
+          // Añadir capas
+          this.map.addLayer({
+            'id': "lineas", // Nombre de la capa
+            'type': 'line',
+            'source': `tiles_source`, // Nombre de la fuente
+            'source-layer': "lineas", // Nombre de la capa de la fuente
+            'maxzoom': this.configuracion.maxzoom,
+            'minzoom': tileset.vector_layers.find(layer => layer.id === "lineas")?.minzoom && 0,
+            'layout': {
+              'line-join': 'round',
+              'line-cap': 'round'
+            },
+            'paint': {
+              'line-color': ['get', 'color'],
+              'line-width': 2
+            }
           });
 
-          // Añadir las paradas (para que estén por encima de las lineas)
-          tilesets.forEach((tileset) => {
-            tileset.vector_layers.forEach((layer) => {
-              if (layer.id.endsWith("paradas")) {
-                this.map.addLayer({
-                  'id': `${layer.id}`, // Nombre de la capa
-                  'type': 'symbol',
-                  'source': `${tileset.id}_source`, // Nombre de la fuente
-                  'source-layer': `${layer.id}`, // Nombre de la capa de la fuente
-                  'maxzoom': this.configuracion.maxzoom,
-                  'minzoom': layer.minzoom,
-                  'layout': {
-                    'icon-image': ['get', ['get', 'location_type'], ['literal', this.tipos_paradas]],
-                    'icon-allow-overlap': true,
-                    'icon-size': 0.5
-                  }
-                });
-              }   
-            });
+          this.map.addLayer({
+            'id': "paradas", // Nombre de la capa
+            'type': 'symbol',
+            'source': "tiles_source", // Nombre de la fuente
+            'source-layer': "paradas", // Nombre de la capa de la fuente
+            'maxzoom': this.configuracion.maxzoom,
+            'minzoom': tileset.vector_layers.find(layer => layer.id === "paradas")?.minzoom && 0,
+            'layout': {
+              'icon-image': ['get', ['get', 'location_type'], ['literal', this.tipos_paradas]],
+              'icon-allow-overlap': true,
+              'icon-size': 0.5
+            }
           });
 
-          // Asegurarse de que las capas de tiempo real están por encima
-          tilesets.map(t => t.id?.split("_")[0]!).filter(t => this.listaFeedTiempoReal.includes(t)).forEach((feed) => {
-            this.map.moveLayer(`${feed}_posiciones_tr`);
+          this.map.addLayer({
+            'id': "posiciones", // Nombre de la capa
+            'type': 'symbol',
+            'source': "posiciones", // Nombre de la fuente
+            'maxzoom': this.configuracion.maxzoom,
+            'minzoom': 0,
+            'layout': {
+              'icon-image': 'vehiculo_tr',
+              'icon-allow-overlap': true,
+              'icon-size': 0.5,
+              'icon-anchor': 'bottom'
+            }
+          });
+
+          this.map.addLayer({
+            'id': "posiciones_tr", // Nombre de la capa
+            'type': 'symbol',
+            'source': "posiciones_tr", // Nombre de la fuente
+            'maxzoom': this.configuracion.maxzoom,
+            'minzoom': 0,
+            'layout': {
+              'icon-image': 'vehiculo_tr',
+              'icon-allow-overlap': true,
+              'icon-size': 0.5,
+              'icon-anchor': 'bottom'
+            }
           });
         });
       });
 
-      // Actualizar posiciones en el mapa mediante marker cada segundo
+      // Actualizar posiciones en el mapa
       setInterval(() => {
-        if (this.listaPosiciones !== undefined) {
-          Object.keys(this.listaPosiciones).forEach((idViaje) => {
-            let marker = this.listaMarkers[idViaje];
-
-            if (marker === undefined) {
-              marker = new maplibregl.Marker().setLngLat([0,0]).setPopup(new maplibregl.Popup().setHTML(`<h1>${idViaje}</h1>`)).addTo(this.map);
-              this.listaMarkers[idViaje] = marker;
-            }
-
-            let posicion = this.listaPosiciones![idViaje][moment().milliseconds(0).toISOString()];
-            if (posicion !== undefined) {
-              marker.setLngLat([posicion.lon, posicion.lat]);
-            }
-          });
-        }            
+        const posiciones = this.listaPosiciones?.get(moment().milliseconds(0).toISOString());
+        console.log(posiciones)
+        if (posiciones !== undefined) {
+          // Actualizar fuente
+          (this.map.getSource("posiciones") as GeoJSONSource).setData(posiciones);
+        }
       }, 1000);
 
 
@@ -254,44 +273,21 @@ export class MapaComponent implements OnInit {
       console.log(tiempoReal);
       // Añadir posiciones al mapa
       if (tiempoReal !== undefined) {
-        // Comprobar si existe la capa idAgencia_posiciones_tr
-        if (this.map.getLayer(`${tiempoReal.idFeed}_posiciones_tr`) === undefined) {
-          this.map.addSource(`${tiempoReal.idFeed}_posiciones_tr`, {
-            'type': 'geojson',
-            'data': {
-              'type': 'FeatureCollection',
-              'features': []
-            }
-          });
-          this.map.addLayer({
-            'id': `${tiempoReal.idFeed}_posiciones_tr`, // Nombre de la capa
-            'type': 'symbol',
-            'source': `${tiempoReal.idFeed}_posiciones_tr`, // Nombre de la fuente
-            'maxzoom': this.configuracion.maxzoom,
-            'minzoom': 0,
-            'layout': {
-              'icon-image': 'vehiculo_tr',
-              'icon-allow-overlap': true,
-              'icon-size': 0.5,
-              'icon-anchor': 'bottom'
-            }
-          });
-        }
-
         let geojson: GeoJSON.FeatureCollection<GeoJSON.Point> = {
           'type': 'FeatureCollection',
           'features': []
         };
 
+        let features: Array<GeoJSON.Feature<GeoJSON.Point>> = [];
         tiempoReal.entidades.forEach((entidad: transit_realtime.IFeedEntity) => {
           if (entidad.vehicle) {
-            geojson.features.push({
-              'type': 'Feature',
-              'geometry': {
+            features.push({
+              type: 'Feature',
+              geometry: {
                 'type': 'Point',
                 'coordinates': [entidad.vehicle.position!.longitude, entidad.vehicle.position!.latitude]
               },
-              'properties': {
+              properties: {
                 ...(entidad.vehicle?.trip?.tripId && {'idViaje': entidad.vehicle?.trip?.tripId}),
                 ...(entidad.vehicle?.trip?.routeId && {'idLinea': entidad.vehicle?.trip?.routeId}),
                 ...(entidad.vehicle?.trip?.directionId && {'direccion': entidad.vehicle?.trip?.directionId}),
@@ -314,7 +310,16 @@ export class MapaComponent implements OnInit {
           }
         });
 
-        (this.map.getSource(`${tiempoReal.idFeed}_posiciones_tr`) as GeoJSONSource).setData(geojson);
+        // Guardar features de este feed
+        this.listaFeaturesTiempoReal.set(tiempoReal.idFeed, features);
+
+        // Unir todas las features de todos los feeds
+        this.listaFeaturesTiempoReal.forEach((features, idFeed) => {
+          geojson.features.push(...features);
+        });
+
+        // Actualizar fuente
+        (this.map.getSource("posiciones_tr") as GeoJSONSource)?.setData(geojson);
       }
     });
   }
@@ -340,22 +345,6 @@ export class MapaComponent implements OnInit {
     }
   }
 
-  // Get info from each tileset present in the catalog and return a promise
-  getTilesetsInfo(): Promise<TileSet[]> {
-    return new Promise((resolve, reject) => {
-      this.tileCatalogService.getCatalog().subscribe((catalog: Catalog) => {
-        let tilesets: TileSet[] = [];
-        Object.keys(catalog.tiles).forEach((item) => {
-          this.tileCatalogService.getTileset(item).subscribe((tileset) => {
-            tileset.id = item;
-            tilesets.push(tileset);
-          });
-        });
-        resolve(tilesets);
-      });
-    });
-  }
-
   filtrarAgencias(agencias: {idAgencia: string; mostrar: boolean;}[]) {
     console.log(agencias);
     this.listaAgencias = agencias;
@@ -367,9 +356,9 @@ export class MapaComponent implements OnInit {
     });
 
     // idFeed_posiciones_tr
-    [... new Set(agencias.map(a => a.idAgencia.split("_")[0]))].forEach((feed) => {
-      this.map.setLayoutProperty(`${feed}_posiciones_tr`, 'visibility', agencias.filter(a => a.idAgencia.split("_")[0] == feed).every(a => !a.mostrar) ? 'none' : 'visible');
-    });
+    // [... new Set(agencias.map(a => a.idAgencia.split("_")[0]))].forEach((feed) => {
+    //   this.map.setLayoutProperty(`${feed}_posiciones_tr`, 'visibility', agencias.filter(a => a.idAgencia.split("_")[0] == feed).every(a => !a.mostrar) ? 'none' : 'visible');
+    // });
 
     // Actualizar suscripciones feeds tiempo real
     this.tiemporealService.actualizar_feeds([... new Set(agencias.filter(a => a.mostrar).map(a => a.idAgencia.split("_")[0]).filter((feed) => this.listaFeedTiempoReal.includes(feed)))]);
@@ -389,39 +378,64 @@ export class MapaComponent implements OnInit {
   }
 
   descargarPosiciones(agencias: string[]) {
+    const inicio = moment()
     let endpoint: Observable<PosicionRespuesta>;
     if (this.listaPosiciones === undefined) {
-      this.listaPosiciones = {};
+      console.log(`Descargar (primero) - ${moment().toISOString()}`)
+      this.listaPosiciones = new Map();
       endpoint = this.posicionesService.getPosicionesActuales(agencias);
     } else {
+      console.log(`Descargar - ${moment().toISOString()}`)
       endpoint = this.posicionesService.getPosicionesProximoMinuto(agencias);
     }
 
     endpoint.subscribe((posiciones) => {
+      let listaFechas: Array<{fecha: string, features: Array<GeoJSON.Feature<GeoJSON.Point>>}> = [];
       posiciones.agencias.forEach((agencia) => {
         agencia.viajes.forEach((viaje) => {
-          if (this.listaPosiciones![viaje.idViaje] === undefined) {
-            this.listaPosiciones![viaje.idViaje] = {};
-          }
           let posiciones_decodificadas = this.decodificarPosiciones(moment(posiciones.fecha), viaje.posiciones);
           Object.keys(posiciones_decodificadas).forEach((fecha) => {
-            this.listaPosiciones![viaje.idViaje][fecha] = posiciones_decodificadas[fecha];
+            if (!listaFechas.some(f => f.fecha === fecha)) {
+              listaFechas.push({fecha: fecha, features: []});
+            }
+
+            const posicion = posiciones_decodificadas[fecha];
+            // Get the feature array by fecha
+            listaFechas.find(f => f.fecha === fecha)?.features.push({
+              type: 'Feature',
+              geometry: {
+                type: 'Point',
+                coordinates: [posicion.lon, posicion.lat]
+              },
+              properties: {
+                agencia: agencia.idAgencia,
+                viaje: viaje.idViaje,
+                proximoOrdenParada: posicion.proximoOrdenParada
+              }
+            });
           });
         });
       });
+
+      // Guardar features
+      listaFechas.forEach((t) => {
+        let geojson: GeoJSON.FeatureCollection<GeoJSON.Point> = {
+          'type': 'FeatureCollection',
+          'features': t.features
+        };
+        this.listaPosiciones?.set(t.fecha, geojson);
+      });
+
       console.log(this.listaPosiciones)
 
       // Eliminar posiciones antiguas
-      Object.keys(this.listaPosiciones!).forEach((idViaje) => {
-        Object.keys(this.listaPosiciones![idViaje]).forEach((fecha) => {
-          if (moment(fecha).isBefore(moment(posiciones.fecha).subtract(1, 'minute'))) {
-            delete this.listaPosiciones![idViaje][fecha];
-          }
-        });
-        if (Object.keys(this.listaPosiciones![idViaje]).length === 0) {
-          delete this.listaPosiciones![idViaje];
+      this.listaPosiciones?.forEach((_, fecha) => {
+        if (moment(fecha).isBefore(moment(posiciones.fecha).subtract(1, 'minute'))) {
+          this.listaPosiciones?.delete(fecha);
         }
       });
+
+      console.log("Descargado en " + moment().diff(inicio, 'milliseconds') + "ms");
     });
   }
 

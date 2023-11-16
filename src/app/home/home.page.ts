@@ -5,13 +5,13 @@ import { AgencyRoutes } from '../models/agencia.model';
 import { CommonModule } from '@angular/common';
 import { Linea } from '../models/linea.model';
 import { AgenciasService } from '../services/agencias.service';
-
+import { ActivatedRoute, Router, RouterModule} from '@angular/router'
 
 @Component({
   selector: 'app-home',
   templateUrl: 'home.page.html',
   standalone: true,
-  imports: [CommonModule, IonicModule, MapaComponent],
+  imports: [CommonModule, IonicModule, RouterModule],
 })
 export class HomePage implements OnInit {  
   @ViewChild(MapaComponent) mapa: MapaComponent;
@@ -19,7 +19,7 @@ export class HomePage implements OnInit {
   agenciasCheckboxChecked: boolean = true;
   agenciasCheckboxIndeterminate: boolean = false;
 
-  constructor(private menuCtrl: MenuController, private agenciesService: AgenciasService) {}
+  constructor(private menuCtrl: MenuController, private agenciesService: AgenciasService, private route: ActivatedRoute, private router: Router) {}
 
   listaAgenciasLineas: AgencyRoutes[] = [];
 
@@ -32,6 +32,10 @@ export class HomePage implements OnInit {
 
   abrirMenu() {
     this.menuCtrl.open();
+  }
+
+  navegarA(ruta: string[]) {
+    this.router.navigate(ruta, {relativeTo: this.route.parent});
   }
 
   agenciaCheckboxClick(event: Event, details: CheckboxChangeEventDetail<string>) {

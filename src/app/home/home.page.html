@@ -1,7 +1,8 @@
-<ion-menu contentId="home-content">
+<ion-menu contentId="mapa_router">
   <ion-header>
     <ion-toolbar>
       <ion-title>Filtrar líneas</ion-title>
+      <button (click)="navegarA(['parada'])"> Parada</button>
     </ion-toolbar>
   </ion-header>
   <ion-content class="ion-padding">
@@ -25,11 +26,8 @@
     </ion-accordion-group>
   </ion-content>
 </ion-menu>
-<ion-content id="home-content">
-  <ion-fab slot="fixed" vertical="top" horizontal="start">
-    <ion-fab-button size="small" (click)="abrirMenu()">
-      <ion-icon src="assets/icon/linea.svg"></ion-icon>
-    </ion-fab-button>
-  </ion-fab>
-  <app-mapa></app-mapa>
-</ion-content>
+<ion-fab slot="fixed" vertical="top" horizontal="start">
+  <ion-fab-button size="small" (click)="abrirMenu()">
+    <ion-icon src="assets/icon/linea.svg"></ion-icon>
+  </ion-fab-button>
+</ion-fab>

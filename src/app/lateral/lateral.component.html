@@ -1,0 +1,21 @@
+<ion-content *ngIf="!mostrarModal">
+  <ng-container [ngTemplateOutlet]="contenido"></ng-container>
+</ion-content>
+<ion-modal id="lateralModal" *ngIf="mostrarModal" [isOpen]="true">
+  <ng-template>
+    <ng-container [ngTemplateOutlet]="contenido"></ng-container> 
+  </ng-template>
+</ion-modal>
+
+<ng-template #contenido>
+  <ion-header>
+    <ion-toolbar>
+      <ion-buttons slot="start">
+        <ion-button (click)="navegarA(['..'])">Atras</ion-button>
+      </ion-buttons>
+    </ion-toolbar>
+  </ion-header>
+  <ion-content>
+    <ng-content></ng-content>
+  </ion-content>
+</ng-template>
