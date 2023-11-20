@@ -16,4 +16,18 @@ export interface Linea {
     idRed?: string;
     paradas?: string[] | Parada[];
     viajes?: string[];
+    bbox: number[];
+}
+
+export class ShapeVectorProperties {
+    idRecorrido: string;
+    idLinea: string;
+    idAgencia: string;
+    nombreAgencia: string;
+    nombreLargo?: string;
+    nombreCorto?: string;
+    tipo?: number;
+    color?: string;
+    colorTexto?: string;
+    bbox: number[];
 }

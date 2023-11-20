@@ -10,6 +10,7 @@ export class PosicionRespuestaAgencia {
 
 export class PosicionRespuestaViaje {
     idViaje: string;
+    idLinea: string;
     posiciones: string;
 }
 

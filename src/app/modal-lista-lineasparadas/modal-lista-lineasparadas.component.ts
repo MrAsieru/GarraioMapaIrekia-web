@@ -1,13 +1,14 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, Input, OnChanges, SimpleChanges } from '@angular/core';
-import { ModalController, IonicModule, IonicSafeString } from '@ionic/angular';
-import { ShapeVectorProperties } from 'src/app/models/shape.model';
+import { Component, OnInit, Input, OnChanges, SimpleChanges, ViewChild } from '@angular/core';
+import { ModalController, IonicModule, IonicSafeString, IonModal } from '@ionic/angular';
+import { ShapeVectorProperties } from 'src/app/models/linea.model';
 import { Parada, StopVectorProperties } from 'src/app/models/parada.model';
 import { LineasService } from '../services/lineas.service';
 import { ParadasService } from '../services/paradas.service';
 import { Linea } from '../models/linea.model';
 import { ModalInfoLineasparadasComponent } from '../modal-info-lineasparadas/modal-info-lineasparadas.component';
 import { Observable } from 'rxjs';
+import { ActivatedRoute, Route, Router } from '@angular/router';
 
 @Component({
   selector: 'app-modal-lista-lineasparadas',
@@ -16,10 +17,14 @@ import { Observable } from 'rxjs';
   imports: [IonicModule, CommonModule],
 })
 export class ModalListaLineasParadasComponent implements OnInit {
+  @Input("route") route: ActivatedRoute;
   @Input("datos") datos: Observable<{lineas: ShapeVectorProperties[], paradas: StopVectorProperties[]}>;
   lineas: ShapeVectorProperties[] = [];
-  paradas: StopVectorProperties[] = [];
-  constructor(private routesService: LineasService, private stopsService: ParadasService, private modalCtrl: ModalController) { }
+  paradas: Parada[] = [];
+  constructor(private routesService: LineasService,
+    private paradasService: ParadasService,
+    private modalCtrl: ModalController,
+    private router: Router) { }
 
   ngOnInit(): void {
     console.log("INIT");
@@ -27,21 +32,28 @@ export class ModalListaLineasParadasComponent implements OnInit {
       console.log(data);
       this.lineas = data.lineas;
       this.paradas = data.paradas;
+
+      this.paradas.forEach((parada) => {
+        this.paradasService.getParada(parada.idParada).subscribe((parada) => {
+          this.paradasService.getLineasParada(parada.idParada).subscribe((colores) => {
+            parada.lineas = colores;
+            this.paradas[this.paradas.findIndex((parada2) => parada2.idParada === parada.idParada)] = parada;
+          });          
+        });
+      });
     });
   }
 
-  mostrarLinea(linea: ShapeVectorProperties, event: MouseEvent) {
-    console.log(event)
-    this.routesService.getLinea(linea.route_id).subscribe((data) => {
-      this.mostrarModal(data, undefined);
-    });
+  mostrarLinea(linea: Linea, event: MouseEvent) {
+    // console.log(event)
+    // this.routesService.getLinea(linea.route_id).subscribe((data) => {
+    //   this.mostrarModal(data, undefined);
+    // });
+    this.navegarA(['linea', linea.idLinea]);
   }
 
-  mostrarParada(parada: StopVectorProperties, event: MouseEvent) {
-    console.log(event)
-    this.stopsService.getParada(parada.stop_id).subscribe((data) => {
-      this.mostrarModal(undefined, data);
-    });
+  mostrarParada(parada: Parada, event: MouseEvent) {
+    this.navegarA(['parada', parada.idParada]);
   }
 
   async mostrarModal(linea?: Linea, parada?: Parada) {
@@ -54,5 +66,10 @@ export class ModalListaLineasParadasComponent implements OnInit {
       componentProps: { linea: linea, parada: parada }
     });
     modal.present();
+  }
+
+  navegarA(ruta: string[]) {
+    this.modalCtrl.dismiss(undefined, undefined, 'modal-lista-lineasparadas');    
+    this.router.navigate(ruta, {relativeTo: this.route});
   }
 }

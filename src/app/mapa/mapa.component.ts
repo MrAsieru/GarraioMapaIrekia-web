@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { IonicModule, ModalController } from '@ionic/angular';
-import maplibregl, { GeoJSONSource, PointLike } from 'maplibre-gl';
+import maplibregl, { ExpressionSpecification, FilterSpecification, GeoJSONSource, PointLike } from 'maplibre-gl';
 import { ModalListaLineasParadasComponent } from '../modal-lista-lineasparadas/modal-lista-lineasparadas.component';
-import { ShapeVectorProperties } from 'src/app/models/shape.model';
+import { ShapeVectorProperties } from 'src/app/models/linea.model';
 import { StopVectorProperties } from 'src/app/models/parada.model';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { environment } from 'src/environments/environment';
@@ -15,7 +15,9 @@ import { AgenciasService } from '../services/agencias.service';
 import { TiempoRealService } from '../services/tiemporeal.service';
 import { transit_realtime } from 'gtfs-realtime-bindings';
 import { FeedsService } from '../services/feeds.service';
-import { RouterModule } from '@angular/router';
+import { ActivatedRoute, Route, Router, RouterModule } from '@angular/router';
+import { MapaService } from '../services/mapa.service';
+import { AjusteMapa, FiltroMapa, MovimientoMapa } from '../models/mapa.model';
 
 @Component({
   selector: 'app-mapa',
@@ -25,7 +27,7 @@ import { RouterModule } from '@angular/router';
 })
 export class MapaComponent implements OnInit {
   configuracion = {
-    maxzoom: 22,
+    maxzoom: 19,
   }
   map: maplibregl.Map;
   modalListaLineasParadasDatos: BehaviorSubject<{lineas: ShapeVectorProperties[], paradas: StopVectorProperties[]}> | null;
@@ -78,7 +80,10 @@ export class MapaComponent implements OnInit {
     private posicionesService: PosicionesService, 
     private agenciasService: AgenciasService,
     private tiemporealService: TiempoRealService,
-    private feedsService: FeedsService) {}
+    private feedsService: FeedsService,
+    private route: ActivatedRoute,
+    private router: Router,
+    private mapaService: MapaService) {}
 
   ngOnInit() {
     this.modalListaLineasParadasDatos = null;
@@ -94,7 +99,7 @@ export class MapaComponent implements OnInit {
             "tiles": ["https://a.tile.openstreetmap.org/{z}/{x}/{y}.png"],
             "tileSize": 256,
             "attribution": "&copy; OpenStreetMap Contributors",
-            "maxzoom": 19
+            "maxzoom": this.configuracion.maxzoom
           }
         },
         "glyphs": "https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf",
@@ -107,7 +112,8 @@ export class MapaComponent implements OnInit {
         ]
       },
       center: [-3, 43.1], // starting position [lng, lat]
-      zoom: 9
+      zoom: 9,
+      maxZoom: this.configuracion.maxzoom - 1
     });
 
     this.agenciasService.getAgencias().subscribe((agencias) => {
@@ -148,8 +154,6 @@ export class MapaComponent implements OnInit {
           'features': []
         }
       });
-
-      
 
       Promise.all(
         this.iconos.map(img => new Promise<void>((resolve, reject) => {
@@ -196,7 +200,7 @@ export class MapaComponent implements OnInit {
             'maxzoom': this.configuracion.maxzoom,
             'minzoom': tileset.vector_layers.find(layer => layer.id === "paradas")?.minzoom && 0,
             'layout': {
-              'icon-image': ['get', ['get', 'location_type'], ['literal', this.tipos_paradas]],
+              'icon-image': ['get', ['get', 'tipo'], ['literal', this.tipos_paradas]],
               'icon-allow-overlap': true,
               'icon-size': 0.5
             }
@@ -229,6 +233,18 @@ export class MapaComponent implements OnInit {
               'icon-anchor': 'bottom'
             }
           });
+
+          this.mapaService.getFiltrosMapa().subscribe((filtros) => {
+            this.filtrarMapa(filtros);
+          });
+    
+          this.mapaService.getMovimientoMapa().subscribe((movimiento) => {
+            this.moverMapa(movimiento);
+          });
+
+          this.mapaService.getAjusteMapa().subscribe((ajuste) => {
+            this.ajustarMapa(ajuste);
+          });
         });
       });
 
@@ -244,24 +260,99 @@ export class MapaComponent implements OnInit {
 
 
     });
+    // this.map.on('click', (e) => {
+    //   const ne: PointLike = [e.point.x + 10, e.point.y - 10];
+    //   const sw: PointLike = [e.point.x - 10, e.point.y + 10];
+    //   const features = this.map.queryRenderedFeatures([ne, sw]);
+
+    //   var lineas: ShapeVectorProperties[] = [];
+    //   features?.filter(f => f.layer.id.endsWith("_lineas")).map(f => f.properties as ShapeVectorProperties).forEach(f => {
+    //     if (!lineas.some(l => l.route_id === f.route_id)) {
+    //       lineas.push(f);
+    //     }
+    //   });
+    //   var paradas: StopVectorProperties[] = features?.filter(f => f.layer.id.endsWith("_paradas")).map(f => f.properties as StopVectorProperties);
+    //   console.log(lineas)
+    //   console.log(paradas)
+
+    //   if (lineas.length + paradas.length > 0) {
+    //     this.mostrarModal(lineas, paradas)
+    //   }
+    // });
+
+    this.map.on('mouseenter', 'paradas', () => {
+      this.map.getCanvas().style.cursor = 'pointer';
+    });
+
+    // Change it back to a pointer when it leaves.
+    this.map.on('mouseleave', 'paradas', () => {
+      this.map.getCanvas().style.cursor = '';
+    });
+
     this.map.on('click', (e) => {
-      const ne: PointLike = [e.point.x + 10, e.point.y - 10];
-      const sw: PointLike = [e.point.x - 10, e.point.y + 10];
-      const features = this.map.queryRenderedFeatures([ne, sw]);
+      let features = this.map.queryRenderedFeatures(e.point, { layers: ['paradas'] });
+      console.log(JSON.stringify(features));
+      if (features.length > 0) {
+        if (features.length == 1) {
+          this.navegarA(['parada', features[0].properties["idParada"]]);
+        } else {
+          if (this.map.getZoom() < this.map.getMaxZoom() - 2) {
+            // Ajustar mapa a paradas
+            let bounds = new maplibregl.LngLatBounds();
+            features.forEach((feature) => {
+              const coordenadas = (feature.geometry as GeoJSON.Point).coordinates as [number, number];
+              bounds.extend({lon: coordenadas[0], lat: coordenadas[1]});
+            });
+            this.map.fitBounds(bounds, {padding: 50, maxZoom: this.configuracion.maxzoom});
+          } else {
+            const paradaUnica = new Set(...features.map(f => (f.properties["paradaPadre"] === "") ?  f.properties["idParada"] : f.properties["paradaPadre"] ));
 
-      var lineas: ShapeVectorProperties[] = [];
-      features?.filter(f => f.layer.id.endsWith("_lineas")).map(f => f.properties as ShapeVectorProperties).forEach(f => {
-        if (!lineas.some(l => l.route_id === f.route_id)) {
-          lineas.push(f);
+            if (paradaUnica.size == 1) {
+              this.navegarA(['parada', paradaUnica.values().next().value]);
+            } else {
+              // Mostrar modal
+              let paradas: StopVectorProperties[] = features.map(f => f.properties as StopVectorProperties);
+              this.mostrarModalSeleccion([], paradas);
+            }
+            
+          }
         }
-      });
-      var paradas: StopVectorProperties[] = features?.filter(f => f.layer.id.endsWith("_paradas")).map(f => f.properties as StopVectorProperties);
-      console.log(lineas)
-      console.log(paradas)
+        return;
+      } 
 
-      if (lineas.length + paradas.length > 0) {
-        this.mostrarModal(lineas, paradas)
+      features = this.map.queryRenderedFeatures(e.point, { layers: ['posiciones'] });
+      if (features.length > 0) {
+        console.log(features[0]);
+        return;
       }
+
+      features = this.map.queryRenderedFeatures(e.point, { layers: ['posiciones_tr'] });
+      if (features.length > 0) {
+        console.log(features[0]);
+        return;
+      }
+
+      features = this.map.queryRenderedFeatures(e.point, { layers: ['lineas'] });
+      if (features.length > 0) {
+        const lineas = new Set(features.map(f => f.properties["idLinea"] as string));
+        console.log(lineas);
+        if (lineas.size == 1) {
+          this.navegarA(['linea', lineas.values().next().value]);
+        } else {
+          // Mostrar modal
+          let lineas: ShapeVectorProperties[] = features.map(f => f.properties as ShapeVectorProperties).filter((linea, index, self) => self.findIndex(l => l.idLinea === linea.idLinea) === index);
+          this.mostrarModalSeleccion(lineas, []);
+        }
+        return;
+      }
+    });
+
+    this.map.on('mouseenter', 'lineas', () => {
+      this.map.getCanvas().style.cursor = 'pointer';
+    });
+
+    this.map.on('mouseleave', 'lineas', () => {
+      this.map.getCanvas().style.cursor = '';
     });
 
     this.feedsService.getFeedsTiempoReal().subscribe((feeds) => {
@@ -324,24 +415,25 @@ export class MapaComponent implements OnInit {
     });
   }
 
-  async mostrarModal(lineas: ShapeVectorProperties[], paradas: StopVectorProperties[]) {
+  async mostrarModalSeleccion(lineas: ShapeVectorProperties[], paradas: StopVectorProperties[]) {
     if (this.modalListaLineasParadasDatos === null) {
       this.modalListaLineasParadasDatos = new BehaviorSubject<{lineas: ShapeVectorProperties[], paradas: StopVectorProperties[]}>({lineas: lineas, paradas: paradas});
       const modal = await this.modalCtrl.create({
+        id: 'modal-lista-lineasparadas',
         component: ModalListaLineasParadasComponent,
         mode: 'md',
         initialBreakpoint: 0.25,
         backdropDismiss: true,
         backdropBreakpoint: 0.5,
         breakpoints: [0, 0.25, 0.5, 0.75, 1],
-        componentProps: { datos: this.modalListaLineasParadasDatos.asObservable() }
+        componentProps: { route: this.route, datos: this.modalListaLineasParadasDatos.asObservable() }
       });
       modal.present();
       modal.onDidDismiss().then(() => {
         this.modalListaLineasParadasDatos = null;
       });
     } else {
-      this.modalListaLineasParadasDatos.next({lineas: lineas, paradas: paradas});
+      this.modalListaLineasParadasDatos.next({lineas: [...lineas], paradas: [...paradas]});
     }
   }
 
@@ -362,6 +454,51 @@ export class MapaComponent implements OnInit {
 
     // Actualizar suscripciones feeds tiempo real
     this.tiemporealService.actualizar_feeds([... new Set(agencias.filter(a => a.mostrar).map(a => a.idAgencia.split("_")[0]).filter((feed) => this.listaFeedTiempoReal.includes(feed)))]);
+  }
+
+  filtrarMapa(filtrosMapa: FiltroMapa) {
+    let agencias_lineas_posiciones = null;
+    let agencias_paradas: ExpressionSpecification | null = null;
+    let lineas = null;
+    let paradas = null;
+    if (filtrosMapa.agencias) {
+      agencias_lineas_posiciones = ['in', 'idAgencia', ...filtrosMapa.agencias!] as FilterSpecification;
+      agencias_paradas = ['any', ...filtrosMapa.agencias.map((agencia) => ['in', agencia, ['get', 'agencias']] as ExpressionSpecification)];  
+    } else {
+      if (filtrosMapa.lineas) {
+        lineas = ['in', 'idLinea', ...filtrosMapa.lineas!] as FilterSpecification;
+      }
+      if (filtrosMapa.paradas) {
+        paradas = ['any', ['in', 'idParada', ...filtrosMapa.paradas!] as FilterSpecification, ['in', 'paradaPadre', ...filtrosMapa.paradas!] as FilterSpecification] as FilterSpecification
+        // paradas = ['in', 'idParada', ...filtrosMapa.paradas!] as FilterSpecification;
+      }
+    }
+
+    this.map.setFilter("lineas", (agencias_lineas_posiciones !== null) ? agencias_lineas_posiciones : lineas);
+    this.map.setFilter("posiciones", (agencias_lineas_posiciones !== null) ? agencias_lineas_posiciones : lineas);
+    this.map.setFilter("paradas", (agencias_paradas !== null) ? agencias_paradas : paradas);
+  }
+
+  moverMapa(movimientoMapa: MovimientoMapa) {
+    const lat = movimientoMapa.latitud || this.map.getCenter().lat;
+    const lon = movimientoMapa.longitud || this.map.getCenter().lng;
+    const zoom = movimientoMapa.zoom || this.map.getZoom();
+
+    this.map.flyTo({
+      center: [lon, lat],
+      zoom: (zoom >= 0) ? zoom : this.map.getMaxZoom()
+    });
+  }
+
+  ajustarMapa(ajusteMapa: AjusteMapa) {
+    if (ajusteMapa.bbox) {
+      const bbox = ajusteMapa.bbox;
+      const offset = ajusteMapa.offset || 50;
+      const zoomMax = ajusteMapa.zoomMax || this.map.getMaxZoom();
+      const linear = ajusteMapa.linear || false;
+  
+      this.map.fitBounds([bbox[0], bbox[1], bbox[2], bbox[3]], {padding: offset, maxZoom: zoomMax, linear: linear});
+    }
   }
 
   cadaMinuto(callback: () => void) {
@@ -408,8 +545,9 @@ export class MapaComponent implements OnInit {
                 coordinates: [posicion.lon, posicion.lat]
               },
               properties: {
-                agencia: agencia.idAgencia,
-                viaje: viaje.idViaje,
+                idAgencia: agencia.idAgencia,
+                idLinea: viaje.idLinea,
+                idViaje: viaje.idViaje,
                 proximoOrdenParada: posicion.proximoOrdenParada
               }
             });
@@ -475,5 +613,9 @@ export class MapaComponent implements OnInit {
     });
 
     return posiciones_decodificadas;
+  }
+
+  navegarA(ruta: string[]) {
+    this.router.navigate(ruta, {relativeTo: this.route});
   }
 }

@@ -4,6 +4,7 @@ import { NgModule } from '@angular/core';
 import { HomePage } from './home/home.page';
 import { MapaComponent } from './mapa/mapa.component';
 import { ParadaComponent } from './parada/parada.component';
+import { LineaComponent } from './linea/linea.component';
 
 export const routes: Routes = [
   {
@@ -22,8 +23,13 @@ export const routes: Routes = [
         pathMatch: 'full'
       },
       {
-        path: 'parada',
+        path: 'parada/:idParada',
         component: ParadaComponent,
+        pathMatch: 'full'
+      },
+      {
+        path: 'linea/:idLinea',
+        component: LineaComponent,
         pathMatch: 'full'
       }
     ]

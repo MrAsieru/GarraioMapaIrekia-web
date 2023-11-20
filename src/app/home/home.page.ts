@@ -6,6 +6,7 @@ import { CommonModule } from '@angular/common';
 import { Linea } from '../models/linea.model';
 import { AgenciasService } from '../services/agencias.service';
 import { ActivatedRoute, Router, RouterModule} from '@angular/router'
+import { MapaService } from '../services/mapa.service';
 
 @Component({
   selector: 'app-home',
@@ -14,12 +15,15 @@ import { ActivatedRoute, Router, RouterModule} from '@angular/router'
   imports: [CommonModule, IonicModule, RouterModule],
 })
 export class HomePage implements OnInit {  
-  @ViewChild(MapaComponent) mapa: MapaComponent;
   @ViewChild('chkbox_home_menu_agencias', { read: ElementRef }) agenciasCheckbox: IonCheckbox;
   agenciasCheckboxChecked: boolean = true;
   agenciasCheckboxIndeterminate: boolean = false;
 
-  constructor(private menuCtrl: MenuController, private agenciesService: AgenciasService, private route: ActivatedRoute, private router: Router) {}
+  constructor(private menuCtrl: MenuController,
+    private agenciesService: AgenciasService,
+    private route: ActivatedRoute,
+    private router: Router,
+    private mapaService: MapaService) {}
 
   listaAgenciasLineas: AgencyRoutes[] = [];
 
@@ -58,7 +62,9 @@ export class HomePage implements OnInit {
     }
 
     // Enviar datos al mapa
-    this.mapa.filtrarAgencias(this.listaAgenciasLineas.map(agencia => ({"idAgencia": agencia.idAgencia, "mostrar": agencia.mostrar})));
+    this.mapaService.setFiltrarMapa({
+      agencias: this.listaAgenciasLineas.filter(agencia => agencia.mostrar).map(agencia => agencia.idAgencia)
+    });
   }
 
   agenciaTodosCheckboxClick(event: Event, details: CheckboxChangeEventDetail<string>) {
@@ -67,7 +73,9 @@ export class HomePage implements OnInit {
     this.listaAgenciasLineas.forEach(agencia => agencia.mostrar = details.checked);    
 
     // Enviar datos al mapa
-    this.mapa.filtrarAgencias(this.listaAgenciasLineas.map(agencia => ({"idAgencia": agencia.idAgencia, "mostrar": agencia.mostrar})));
+    this.mapaService.setFiltrarMapa({
+      agencias: this.listaAgenciasLineas.filter(agencia => agencia.mostrar).map(agencia => agencia.idAgencia)
+    });
   }
 
   mostrarLinea(event: Event, linea: Linea) {

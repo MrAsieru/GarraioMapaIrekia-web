@@ -17,7 +17,7 @@ export class Parada {
     accesibilidad?: number;
     idNivel?: string;
     codigoPlataforma?: string;
-    lineas?: string[] | Linea[];
+    lineas?: Array<string | Linea>;
     viajes?: string[];
     areas?: string[] | Area[];
     nivel?: Nivel;
@@ -30,10 +30,11 @@ export class Nivel {
 }
 
 export class StopVectorProperties {
-    stop_id: string;
-    name: string;
-    zone_id: string;
-    location_type: number;
-    parent_station: string;
-    platform_code: string;
+    idParada: string;
+    nombre: string;
+    idZona: string;
+    tipo: number;
+    paradaPadre: string;
+    codigoPlataforma: string;
+    agencias: string[];
 }

@@ -4,10 +4,8 @@
       <ion-label>Paradas</ion-label>
     </ion-list-header>
     <ion-item *ngFor="let p of paradas" button (click)="mostrarParada(p, $event)">
-      <ion-label>
-        <h2>{{p.name}}</h2>
-        <h2 *ngIf="p.platform_code != null">[{{p.platform_code}}]</h2>
-      </ion-label>
+      <h2>{{p.nombre}}</h2><h2 *ngIf="p.codigoPlataforma != ''">[{{p.codigoPlataforma}}]</h2>
+      <ion-chip *ngFor="let linea of p.lineas | slice:0:3" [ngStyle]="{'background': $any(linea).color, 'color': $any(linea).colorTexto}">{{$any(linea).nombreCorto}}</ion-chip>
     </ion-item>
   </ion-list>
   <ion-list *ngIf="lineas.length > 0">
@@ -15,10 +13,9 @@
       <ion-label><b>Lineas</b></ion-label>
     </ion-list-header>
     <ion-item *ngFor="let l of lineas" button (click)="mostrarLinea(l, $event)">
-      <ion-chip [ngStyle]="{'background': l.color, 'color': l.text_color}">{{l.route_id}}</ion-chip>
-      <ion-label>
-        <h2>{{l.short_name}}{{(l.short_name && l.long_name) ? ' - ' : ''}}{{l.long_name}}</h2>
-      </ion-label>
+      <ion-icon src="assets/img/tipolinea_{{l.tipo ? l.tipo : 0}}.svg"></ion-icon>
+      <h2>{{l.nombreCorto}}{{(l.nombreCorto && l.nombreLargo) ? ' - ' : ''}}{{l.nombreLargo}}</h2>
+      <ion-chip [ngStyle]="{'background': l.color, 'color': l.colorTexto}">{{l.nombreAgencia}}</ion-chip>
     </ion-item>
   </ion-list>
 </ion-content>

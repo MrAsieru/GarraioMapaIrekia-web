@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { Parada } from '../models/parada.model';
+import { Linea } from '../models/linea.model';
 
 @Injectable({
   providedIn: 'root'
@@ -18,5 +19,9 @@ export class ParadasService {
 
   getParada(id: string): Observable<Parada> {
     return this.http.get<Parada>(this.baseUrl+"/"+id);
+  }
+
+  getLineasParada(id: string): Observable<Linea[]> {
+    return this.http.get<Linea[]>(this.baseUrl+"/"+id+"/lineas");
   }
 }
