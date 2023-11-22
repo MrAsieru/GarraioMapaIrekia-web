@@ -1,5 +1,61 @@
 <app-lateral>
   <div>
-    {{parada | json}}
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>
+          <span *ngIf="parada.codigoPlataforma !== ''">{{parada.codigoPlataforma}} - </span>
+          <span>{{parada.nombre}}</span>
+          <span *ngIf="parada.codigo"> - {{parada.codigo}}</span>
+        </ion-card-title>
+        <ion-card-subtitle>
+          <span *ngIf="parada.idZona !== ''">Zona {{parada.idZona?.split("_")?.[1]}} - </span>
+          <ion-icon id="parada_accesibilidad" src="assets/img/accesibilidad_{{parada.accesibilidad ? parada.accesibilidad : '0'}}.svg"></ion-icon>
+          <ion-popover trigger="parada_accesibilidad" triggerAction="click"showBackdrop="false">
+            <ng-template>
+              <ion-content *ngIf="parada.accesibilidad === undefined || parada.accesibilidad === 0" class="ion-padding">Sin información</ion-content>
+              <ion-content *ngIf="parada.accesibilidad === 1" class="ion-padding">Algunos vehiculos permiten acceder en silla de ruedas</ion-content>
+              <ion-content *ngIf="parada.accesibilidad === 2" class="ion-padding">No es posible acceder en silla de ruedas</ion-content>
+            </ng-template>
+          </ion-popover>
+        </ion-card-subtitle>
+        <ion-card-content style="padding: 0 !important;">
+          <ion-row style="justify-content: flex-start; flex-wrap: nowrap; overflow-x: scroll !important; overflow-y: hidden;">
+            <ion-col *ngFor="let agencia of agencias" style="display: flex; flex-wrap: nowrap;">
+              <ion-chip text-wrap>
+                <ion-label text-wrap style="max-width: 100px; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">{{agencia.nombre}}</ion-label>
+              </ion-chip>
+            </ion-col>
+          </ion-row>
+        </ion-card-content>
+      </ion-card-header>
+    </ion-card>
+    <ion-card>
+      <ion-list>
+        <ion-item *ngFor="let horario of horarios">
+          <ion-icon src="assets/img/tipolinea_{{horario.linea?.tipo ? horario.linea?.tipo : 0}}.svg"></ion-icon>
+          <ion-label>
+            <ion-chip [ngStyle]="{'background': horario.linea?.color, 'color': horario.linea?.colorTexto}">{{horario.linea?.nombreCorto ?? horario.linea?.idLinea?.split("_")?.[1]}}</ion-chip>
+            <ion-text>{{horario.letrero ?? horario.linea?.nombreLargo}}</ion-text>
+          </ion-label>
+          
+          <ion-text>
+            <span id="parada_hora_{{horario.idViaje}}_{{horario.horario.orden}}">en {{horario.tiempoRestante}}min a las {{horario.horario.momentoLlegada! | dateFormat:'H:mm'}}</span>
+            <ion-popover trigger="parada_hora_{{horario.idViaje}}_{{horario.horario.orden}}" triggerAction="click" showBackdrop="false">
+              <ng-template>
+                <ion-content class="ion-padding">A las {{horario.horario.momentoLlegada?.tz(horario.zonaHoraria)! | dateFormat:'H:mm'}} hora local</ion-content>
+              </ng-template>
+            </ion-popover>
+            <ion-icon id="parada_exacto_{{horario.idViaje}}_{{horario.horario.orden}}" src="assets/img/exacto_{{horario.horario.exacto ? '1' : '0'}}.svg"></ion-icon>
+            <ion-popover trigger="parada_exacto_{{horario.idViaje}}_{{horario.horario.orden}}" triggerAction="click" showBackdrop="false">
+              <ng-template>
+                <ion-content *ngIf="horario.horario.exacto === undefined || !horario.horario.exacto" class="ion-padding">Horario aproximado</ion-content>
+                <ion-content *ngIf="horario.horario.exacto" class="ion-padding">Horario exacto</ion-content>
+              </ng-template>
+            </ion-popover>
+          </ion-text>
+        </ion-item>
+      </ion-list>
+    </ion-card>
+    
   </div>
 </app-lateral>

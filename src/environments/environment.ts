@@ -6,7 +6,7 @@ export const environment = {
   production: false,
   apiBaseUrl: 'http://localhost:8000',
   websocketBaseUrl: 'ws://localhost:8000',
-  tilesUrl: 'http://tile.mrasieru.eus'
+  tilesUrl: 'http://tile.mrasieru.live'
 };
 
 /*

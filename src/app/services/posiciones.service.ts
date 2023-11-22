@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { PosicionRespuesta } from '../models/posicion.model';
-import moment from 'moment';
+import moment from 'moment-timezone';
 
 @Injectable({
   providedIn: 'root'

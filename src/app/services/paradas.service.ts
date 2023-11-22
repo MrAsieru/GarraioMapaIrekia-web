@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
-import { Parada } from '../models/parada.model';
+import { HorarioParada, Parada } from '../models/parada.model';
 import { Linea } from '../models/linea.model';
 
 @Injectable({
@@ -23,5 +23,9 @@ export class ParadasService {
 
   getLineasParada(id: string): Observable<Linea[]> {
     return this.http.get<Linea[]>(this.baseUrl+"/"+id+"/lineas");
+  }
+
+  getHorariosParada(id: string): Observable<HorarioParada[]> {
+    return this.http.get<HorarioParada[]>(this.baseUrl+"/"+id+"/horarios");
   }
 }
