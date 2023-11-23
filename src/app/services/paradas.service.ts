@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
-import { HorarioParada, Parada } from '../models/parada.model';
+import { ViajeParada, Parada } from '../models/parada.model';
 import { Linea } from '../models/linea.model';
 import { Agencia } from '../models/agencia.model';
 
@@ -30,7 +30,7 @@ export class ParadasService {
     return this.http.get<Agencia[]>(this.baseUrl+"/"+id+"/agencias");
   }
 
-  getHorariosParada(id: string): Observable<HorarioParada[]> {
-    return this.http.get<HorarioParada[]>(this.baseUrl+"/"+id+"/horarios");
+  getHorariosParada(id: string): Observable<ViajeParada[]> {
+    return this.http.get<ViajeParada[]>(this.baseUrl+"/"+id+"/horarios");
   }
 }

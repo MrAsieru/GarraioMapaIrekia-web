@@ -1,5 +1,6 @@
 import { Area } from "./area.model";
 import { Linea } from "./linea.model";
+import { HorarioViaje, Viaje } from "./viaje.model";
 
 export class Parada {
     idParada: string;
@@ -40,46 +41,14 @@ export class StopVectorProperties {
     agencias: string[];
 }
 
-export class HorarioParada {
-    idAgencia: string;
-    idViaje: string;
-    idLinea: string;
-    idServicio: string;
-    letrero?: string;
-    nombre?: string;
-    direccion?: number;
-    idBloque?: string;
-    idRecorrido?: string;
-    accesibilidad?: number;
-    bicicletas?: number;
-    horario: Horario;
-    paradas?: string[];
-    frecuencias?: FrecuenciasViaje[];
-    fechas?: Date[];
+export class ViajeParada extends Viaje {
+    horario: HorarioParada;
     zonaHoraria: string;
     linea?: Linea;
     tiempoRestante?: number; // en minutos
 }
 
-export class Horario {
-    idParada: string;
-    horaLlegada?: string;
-    horaSalida?: string;
-    orden: number;
-    letrero?: string;
-    tipoRecogida?: number;
-    tipoBajada?: number;
-    recogidaContinua?: boolean;
-    bajadaContinua?: boolean;
-    distanciaRecorrida?: number;
-    exacto?: boolean;
+export class HorarioParada extends HorarioViaje {
     momentoLlegada?: moment.Moment;
     momentoSalida?: moment.Moment;
-}
-
-export class FrecuenciasViaje {
-    horaInicio: string;
-    horaFin: string;
-    margen: number;
-    exacto?: boolean;
 }

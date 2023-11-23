@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { LateralComponent } from '../lateral/lateral.component';
 import { ActivatedRoute, Router } from '@angular/router';
-import { HorarioParada, Parada } from '../models/parada.model';
+import { Parada, ViajeParada } from '../models/parada.model';
 import { ParadasService } from '../services/paradas.service';
 import { MapaService } from '../services/mapa.service';
 import { CommonModule } from '@angular/common';
@@ -21,7 +21,7 @@ import { AgenciasService } from '../services/agencias.service';
 export class ParadaComponent  implements OnInit, OnDestroy {
   idParada: string | null;
   parada: Parada = new Parada();
-  horarios: HorarioParada[] = [];
+  viajes: ViajeParada[] = [];
   agencias: Agencia[] = [];
 
   constructor(private router: Router,
@@ -81,7 +81,7 @@ export class ParadaComponent  implements OnInit, OnDestroy {
                 viaje.tiempoRestante = (viaje.horario.momentoLlegada as moment.Moment).diff(moment(), 'minutes');
               }
             });
-            this.horarios = viajes.sort((a, b) => a.tiempoRestante! - b.tiempoRestante!);
+            this.viajes = viajes.sort((a, b) => a.tiempoRestante! - b.tiempoRestante!);
           });
         }        
       });

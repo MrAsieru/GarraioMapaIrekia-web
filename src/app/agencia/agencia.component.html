@@ -10,29 +10,31 @@
           <ion-button (click)="abrirUrl(agencia.url)">
             <ion-icon slot="icon-only" src="assets/img/web.svg"></ion-icon>
           </ion-button>
-          <ion-button id="agencia_mas" *ngIf="agencia.urlTarifa || agencia.email || agencia.telefono">
-            <ion-icon slot="icon-only" src="assets/img/mas.svg"></ion-icon>
-          </ion-button>
-          <ion-popover trigger="agencia_mas" [dismissOnSelect]="true">
-            <ng-template>
-              <ion-content>
-                <ion-list>
-                  <ion-item *ngIf="agencia.urlTarifa" [button]="true" [detail]="false" (click)="abrirUrl(agencia.urlTarifa)">
-                    <ion-icon slot="start" src="assets/img/euro.svg"></ion-icon>
-                    <ion-label>Tarifa</ion-label>
-                  </ion-item>
-                  <ion-item *ngIf="agencia.email" [button]="true" [detail]="false" (click)="abrirUrl('mailto:'+agencia.email)">
-                    <ion-icon slot="start" src="assets/img/email.svg"></ion-icon>
-                    <ion-label>Email</ion-label>
-                  </ion-item>
-                  <ion-item *ngIf="agencia.telefono" [button]="true" [detail]="false" (click)="abrirUrl('tel:'+agencia.telefono)">
-                    <ion-icon slot="start" src="assets/img/telefono.svg"></ion-icon>
-                    <ion-label>Telefono</ion-label>
-                  </ion-item>
-                </ion-list>
-              </ion-content>
-            </ng-template>
-          </ion-popover>
+          <ng-container *ngIf="agencia.urlTarifa || agencia.email || agencia.telefono">
+            <ion-button id="agencia_mas">
+              <ion-icon slot="icon-only" src="assets/img/mas.svg"></ion-icon>
+            </ion-button>
+            <ion-popover trigger="agencia_mas" [dismissOnSelect]="true">
+              <ng-template>
+                <ion-content>
+                  <ion-list>
+                    <ion-item *ngIf="agencia.urlTarifa" [button]="true" [detail]="false" (click)="abrirUrl(agencia.urlTarifa)">
+                      <ion-icon slot="start" src="assets/img/euro.svg"></ion-icon>
+                      <ion-label>Tarifa</ion-label>
+                    </ion-item>
+                    <ion-item *ngIf="agencia.email" [button]="true" [detail]="false" (click)="abrirUrl('mailto:'+agencia.email)">
+                      <ion-icon slot="start" src="assets/img/email.svg"></ion-icon>
+                      <ion-label>Email</ion-label>
+                    </ion-item>
+                    <ion-item *ngIf="agencia.telefono" [button]="true" [detail]="false" (click)="abrirUrl('tel:'+agencia.telefono)">
+                      <ion-icon slot="start" src="assets/img/telefono.svg"></ion-icon>
+                      <ion-label>Telefono</ion-label>
+                    </ion-item>
+                  </ion-list>
+                </ion-content>
+              </ng-template>
+            </ion-popover>
+          </ng-container>
         </ion-card-content>
       </ion-card-header>
     </ion-card>
