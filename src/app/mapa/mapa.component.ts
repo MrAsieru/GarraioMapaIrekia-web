@@ -290,7 +290,7 @@ export class MapaComponent implements OnInit {
     });
 
     this.map.on('click', (e) => {
-      let features = this.map.queryRenderedFeatures(e.point, { layers: ['paradas'] });
+      let features = this.map.queryRenderedFeatures(e.point, { layers: ['paradas'] }).filter((feature) => feature.properties["paradaPadre"] === undefined || feature.properties["paradaPadre"] === "");
       console.log(JSON.stringify(features));
       if (features.length > 0) {
         if (features.length == 1) {

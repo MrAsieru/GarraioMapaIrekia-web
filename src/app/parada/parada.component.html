@@ -21,7 +21,7 @@
         <ion-card-content style="padding: 0 !important;">
           <ion-row style="justify-content: flex-start; flex-wrap: nowrap; overflow-x: scroll !important; overflow-y: hidden;">
             <ion-col *ngFor="let agencia of agencias" style="display: flex; flex-wrap: nowrap;">
-              <ion-chip text-wrap>
+              <ion-chip text-wrap (click)="navegarA(['../../agencia', agencia.idAgencia])">
                 <ion-label text-wrap style="max-width: 100px; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">{{agencia.nombre}}</ion-label>
               </ion-chip>
             </ion-col>
@@ -56,6 +56,5 @@
         </ion-item>
       </ion-list>
     </ion-card>
-    
   </div>
 </app-lateral>

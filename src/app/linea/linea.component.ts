@@ -23,7 +23,7 @@ export class LineaComponent  implements OnInit {
     this.idLinea = this.route.snapshot.paramMap.get('idLinea');
 
     if (this.idLinea) {
-      this.lineasService.getLineaConParadas(this.idLinea).subscribe(linea => {
+      this.lineasService.getLinea(this.idLinea, true).subscribe(linea => {
         this.linea = linea;
 
         this.mapaService.setFiltrarMapa({

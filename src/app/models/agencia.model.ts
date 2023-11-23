@@ -10,6 +10,7 @@ export class Agencia {
     urlTarifa?: string;
     email?: string;
     lineas?: string[] | Linea[];
+    bbox: number[];
     mostrar: boolean = true;
 }
 

@@ -35,8 +35,23 @@ export class ModalListaLineasParadasComponent implements OnInit {
 
       this.paradas.forEach((parada) => {
         this.paradasService.getParada(parada.idParada).subscribe((parada) => {
-          this.paradasService.getLineasParada(parada.idParada).subscribe((colores) => {
-            parada.lineas = colores;
+          this.paradasService.getLineasParada(parada.idParada).subscribe((lineas) => {
+            // Comprobar colores
+            lineas.forEach(linea => {
+              if (linea.color && linea.colorTexto && linea.color === linea.colorTexto) {
+                // Conseguir valores RGB
+                const r = parseInt(linea.color.substring(1, 3), 16);
+                const g = parseInt(linea.color.substring(3, 5), 16);
+                const b = parseInt(linea.color.substring(5, 7), 16);
+
+                if ((r*0.299 + g*0.587 + b*0.114) > 186) {
+                  linea.colorTexto = '#000000';
+                } else {
+                  linea.colorTexto = '#FFFFFF';
+                }
+              }
+            });
+            parada.lineas = lineas;
             this.paradas[this.paradas.findIndex((parada2) => parada2.idParada === parada.idParada)] = parada;
           });          
         });

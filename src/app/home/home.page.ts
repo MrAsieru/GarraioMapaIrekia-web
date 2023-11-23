@@ -28,7 +28,7 @@ export class HomePage implements OnInit {
   listaAgenciasLineas: AgencyRoutes[] = [];
 
   ngOnInit() {
-    this.agenciesService.getAgenciasLineas().subscribe((agencies) => {
+    this.agenciesService.getAgenciasConLineas().subscribe((agencies) => {
       this.listaAgenciasLineas = agencies;
       this.listaAgenciasLineas.forEach(agencia => agencia.mostrar = true);
     });

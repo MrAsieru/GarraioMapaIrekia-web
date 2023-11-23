@@ -1,4 +1,4 @@
-<ion-content *ngIf="!mostrarModal">
+<ion-content *ngIf="!mostrarModal" scrollY="false">
   <ng-container [ngTemplateOutlet]="contenido"></ng-container>
 </ion-content>
 <ion-modal id="lateralModal" *ngIf="mostrarModal" [isOpen]="true">
@@ -8,14 +8,16 @@
 </ion-modal>
 
 <ng-template #contenido>
-  <ion-header>
-    <ion-toolbar>
-      <ion-buttons slot="start">
-        <ion-button (click)="navegarA(['..'])">Atras</ion-button>
-      </ion-buttons>
-    </ion-toolbar>
-  </ion-header>
-  <ion-content>
-    <ng-content></ng-content>
-  </ion-content>
+  <div style="display: flex; flex-flow: column; height: 100%;">
+    <ion-header>
+      <ion-toolbar>
+        <ion-buttons slot="start">
+          <ion-button (click)="back()">Atras</ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content scrollY="true" style="flex-grow: 1;">
+      <ng-content></ng-content>
+    </ion-content>
+  </div>
 </ng-template>

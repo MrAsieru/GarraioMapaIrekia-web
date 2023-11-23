@@ -16,8 +16,8 @@ export class LineasService {
     return this.http.get<Linea[]>(this.baseUrl);
   }
 
-  getLinea(id: string): Observable<Linea> {
-    return this.http.get<Linea>(this.baseUrl+"/"+id);
+  getLinea(id: string, incluirParadas: boolean = false): Observable<Linea> {
+    return this.http.get<Linea>(this.baseUrl+"/"+id, {params: {incluirParadas: incluirParadas}});
   }
 
   getLineaConParadas(id: string): Observable<Linea> {

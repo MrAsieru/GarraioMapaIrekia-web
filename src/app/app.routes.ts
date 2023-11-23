@@ -5,6 +5,7 @@ import { HomePage } from './home/home.page';
 import { MapaComponent } from './mapa/mapa.component';
 import { ParadaComponent } from './parada/parada.component';
 import { LineaComponent } from './linea/linea.component';
+import { AgenciaComponent } from './agencia/agencia.component';
 
 export const routes: Routes = [
   {
@@ -30,6 +31,11 @@ export const routes: Routes = [
       {
         path: 'linea/:idLinea',
         component: LineaComponent,
+        pathMatch: 'full'
+      },
+      {
+        path: 'agencia/:idAgencia',
+        component: AgenciaComponent,
         pathMatch: 'full'
       }
     ]
