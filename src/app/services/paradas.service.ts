@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { HorarioParada, Parada } from '../models/parada.model';
 import { Linea } from '../models/linea.model';
+import { Agencia } from '../models/agencia.model';
 
 @Injectable({
   providedIn: 'root'
@@ -23,6 +24,10 @@ export class ParadasService {
 
   getLineasParada(id: string): Observable<Linea[]> {
     return this.http.get<Linea[]>(this.baseUrl+"/"+id+"/lineas");
+  }
+
+  getAgenciasParada(id: string): Observable<Agencia[]> {
+    return this.http.get<Agencia[]>(this.baseUrl+"/"+id+"/agencias");
   }
 
   getHorariosParada(id: string): Observable<HorarioParada[]> {

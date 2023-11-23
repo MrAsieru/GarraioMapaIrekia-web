@@ -52,6 +52,22 @@
                 <ion-content *ngIf="horario.horario.exacto" class="ion-padding">Horario exacto</ion-content>
               </ng-template>
             </ion-popover>
+            <ion-icon id="parada_bici_{{horario.idViaje}}_{{horario.horario.orden}}" src="assets/img/bici_{{horario.bicicletas ? horario.bicicletas : '0'}}.svg"></ion-icon>
+            <ion-popover trigger="parada_bici_{{horario.idViaje}}_{{horario.horario.orden}}" triggerAction="click"showBackdrop="false">
+              <ng-template>
+                <ion-content *ngIf="horario.bicicletas === undefined || horario.bicicletas === 0" class="ion-padding">Sin información</ion-content>
+                <ion-content *ngIf="horario.bicicletas === 1" class="ion-padding">Se permite acceder con una bicicleta</ion-content>
+                <ion-content *ngIf="horario.bicicletas === 2" class="ion-padding">No es posible acceder con una bicicleta</ion-content>
+              </ng-template>
+            </ion-popover>
+            <ion-icon id="parada_accesibilidad_{{horario.idViaje}}_{{horario.horario.orden}}" src="assets/img/accesibilidad_{{horario.accesibilidad ? horario.accesibilidad : '0'}}.svg"></ion-icon>
+            <ion-popover trigger="parada_accesibilidad_{{horario.idViaje}}_{{horario.horario.orden}}" triggerAction="click"showBackdrop="false">
+              <ng-template>
+                <ion-content *ngIf="horario.accesibilidad === undefined || horario.accesibilidad === 0" class="ion-padding">Sin información</ion-content>
+                <ion-content *ngIf="horario.accesibilidad === 1" class="ion-padding">Es posible acceder en silla de ruedas</ion-content>
+                <ion-content *ngIf="horario.accesibilidad === 2" class="ion-padding">No es posible acceder en silla de ruedas</ion-content>
+              </ng-template>
+            </ion-popover>
           </ion-text>
         </ion-item>
       </ion-list>

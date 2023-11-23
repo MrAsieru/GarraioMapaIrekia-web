@@ -21,7 +21,7 @@ export class Parada {
     viajes?: string[];
     areas?: string[] | Area[];
     nivel?: Nivel;
-    agencias: string[];
+    agencias?: string[];
 }
 
 export class Nivel {

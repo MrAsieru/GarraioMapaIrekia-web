@@ -51,13 +51,12 @@ export class ParadaComponent  implements OnInit, OnDestroy {
             longitud: parada.posicionLongitud,
             zoom: 17
           });
-
-          parada.agencias.forEach(idAgencia => {
-            this.agenciasService.getAgencia(idAgencia).subscribe(agencia => {
-              this.agencias.push(agencia);
-              this.agencias.sort((a, b) => a.nombre!.localeCompare(b.nombre!));
-            });
+          
+          this.paradasService.getAgenciasParada(parada.idParada).subscribe(agencias => {
+            agencias.sort((a, b) => a.nombre!.localeCompare(b.nombre!));
+            this.agencias = agencias;
           });
+          
 
           this.paradasService.getHorariosParada(parada.idParada).subscribe(viajes => {
             new Set(viajes.map(viaje => viaje.idLinea)).forEach(idLinea => {
