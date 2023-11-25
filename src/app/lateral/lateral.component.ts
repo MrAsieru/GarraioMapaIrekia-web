@@ -28,12 +28,12 @@ export class LateralComponent  implements OnInit {
     });
   }
 
-  navegarA(ruta: string[]) {
+  back() {
     this.lateralModal?.dismiss();
-    this.router.navigate(ruta, {relativeTo: this.route.parent});
+    this.navegacionService.back();
   }
 
-  back() {
-    this.navegacionService.back();
+  ngOnDestroy() {
+    this.lateralModal?.dismiss();
   }
 }
