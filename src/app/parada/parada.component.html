@@ -38,7 +38,7 @@
             <ion-text>{{horario.letrero ?? horario.linea?.nombreLargo}}</ion-text>
           </ion-label>
           
-          <ion-text>
+          <ion-note class="ion-align-self-end">
             <span id="parada_hora_{{horario.idViaje}}_{{horario.horario.orden}}">en {{horario.tiempoRestante}}min a las {{horario.horario.momentoLlegada! | dateFormat:'H:mm'}}</span>
             <ion-popover trigger="parada_hora_{{horario.idViaje}}_{{horario.horario.orden}}" triggerAction="click" showBackdrop="false">
               <ng-template>
@@ -68,7 +68,7 @@
                 <ion-content *ngIf="horario.accesibilidad === 2" class="ion-padding">No es posible acceder en silla de ruedas</ion-content>
               </ng-template>
             </ion-popover>
-          </ion-text>
+          </ion-note>
         </ion-item>
       </ion-list>
     </ion-card>

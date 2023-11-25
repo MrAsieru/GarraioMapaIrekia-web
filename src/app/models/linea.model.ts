@@ -1,7 +1,9 @@
 import { Agencia } from "./agencia.model";
 import { Parada } from "./parada.model";
+const Omit = <T, K extends keyof T>(Class: new () => T, keys: K[]): new () => Omit<T, typeof keys[number]> => Class;
 
-export interface Linea {
+
+export class Linea {
     idLinea: string;
     idAgencia: string;
     agencia?: Agencia;
@@ -17,6 +19,17 @@ export interface Linea {
     paradas?: string[] | Parada[];
     viajes?: string[];
     bbox: number[];
+    patrones?: PatronLinea[];
+}
+
+export class PatronLinea {
+    de: string;
+    a: string;
+    idDireccion?: number;
+    letrero?: string;
+    paradas: string[];
+    paradasObj?: Parada[];
+    numViajes: number;
 }
 
 export class ShapeVectorProperties {

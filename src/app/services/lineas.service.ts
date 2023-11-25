@@ -2,7 +2,8 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
 import { Observable } from 'rxjs';
-import { Linea } from '../models/linea.model';
+import { Linea, PatronLinea } from '../models/linea.model';
+import { Parada } from '../models/parada.model';
 
 @Injectable({
   providedIn: 'root'
@@ -16,11 +17,15 @@ export class LineasService {
     return this.http.get<Linea[]>(this.baseUrl);
   }
 
-  getLinea(id: string, incluirParadas: boolean = false): Observable<Linea> {
-    return this.http.get<Linea>(this.baseUrl+"/"+id, {params: {incluirParadas: incluirParadas}});
+  getLinea(id: string): Observable<Linea> {
+    return this.http.get<Linea>(this.baseUrl+"/"+id);
   }
 
-  getLineaConParadas(id: string): Observable<Linea> {
-    return this.http.get<Linea>(this.baseUrl+"/"+id, {params: {incluirParadas: "true"}});
+  getParadasLinea(id: string): Observable<Parada[]> {
+    return this.http.get<Parada[]>(this.baseUrl+"/"+id+"/paradas");
+  }
+
+  getPatronesLinea(id: string): Observable<PatronLinea[]> {
+    return this.http.get<PatronLinea[]>(this.baseUrl+"/"+id+"/patrones");
   }
 }
