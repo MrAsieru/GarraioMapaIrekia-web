@@ -1,0 +1,141 @@
+<app-lateral>
+  <div>
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>
+          <ion-icon src="assets/img/tipolinea_{{linea?.tipo ? linea?.tipo : 0}}.svg"></ion-icon>
+          <ion-label>
+            <ion-chip [ngStyle]="{'background': linea?.color, 'color': linea?.colorTexto}" (click)="navegarA(['../../linea', viaje?.idLinea!])">{{linea?.nombreCorto ?? viaje?.idLinea!.split("_")[1]}}</ion-chip>
+            <ion-text id="viaje_letrero">{{viaje?.letrero ?? linea?.nombreLargo}}</ion-text>
+            <ion-popover trigger="viaje_letrero" triggerAction="click" showBackdrop="false">
+              <ng-template>
+                <ion-text>Otros letreros usados durante el recorrido:</ion-text>
+                <ng-container *ngFor="let letrero of letreros;">
+                  <br/>
+                  <ion-text>{{letrero}}</ion-text>                  
+                </ng-container>
+              </ng-template>
+            </ion-popover>
+          </ion-label>
+        </ion-card-title>
+        <ion-card-subtitle>
+          <ion-icon id="viaje_accesibilidad" src="assets/img/accesibilidad_{{viaje?.accesibilidad ? viaje?.accesibilidad : '0'}}.svg"></ion-icon>
+          <ion-popover trigger="viaje_accesibilidad" triggerAction="click"showBackdrop="false">
+            <ng-template>
+              <ion-content *ngIf="viaje?.accesibilidad === undefined || viaje?.accesibilidad === 0" class="ion-padding">Sin información sobre accesibilidad</ion-content>
+              <ion-content *ngIf="viaje?.accesibilidad === 1" class="ion-padding">Algunos vehiculos permiten acceder en silla de ruedas</ion-content>
+              <ion-content *ngIf="viaje?.accesibilidad === 2" class="ion-padding">No es posible acceder en silla de ruedas</ion-content>
+            </ng-template>
+          </ion-popover>
+          <ion-icon id="viaje_bici" src="assets/img/bici_{{viaje?.bicicletas ? viaje?.bicicletas : '0'}}.svg"></ion-icon>
+          <ion-popover trigger="viaje_bici" triggerAction="click"showBackdrop="false">
+            <ng-template>
+              <ion-content *ngIf="viaje?.bicicletas === undefined || viaje?.bicicletas === 0" class="ion-padding">Sin información sobre bicicletas</ion-content>
+                <ion-content *ngIf="viaje?.bicicletas === 1" class="ion-padding">Se permite acceder con una bicicleta</ion-content>
+                <ion-content *ngIf="viaje?.bicicletas === 2" class="ion-padding">No es posible acceder con una bicicleta</ion-content>
+            </ng-template>
+          </ion-popover>
+        </ion-card-subtitle>
+        <ion-card-content style="padding: 0 !important;">
+          <ion-chip text-wrap (click)="navegarA(['../../agencia', viaje?.idAgencia!])">
+            <ion-label text-wrap style="max-width: 100px; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">{{agencia?.nombre ?? viaje?.idAgencia}}</ion-label>
+          </ion-chip>
+          <ion-button id="viaje_calendario">
+            <ion-icon src="assets/img/calendario.svg"></ion-icon>
+          </ion-button>
+          <ion-popover class="ion-datetime-button-overlay" trigger="viaje_calendario" [keepContentsMounted]="true">
+            <ng-template>
+              <ion-datetime presentation="date" readonly="true" [locale]="locale" [firstDayOfWeek]="1" [highlightedDates]="calendario.fechas" [min]="calendario.fechaMin" [max]="calendario.fechaMax"></ion-datetime>
+            </ng-template>
+          </ion-popover>
+          <ng-container *ngIf="viaje?.frecuencias?.length! > 0">
+            <ion-button id="viaje_frecuencias">
+              <ion-icon src="assets/img/frecuencias.svg"></ion-icon>
+            </ion-button>
+            <ion-popover class="ion-datetime-button-overlay" trigger="viaje_frecuencias">
+              <ng-template>
+                <ion-grid>
+                  <ion-row>
+                    <ion-col size="3" class="ion-no-padding"><ion-label style="font-size: 0.75em; padding-inline: 0.75em; overflow: visible;">Desde</ion-label></ion-col>
+                    <ion-col size="3" class="ion-no-padding"><ion-label style="font-size: 0.75em; padding-inline: 0.75em; overflow: visible;">Hasta</ion-label></ion-col>
+                    <ion-col size="4" class="ion-no-padding"><ion-label style="font-size: 0.75em; padding-inline: 0.75em; overflow: visible;">Cada</ion-label></ion-col>
+                    <ion-col size="2" class="ion-no-padding"><ion-label style="font-size: 0.75em; padding-inline: 0.75em; overflow: visible;"><ion-icon src="assets/img/exacto_1.svg"></ion-icon></ion-label></ion-col>
+                  </ion-row>
+                  <ion-row *ngFor="let frecuencia of viaje?.frecuencias">
+                    <ion-col size="3" class="ion-no-padding"><ion-item class="ion-no-padding" style="--inner-padding-end: 0.1em;"><ion-label style="font-size: 0.75em; padding-inline: 1em; overflow: visible;">{{frecuencia.horaInicio | slice:0:-3}}</ion-label></ion-item></ion-col>
+                    <ion-col size="3" class="ion-no-padding"><ion-item class="ion-no-padding" style="--inner-padding-end: 0.1em;"><ion-label style="font-size: 0.75em; padding-inline: 1em; overflow: visible;">{{frecuencia.horaFin | slice:0:-3}}</ion-label></ion-item></ion-col>
+                    <ion-col size="4" class="ion-no-padding"><ion-item class="ion-no-padding" style="--inner-padding-end: 0.1em;"><ion-label style="font-size: 0.75em; padding-inline: 1em; overflow: visible;">{{frecuencia.margen * 1000 | date:"H'h' m'm'":'UTC'}}</ion-label></ion-item></ion-col>
+                    <ion-col size="2" class="ion-no-padding"><ion-item class="ion-no-padding" style="--inner-padding-end: 0.1em;"><ion-label style="font-size: 0.75em; padding-inline: 1em; overflow: visible;">{{frecuencia.exacto ? 'Si' : 'No'}}</ion-label></ion-item></ion-col>
+                  </ion-row>
+                </ion-grid>
+              </ng-template>
+            </ion-popover>
+          </ng-container>
+          
+        </ion-card-content>
+      </ion-card-header>
+    </ion-card>
+    <ion-card>
+      <ion-list>          
+        <ion-item *ngFor="let horario of viaje?.horarios; index as i" [button]="true" [detail]="false" (click)="navegarA(['../../parada', horario.idParada])" [ngClass]="horario.claseElemento ?? 'futura'">
+          <ion-label style="flex-grow: 2;">
+            <ion-text>{{horario.paradaObj?.nombre}}</ion-text>            
+          </ion-label>
+          <ion-label style="flex: 0 0 auto;">
+            <ion-text>{{horario.momentoLlegada | dateFormat:'H:mm'}} <ion-text *ngIf="horario.momentoLlegada && horario.momentoSalida"> - </ion-text> {{horario.momentoSalida | dateFormat:'H:mm'}}</ion-text>
+            <br/>
+            <ion-note>
+              <ion-text *ngIf="horario.tiempoRestante && horario.tiempoRestante < 0">hace {{-horario.tiempoRestante}} min </ion-text>
+              <ion-text *ngIf="horario.tiempoRestante && horario.tiempoRestante >= 0">en {{horario.tiempoRestante}} min </ion-text>
+              <ion-icon id="parada_exacto_{{horario.orden}}" src="assets/img/exacto_{{horario.exacto ? '1' : '0'}}.svg" (click)="$event.stopPropagation()"></ion-icon>
+              <ion-popover trigger="parada_exacto_{{horario.orden}}" triggerAction="click" showBackdrop="false">
+                <ng-template>
+                  <ion-content *ngIf="horario.exacto === undefined || !horario.exacto" class="ion-padding">Horario aproximado</ion-content>
+                  <ion-content *ngIf="horario.exacto" class="ion-padding">Horario exacto</ion-content>
+                </ng-template>
+              </ion-popover>
+              <ng-container *ngIf="horario.tipoRecogida != 0 || horario.tipoBajada != 0 || horario.recogidaContinua != 1 || horario.bajadaContinua != 1">
+                <ion-icon id="parada_pickup_dropoff_{{horario.orden}}" src="assets/img/pickup_dropoff.svg" (click)="$event.stopPropagation()"></ion-icon>
+                <ion-popover trigger="parada_pickup_dropoff_{{horario.orden}}" triggerAction="click" showBackdrop="false">
+                  <ng-template>
+                    <ion-content>
+                      <ng-container *ngIf="horario.tipoRecogida != 0">
+                        <ion-text style="font-weight: bold;">Tipo de recogida:</ion-text>
+                        <ion-text *ngIf="horario.tipoRecogida === 1"><br/>No hay recogida disponible.</ion-text>
+                        <ion-text *ngIf="horario.tipoRecogida === 2"><br/>Debe llamar a la agencia para organizar la recogida.</ion-text>
+                        <ion-text *ngIf="horario.tipoRecogida === 3"><br/>Debe coordinar con el conductor para organizar la recogida.</ion-text>
+                        <br/>
+                      </ng-container>
+                      <ng-container *ngIf="horario.tipoBajada != 0">
+                        <ion-text style="font-weight: bold;">Tipo de bajada:</ion-text>
+                        <ion-text *ngIf="horario.tipoBajada === 1"><br/>No hay bajada disponible.</ion-text>
+                        <ion-text *ngIf="horario.tipoBajada === 2"><br/>Debe llamar a la agencia para organizar la bajada.</ion-text>
+                        <ion-text *ngIf="horario.tipoBajada === 3"><br/>Debe coordinar con el conductor para organizar la bajada.</ion-text>
+                        <br/>
+                      </ng-container>
+                      <ng-container *ngIf="horario.recogidaContinua != 1">
+                        <ion-text style="font-weight: bold;">Recogida continua:</ion-text>
+                        <ion-text *ngIf="horario.recogidaContinua === 0"><br/>Recogida continua con paradas.</ion-text>
+                        <ion-text *ngIf="horario.recogidaContinua === 2"><br/>Debe llamar a la agencia para organizar la recogida continua con paradas.</ion-text>
+                        <ion-text *ngIf="horario.recogidaContinua === 3"><br/>Debe coordinar con el conductor para organizar la recogida continua con paradas.</ion-text>
+                        <br/>
+                      </ng-container>
+                      <ng-container *ngIf="horario.bajadaContinua != 1">
+                        <ion-text style="font-weight: bold;">Bajada continua:</ion-text>
+                        <ion-text *ngIf="horario.bajadaContinua === 0"><br/>Bajada continua con paradas.</ion-text>
+                        <ion-text *ngIf="horario.bajadaContinua === 2"><br/>Debe llamar a la agencia para organizar la bajada continua con paradas.</ion-text>
+                        <ion-text *ngIf="horario.bajadaContinua === 3"><br/>Debe coordinar con el conductor para organizar la bajada continua con paradas.</ion-text>
+                        <br/>
+                      </ng-container>
+                    </ion-content>
+                  </ng-template>
+                </ion-popover>
+              </ng-container>
+              
+            </ion-note>
+          </ion-label>
+        </ion-item>
+      </ion-list>
+    </ion-card>
+  </div>
+</app-lateral>

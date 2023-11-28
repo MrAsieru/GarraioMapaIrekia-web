@@ -1,0 +1,69 @@
+:root {
+    --actual: #FFC107;
+    --color-linea: #2196F3;
+}
+
+ion-item.pasada::before, ion-item.actual::before, ion-item.futura::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 1.1em; /* Adjusted left position */
+  width: 0.2em; /* Line thickness */
+  z-index: 2;
+}
+
+ion-item.pasada::after, ion-item.actual::after, ion-item.futura::after {
+  content: '•'; /* Bullet character */
+  position: absolute;
+  top: 50%;
+  left: 0.55em; /* Adjusted left position */
+  transform: translateY(-50%);
+  color: white; /* Text color of the bullet */
+  border-radius: 50%;
+  padding: 0.1em 0.5em; /* Adjusted padding to ensure a perfectly round bubble */
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.3); /* Shadow for the bullet */
+  z-index: 3;
+}
+
+ion-item:first-of-type::before {
+  top: 50%; /* Adjusted to have the line below the bullet for the first station */
+}
+
+ion-item:last-of-type::before {
+  bottom: 50%; /* Adjusted to have the line below the bullet for the first station */
+}
+
+ion-item.pasada ion-label,
+ion-item.actual ion-label,
+ion-item.futura ion-label {
+  padding-left: 1.5em;
+}
+
+.pasada::before {
+  background-color: var(--color-linea); /* Material Design grey for passed stations */
+}
+
+.pasada::after {
+  background-color: var(--color-linea); /* Material Design grey for passed stations */
+}
+
+.actual::before {
+  background-color: var(--actual); /* Material Design yellow for the current station */
+}
+
+.actual::after {
+  background-color: var(--actual); /* Material Design yellow for the current station */
+}
+
+.actual {
+  font-weight: bold;
+}
+
+.futura::before {
+  background-color: var(--color-linea); /* Material Design green for upcoming stations */
+}
+
+.futura::after {
+  background-color: var(--color-linea); /* Material Design green for upcoming stations */
+}  

@@ -42,13 +42,8 @@ export class StopVectorProperties {
 }
 
 export class ViajeParada extends Viaje {
-    horario: HorarioParada;
+    horario: HorarioViaje;
     zonaHoraria: string;
     linea?: Linea;
     tiempoRestante?: number; // en minutos
-}
-
-export class HorarioParada extends HorarioViaje {
-    momentoLlegada?: moment.Moment;
-    momentoSalida?: moment.Moment;
 }

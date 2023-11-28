@@ -1,3 +1,6 @@
+import { Linea } from "./linea.model";
+import { Parada } from "./parada.model";
+
 export class Viaje {
     idAgencia: string;
     idViaje: string;
@@ -14,6 +17,7 @@ export class Viaje {
     paradas?: string[];
     frecuencias?: FrecuenciasViaje[];
     fechas?: Date[];
+    bbox: number[];
 }
 
 export class HorarioViaje {
@@ -24,10 +28,16 @@ export class HorarioViaje {
     letrero?: string;
     tipoRecogida?: number;
     tipoBajada?: number;
-    recogidaContinua?: boolean;
-    bajadaContinua?: boolean;
+    recogidaContinua?: number;
+    bajadaContinua?: number;
     distanciaRecorrida?: number;
     exacto?: boolean;
+
+    paradaObj?: Parada;
+    momentoLlegada?: moment.Moment;
+    momentoSalida?: moment.Moment;
+    tiempoRestante?: number;
+    claseElemento?: string;
 }
 
 export class FrecuenciasViaje {

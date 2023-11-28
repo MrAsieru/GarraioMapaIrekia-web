@@ -2,6 +2,8 @@ export class FiltroMapa {
     agencias?: string[];
     lineas?: string[];
     paradas?: string[];
+    viajes?: string[];
+    recorridos?: string[];
 }
 
 export class MovimientoMapa {

@@ -6,6 +6,7 @@ import { MapaComponent } from './mapa/mapa.component';
 import { ParadaComponent } from './parada/parada.component';
 import { LineaComponent } from './linea/linea.component';
 import { AgenciaComponent } from './agencia/agencia.component';
+import { ViajeComponent } from './viaje/viaje.component';
 
 export const routes: Routes = [
   {
@@ -36,6 +37,11 @@ export const routes: Routes = [
       {
         path: 'agencia/:idAgencia',
         component: AgenciaComponent,
+        pathMatch: 'full'
+      },
+      {
+        path: 'viaje/:idViaje',
+        component: ViajeComponent,
         pathMatch: 'full'
       }
     ]

@@ -290,7 +290,48 @@ export class MapaComponent implements OnInit {
     });
 
     this.map.on('click', (e) => {
-      let features = this.map.queryRenderedFeatures(e.point, { layers: ['paradas'] }).filter((feature) => feature.properties["paradaPadre"] === undefined || feature.properties["paradaPadre"] === "");
+      let features = this.map.queryRenderedFeatures(e.point, { layers: ['posiciones'] });
+      console.log(JSON.stringify(features));
+      if (features.length > 0) {
+        if (features.length == 1) {
+          this.navegarA(['viaje', features[0].properties["idViaje"]]);
+        } else {
+          if (this.map.getZoom() < this.map.getMaxZoom() - 2) {
+            // Ajustar mapa a posiciones
+            let bounds = new maplibregl.LngLatBounds();
+            features.forEach((feature) => {
+              const coordenadas = (feature.geometry as GeoJSON.Point).coordinates as [number, number];
+              bounds.extend({lon: coordenadas[0], lat: coordenadas[1]});
+            });
+            this.map.fitBounds(bounds, {padding: 50, maxZoom: this.configuracion.maxzoom});
+          }
+        }
+        return;
+      }
+
+      features = this.map.queryRenderedFeatures(e.point, { layers: ['posiciones_tr'] });
+      if (features.length > 0) {
+        if (features.length == 1) {
+          if (features[0].properties["idViaje"]) {
+            this.navegarA(['viaje', features[0].properties["idViaje"]]);
+          } else if (features[0].properties["idLinea"]) {
+            this.navegarA(['linea', features[0].properties["idLinea"]]);
+          }
+        } else {
+          if (this.map.getZoom() < this.map.getMaxZoom() - 2) {
+            // Ajustar mapa a posiciones
+            let bounds = new maplibregl.LngLatBounds();
+            features.forEach((feature) => {
+              const coordenadas = (feature.geometry as GeoJSON.Point).coordinates as [number, number];
+              bounds.extend({lon: coordenadas[0], lat: coordenadas[1]});
+            });
+            this.map.fitBounds(bounds, {padding: 50, maxZoom: this.configuracion.maxzoom});
+          }
+        }
+        return;
+      }
+
+      features = this.map.queryRenderedFeatures(e.point, { layers: ['paradas'] }).filter((feature) => feature.properties["paradaPadre"] === undefined || feature.properties["paradaPadre"] === "");
       console.log(JSON.stringify(features));
       if (features.length > 0) {
         if (features.length == 1) {
@@ -317,18 +358,6 @@ export class MapaComponent implements OnInit {
             
           }
         }
-        return;
-      } 
-
-      features = this.map.queryRenderedFeatures(e.point, { layers: ['posiciones'] });
-      if (features.length > 0) {
-        console.log(features[0]);
-        return;
-      }
-
-      features = this.map.queryRenderedFeatures(e.point, { layers: ['posiciones_tr'] });
-      if (features.length > 0) {
-        console.log(features[0]);
         return;
       }
 
@@ -379,8 +408,9 @@ export class MapaComponent implements OnInit {
                 'coordinates': [entidad.vehicle.position!.longitude, entidad.vehicle.position!.latitude]
               },
               properties: {
-                ...(entidad.vehicle?.trip?.tripId && {'idViaje': entidad.vehicle?.trip?.tripId}),
-                ...(entidad.vehicle?.trip?.routeId && {'idLinea': entidad.vehicle?.trip?.routeId}),
+                'idFeed': tiempoReal.idFeed,
+                ...(entidad.vehicle?.trip?.tripId && {'idViaje': tiempoReal.idFeed+"_"+entidad.vehicle?.trip?.tripId}),
+                ...(entidad.vehicle?.trip?.routeId && {'idLinea': tiempoReal.idFeed+"_"+entidad.vehicle?.trip?.routeId}),
                 ...(entidad.vehicle?.trip?.directionId && {'direccion': entidad.vehicle?.trip?.directionId}),
                 ...(entidad.vehicle?.trip?.scheduleRelationship && {'relacionHorario': entidad.vehicle?.trip?.scheduleRelationship}),
                 ...(entidad.vehicle?.vehicle?.label && {'etiqueta': entidad.vehicle?.vehicle?.label}),
@@ -390,7 +420,7 @@ export class MapaComponent implements OnInit {
                 ...(entidad.vehicle?.position?.odometer && {'odometro': entidad.vehicle?.position?.odometer}),
                 ...(entidad.vehicle?.position?.speed && {'velocidad': entidad.vehicle?.position?.speed}),
                 ...(entidad.vehicle?.currentStopSequence && {'secuenciaParada': entidad.vehicle?.currentStopSequence}),
-                ...(entidad.vehicle?.stopId && {'idParada': entidad.vehicle?.stopId}),
+                ...(entidad.vehicle?.stopId && {'idParada': tiempoReal.idFeed+"_"+entidad.vehicle?.stopId}),
                 ...(entidad.vehicle?.currentStatus && {'estadoActual': entidad.vehicle?.currentStatus}),
                 ...(entidad.vehicle?.timestamp && {'timestamp': entidad.vehicle?.timestamp}),
                 ...(entidad.vehicle?.congestionLevel && {'congestion': entidad.vehicle?.congestionLevel}),
@@ -457,10 +487,14 @@ export class MapaComponent implements OnInit {
   }
 
   filtrarMapa(filtrosMapa: FiltroMapa) {
+    console.log(filtrosMapa);
     let agencias_lineas_posiciones = null;
     let agencias_paradas: ExpressionSpecification | null = null;
     let lineas = null;
     let paradas = null;
+    let viajes = null;
+    let recorridos = null;
+    let posiciones_tr_lineas_viajes = null;
     if (filtrosMapa.agencias) {
       agencias_lineas_posiciones = ['in', 'idAgencia', ...filtrosMapa.agencias!] as FilterSpecification;
       agencias_paradas = ['any', ...filtrosMapa.agencias.map((agencia) => ['in', agencia, ['get', 'agencias']] as ExpressionSpecification)];  
@@ -472,10 +506,20 @@ export class MapaComponent implements OnInit {
         paradas = ['any', ['in', 'idParada', ...filtrosMapa.paradas!] as FilterSpecification, ['in', 'paradaPadre', ...filtrosMapa.paradas!] as FilterSpecification] as FilterSpecification
         // paradas = ['in', 'idParada', ...filtrosMapa.paradas!] as FilterSpecification;
       }
+      if (filtrosMapa.viajes) {
+        viajes = ['in', 'idViaje', ...filtrosMapa.viajes!] as FilterSpecification;
+      }
+      if (filtrosMapa.recorridos) {
+        recorridos = ['in', 'idRecorrido', ...filtrosMapa.recorridos!] as FilterSpecification;
+      }
+      if (filtrosMapa.lineas && filtrosMapa.viajes) {
+        posiciones_tr_lineas_viajes = ['any', ['in', 'idLinea', ...filtrosMapa.lineas!] as FilterSpecification, ['in', 'idViaje', ...filtrosMapa.viajes!] as FilterSpecification] as FilterSpecification;
+      }
     }
 
-    this.map.setFilter("lineas", (agencias_lineas_posiciones !== null) ? agencias_lineas_posiciones : lineas);
-    this.map.setFilter("posiciones", (agencias_lineas_posiciones !== null) ? agencias_lineas_posiciones : lineas);
+    this.map.setFilter("lineas", (agencias_lineas_posiciones !== null) ? agencias_lineas_posiciones : ((lineas != null) ? lineas : recorridos));
+    this.map.setFilter("posiciones", (agencias_lineas_posiciones !== null) ? agencias_lineas_posiciones : ((lineas != null) ? lineas : viajes));
+    this.map.setFilter("posiciones_tr", (posiciones_tr_lineas_viajes !== null) ? posiciones_tr_lineas_viajes : ((lineas != null) ? lineas : viajes));
     this.map.setFilter("paradas", (agencias_paradas !== null) ? agencias_paradas : paradas);
   }
 
