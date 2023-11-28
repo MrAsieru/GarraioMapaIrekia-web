@@ -35,7 +35,7 @@ export class ParadaComponent  implements OnInit, OnDestroy {
     this.idParada = this.route.snapshot.paramMap.get('idParada');
 
     if (this.idParada) {
-      this.paradasService.getParada(this.idParada).subscribe(parada => {
+      this.paradasService.getParada(this.idParada, {incluirLineas: true, incluirViajes: true}).subscribe(parada => {
         this.parada = parada;
 
         if (parada.paradaPadre) {
@@ -43,7 +43,8 @@ export class ParadaComponent  implements OnInit, OnDestroy {
         } else {
           this.mapaService.setFiltrarMapa({
             paradas: [parada.idParada],
-            lineas: (parada.lineas as string[])
+            lineas: (parada.lineas as string[]),
+            viajes: (parada.viajes as string[])
           });
   
           this.mapaService.setMovimientoMapa({
@@ -79,6 +80,10 @@ export class ParadaComponent  implements OnInit, OnDestroy {
                 viaje.tiempoRestante = (viaje.horario.momentoSalida as moment.Moment).diff(moment(), 'minutes');
               } else {
                 viaje.tiempoRestante = (viaje.horario.momentoLlegada as moment.Moment).diff(moment(), 'minutes');
+              }
+
+              if (viaje.letrero === undefined || viaje.letrero === "") {
+                viaje.letrero = viaje.horario.letrero;
               }
             });
             this.viajes = viajes.sort((a, b) => a.tiempoRestante! - b.tiempoRestante!);

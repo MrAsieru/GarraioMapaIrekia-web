@@ -79,8 +79,10 @@ export class LineaComponent  implements OnInit {
     this.mapaService.setFiltrarMapa({});
   }
 
-  abrirUrl(url: string) {
-    window.open(url, '_blank');
+  abrirUrl(url: string | undefined) {
+    if (url) {
+      window.open(url, '_blank');
+    }    
   }
 
   navegarA(ruta: string[]) {

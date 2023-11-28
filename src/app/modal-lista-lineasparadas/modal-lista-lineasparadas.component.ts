@@ -34,7 +34,7 @@ export class ModalListaLineasParadasComponent implements OnInit {
       this.paradas = data.paradas;
 
       this.paradas.forEach((parada) => {
-        this.paradasService.getParada(parada.idParada).subscribe((parada) => {
+        this.paradasService.getParada(parada.idParada, {incluirLineas: true}).subscribe((parada) => {
           this.paradasService.getLineasParada(parada.idParada).subscribe((lineas) => {
             // Comprobar colores
             lineas.forEach(linea => {

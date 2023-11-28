@@ -12,7 +12,7 @@
           <ion-icon id="parada_accesibilidad" src="assets/img/accesibilidad_{{parada.accesibilidad ? parada.accesibilidad : '0'}}.svg"></ion-icon>
           <ion-popover trigger="parada_accesibilidad" triggerAction="click"showBackdrop="false">
             <ng-template>
-              <ion-content *ngIf="parada.accesibilidad === undefined || parada.accesibilidad === 0" class="ion-padding">Sin información</ion-content>
+              <ion-content *ngIf="parada.accesibilidad === undefined || parada.accesibilidad === 0" class="ion-padding">Sin información sobre accesibilidad</ion-content>
               <ion-content *ngIf="parada.accesibilidad === 1" class="ion-padding">Algunos vehiculos permiten acceder en silla de ruedas</ion-content>
               <ion-content *ngIf="parada.accesibilidad === 2" class="ion-padding">No es posible acceder en silla de ruedas</ion-content>
             </ng-template>
@@ -31,7 +31,7 @@
     </ion-card>
     <ion-card>
       <ion-list>
-        <ion-item *ngFor="let horario of viajes">
+        <ion-item *ngFor="let horario of viajes" [button]="true" [detail]="false" (click)="navegarA(['../../viaje', horario.idViaje])">
           <ion-icon src="assets/img/tipolinea_{{horario.linea?.tipo ? horario.linea?.tipo : 0}}.svg"></ion-icon>
           <ion-label>
             <ion-chip [ngStyle]="{'background': horario.linea?.color, 'color': horario.linea?.colorTexto}">{{horario.linea?.nombreCorto ?? horario.linea?.idLinea?.split("_")?.[1]}}</ion-chip>

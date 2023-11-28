@@ -28,11 +28,11 @@ ion-item.parada::after {
 }
 
 ion-item.parada:first-of-type::before {
-  top: 1.3em; /* Adjusted to have the line below the bullet for the first station */
+  top: 50%; /* Adjusted to have the line below the bullet for the first station */
 }
 
 ion-item.parada:last-of-type::before {
-  bottom: 1.3em; /* Adjusted to have the line below the bullet for the first station */
+  bottom: 50%; /* Adjusted to have the line below the bullet for the first station */
 }
 
 ion-item.parada ion-label {
