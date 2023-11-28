@@ -9,7 +9,7 @@ import { Parada } from '../models/parada.model';
   providedIn: 'root'
 })
 export class LineasService {
-  public baseUrl: string = environment.apiBaseUrl+"/lineas";
+  public baseUrl: string = environment.apiBaseUrl+"/lineas/";
 
   constructor(private http: HttpClient) { }
 
@@ -18,14 +18,14 @@ export class LineasService {
   }
 
   getLinea(id: string): Observable<Linea> {
-    return this.http.get<Linea>(this.baseUrl+"/"+id);
+    return this.http.get<Linea>(this.baseUrl+id);
   }
 
   getParadasLinea(id: string): Observable<Parada[]> {
-    return this.http.get<Parada[]>(this.baseUrl+"/"+id+"/paradas");
+    return this.http.get<Parada[]>(this.baseUrl+id+"/paradas");
   }
 
   getPatronesLinea(id: string): Observable<PatronLinea[]> {
-    return this.http.get<PatronLinea[]>(this.baseUrl+"/"+id+"/patrones");
+    return this.http.get<PatronLinea[]>(this.baseUrl+id+"/patrones");
   }
 }

@@ -9,7 +9,7 @@ import { Parada } from '../models/parada.model';
   providedIn: 'root'
 })
 export class ViajesService {
-  public baseUrl: string = environment.apiBaseUrl+"/viajes";
+  public baseUrl: string = environment.apiBaseUrl+"/viajes/";
 
   constructor(private http: HttpClient) { }
 
@@ -19,10 +19,10 @@ export class ViajesService {
     incluirFechas?: boolean,
     incluirFrecuencias?: boolean
   }): Observable<Viaje> {
-    return this.http.get<Viaje>(this.baseUrl+"/"+id, {params: parametros});
+    return this.http.get<Viaje>(this.baseUrl+id, {params: parametros});
   }
 
   getParadasViaje(id: string): Observable<Parada[]> {
-    return this.http.get<Parada[]>(this.baseUrl+"/"+id+"/paradas");
+    return this.http.get<Parada[]>(this.baseUrl+id+"/paradas");
   }
 }

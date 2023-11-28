@@ -9,7 +9,7 @@ import moment from 'moment-timezone';
   providedIn: 'root'
 })
 export class PosicionesService {
-  public baseUrl: string = environment.apiBaseUrl+"/posicionesVehiculos";
+  public baseUrl: string = environment.apiBaseUrl+"/posiciones/";
 
   constructor(private http: HttpClient) { }
 

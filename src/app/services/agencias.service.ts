@@ -9,7 +9,7 @@ import { Linea } from '../models/linea.model';
   providedIn: 'root'
 })
 export class AgenciasService {
-  public baseUrl: string = environment.apiBaseUrl+"/agencias";
+  public baseUrl: string = environment.apiBaseUrl+"/agencias/";
 
   constructor(private http: HttpClient) { }
 
@@ -18,14 +18,14 @@ export class AgenciasService {
   }
 
   getAgencia(id: string): Observable<Agencia> {
-    return this.http.get<Agencia>(this.baseUrl+'/'+id);
+    return this.http.get<Agencia>(this.baseUrl+id);
   }
 
   getLineasAgencia(id: string): Observable<Linea[]> {
-    return this.http.get<Linea[]>(this.baseUrl+'/'+id+'/lineas');
+    return this.http.get<Linea[]>(this.baseUrl+id+'/lineas');
   }
 
   getAgenciasConLineas(): Observable<AgencyRoutes[]> {
-    return this.http.get<AgencyRoutes[]>(this.baseUrl+'/lineas');
+    return this.http.get<AgencyRoutes[]>(this.baseUrl+'lineas');
   }
 }

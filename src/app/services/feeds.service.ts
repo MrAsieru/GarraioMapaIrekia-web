@@ -8,11 +8,11 @@ import { Feed } from '../models/feed.model';
   providedIn: 'root'
 })
 export class FeedsService {
-  public baseUrl: string = environment.apiBaseUrl+"/feeds";
+  public baseUrl: string = environment.apiBaseUrl+"/feeds/";
 
   constructor(private http: HttpClient) { }
 
   getFeedsTiempoReal(): Observable<Feed[]> {
-    return this.http.get<Feed[]>(this.baseUrl+"/tiempoReal");
+    return this.http.get<Feed[]>(this.baseUrl+"tiempoReal");
   }
 }

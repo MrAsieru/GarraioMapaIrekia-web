@@ -10,7 +10,7 @@ import { Agencia } from '../models/agencia.model';
   providedIn: 'root'
 })
 export class ParadasService {
-  public baseUrl: string = environment.apiBaseUrl+"/paradas";
+  public baseUrl: string = environment.apiBaseUrl+"/paradas/";
 
   constructor(private http: HttpClient) { }
 
@@ -23,18 +23,18 @@ export class ParadasService {
     incluirViajes?: boolean,
     incluirAgencias?: boolean
   }): Observable<Parada> {
-    return this.http.get<Parada>(this.baseUrl+"/"+id, {params: parametros});
+    return this.http.get<Parada>(this.baseUrl+id, {params: parametros});
   }
 
   getLineasParada(id: string): Observable<Linea[]> {
-    return this.http.get<Linea[]>(this.baseUrl+"/"+id+"/lineas");
+    return this.http.get<Linea[]>(this.baseUrl+id+"/lineas");
   }
 
   getAgenciasParada(id: string): Observable<Agencia[]> {
-    return this.http.get<Agencia[]>(this.baseUrl+"/"+id+"/agencias");
+    return this.http.get<Agencia[]>(this.baseUrl+id+"/agencias");
   }
 
   getHorariosParada(id: string): Observable<ViajeParada[]> {
-    return this.http.get<ViajeParada[]>(this.baseUrl+"/"+id+"/horarios");
+    return this.http.get<ViajeParada[]>(this.baseUrl+id+"/horarios");
   }
 }
