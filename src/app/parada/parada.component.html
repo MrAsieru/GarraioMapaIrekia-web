@@ -1,4 +1,4 @@
-<app-lateral>
+<app-lateral nombre="Parada">
   <div>
     <ion-card>
       <ion-card-header>
@@ -38,42 +38,46 @@
       <ion-list>
         <ion-item *ngFor="let horario of viajes" [button]="true" [detail]="false" (click)="navegarA(['../../viaje', horario.idViaje])">
           <ion-icon src="assets/img/tipolinea_{{horario.linea?.tipo ? horario.linea?.tipo : 0}}.svg"></ion-icon>
-          <ion-label>
+          <ion-label style="flex-grow: 2;">
             <ion-chip [ngStyle]="{'background': horario.linea?.color, 'color': horario.linea?.colorTexto}">{{horario.linea?.nombreCorto ?? horario.linea?.idLinea?.split("_")?.[1]}}</ion-chip>
             <ion-text>{{horario.letrero ?? horario.linea?.nombreLargo}}</ion-text>
           </ion-label>
+          <ion-label style="flex: 0 0 auto; text-align: end;">
+            <ion-text id="parada_hora_{{horario.idViaje}}_{{horario.horario.orden}}">en {{horario.tiempoRestante}}min</ion-text>
+            <br/>
+            <ion-note class="ion-align-self-end">
+              <ion-text>a las {{horario.horario.momentoLlegada! | dateFormat:'H:mm'}}</ion-text>
+              <ion-popover trigger="parada_hora_{{horario.idViaje}}_{{horario.horario.orden}}" triggerAction="click" showBackdrop="false">
+                <ng-template>
+                  <ion-content class="ion-padding">A las {{horario.horario.momentoLlegada?.tz(horario.zonaHoraria)! | dateFormat:'H:mm'}} hora local</ion-content>
+                </ng-template>
+              </ion-popover>
+              <ion-icon id="parada_exacto_{{horario.idViaje}}_{{horario.horario.orden}}" src="assets/img/exacto_{{horario.horario.exacto ? '1' : '0'}}.svg" (click)="$event.stopPropagation()"></ion-icon>
+              <ion-popover trigger="parada_exacto_{{horario.idViaje}}_{{horario.horario.orden}}" triggerAction="click" showBackdrop="false">
+                <ng-template>
+                  <ion-content *ngIf="horario.horario.exacto === undefined || !horario.horario.exacto" class="ion-padding">Horario aproximado</ion-content>
+                  <ion-content *ngIf="horario.horario.exacto" class="ion-padding">Horario exacto</ion-content>
+                </ng-template>
+              </ion-popover>
+              <ion-icon id="parada_bici_{{horario.idViaje}}_{{horario.horario.orden}}" src="assets/img/bici_{{horario.bicicletas ? horario.bicicletas : '0'}}.svg" (click)="$event.stopPropagation()"></ion-icon>
+              <ion-popover trigger="parada_bici_{{horario.idViaje}}_{{horario.horario.orden}}" triggerAction="click"showBackdrop="false">
+                <ng-template>
+                  <ion-content *ngIf="horario.bicicletas === undefined || horario.bicicletas === 0" class="ion-padding">Sin información</ion-content>
+                  <ion-content *ngIf="horario.bicicletas === 1" class="ion-padding">Se permite acceder con una bicicleta</ion-content>
+                  <ion-content *ngIf="horario.bicicletas === 2" class="ion-padding">No es posible acceder con una bicicleta</ion-content>
+                </ng-template>
+              </ion-popover>
+              <ion-icon id="parada_accesibilidad_{{horario.idViaje}}_{{horario.horario.orden}}" src="assets/img/accesibilidad_{{horario.accesibilidad ? horario.accesibilidad : '0'}}.svg" (click)="$event.stopPropagation()"></ion-icon>
+              <ion-popover trigger="parada_accesibilidad_{{horario.idViaje}}_{{horario.horario.orden}}" triggerAction="click"showBackdrop="false">
+                <ng-template>
+                  <ion-content *ngIf="horario.accesibilidad === undefined || horario.accesibilidad === 0" class="ion-padding">Sin información</ion-content>
+                  <ion-content *ngIf="horario.accesibilidad === 1" class="ion-padding">Es posible acceder en silla de ruedas</ion-content>
+                  <ion-content *ngIf="horario.accesibilidad === 2" class="ion-padding">No es posible acceder en silla de ruedas</ion-content>
+                </ng-template>
+              </ion-popover>
+            </ion-note>
+          </ion-label>
           
-          <ion-note class="ion-align-self-end">
-            <span id="parada_hora_{{horario.idViaje}}_{{horario.horario.orden}}">en {{horario.tiempoRestante}}min a las {{horario.horario.momentoLlegada! | dateFormat:'H:mm'}}</span>
-            <ion-popover trigger="parada_hora_{{horario.idViaje}}_{{horario.horario.orden}}" triggerAction="click" showBackdrop="false">
-              <ng-template>
-                <ion-content class="ion-padding">A las {{horario.horario.momentoLlegada?.tz(horario.zonaHoraria)! | dateFormat:'H:mm'}} hora local</ion-content>
-              </ng-template>
-            </ion-popover>
-            <ion-icon id="parada_exacto_{{horario.idViaje}}_{{horario.horario.orden}}" src="assets/img/exacto_{{horario.horario.exacto ? '1' : '0'}}.svg"></ion-icon>
-            <ion-popover trigger="parada_exacto_{{horario.idViaje}}_{{horario.horario.orden}}" triggerAction="click" showBackdrop="false">
-              <ng-template>
-                <ion-content *ngIf="horario.horario.exacto === undefined || !horario.horario.exacto" class="ion-padding">Horario aproximado</ion-content>
-                <ion-content *ngIf="horario.horario.exacto" class="ion-padding">Horario exacto</ion-content>
-              </ng-template>
-            </ion-popover>
-            <ion-icon id="parada_bici_{{horario.idViaje}}_{{horario.horario.orden}}" src="assets/img/bici_{{horario.bicicletas ? horario.bicicletas : '0'}}.svg"></ion-icon>
-            <ion-popover trigger="parada_bici_{{horario.idViaje}}_{{horario.horario.orden}}" triggerAction="click"showBackdrop="false">
-              <ng-template>
-                <ion-content *ngIf="horario.bicicletas === undefined || horario.bicicletas === 0" class="ion-padding">Sin información</ion-content>
-                <ion-content *ngIf="horario.bicicletas === 1" class="ion-padding">Se permite acceder con una bicicleta</ion-content>
-                <ion-content *ngIf="horario.bicicletas === 2" class="ion-padding">No es posible acceder con una bicicleta</ion-content>
-              </ng-template>
-            </ion-popover>
-            <ion-icon id="parada_accesibilidad_{{horario.idViaje}}_{{horario.horario.orden}}" src="assets/img/accesibilidad_{{horario.accesibilidad ? horario.accesibilidad : '0'}}.svg"></ion-icon>
-            <ion-popover trigger="parada_accesibilidad_{{horario.idViaje}}_{{horario.horario.orden}}" triggerAction="click"showBackdrop="false">
-              <ng-template>
-                <ion-content *ngIf="horario.accesibilidad === undefined || horario.accesibilidad === 0" class="ion-padding">Sin información</ion-content>
-                <ion-content *ngIf="horario.accesibilidad === 1" class="ion-padding">Es posible acceder en silla de ruedas</ion-content>
-                <ion-content *ngIf="horario.accesibilidad === 2" class="ion-padding">No es posible acceder en silla de ruedas</ion-content>
-              </ng-template>
-            </ion-popover>
-          </ion-note>
         </ion-item>
       </ion-list>
     </ion-card>

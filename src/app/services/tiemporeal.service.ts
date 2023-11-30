@@ -211,7 +211,7 @@ export class TiempoRealService {
     // Recorrer todos los campos del descriptor
     for (const fieldName of tripFieldNames) {  
       // Si alguno de los valores es undefined, pasar al siguiente campo
-      if (descriptor1[fieldName] === undefined || descriptor2[fieldName] === undefined) {
+      if (!descriptor1[fieldName] || !descriptor2[fieldName]) {
         continue;
       }
   

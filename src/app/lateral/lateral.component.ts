@@ -1,5 +1,5 @@
 import { CommonModule, NgTemplateOutlet } from '@angular/common';
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, Input, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { IonModal, IonicModule } from '@ionic/angular';
 import { BreakpointObserver, BreakpointState, Breakpoints } from '@angular/cdk/layout';
@@ -13,6 +13,7 @@ import { NavegacionService } from '../services/navegacion.service';
   imports: [CommonModule, IonicModule, NgTemplateOutlet],
 })
 export class LateralComponent  implements OnInit {
+  @Input() nombre: string = "";
   // Modal lateral_modal
   @ViewChild(IonModal) lateralModal: IonModal;
   constructor(private route: ActivatedRoute,
@@ -31,6 +32,11 @@ export class LateralComponent  implements OnInit {
   back() {
     this.lateralModal?.dismiss();
     this.navegacionService.back();
+  }
+
+  cerrar() {
+    this.lateralModal?.dismiss();
+    this.navegacionService.navegarA(['../..'], this.route);
   }
 
   ngOnDestroy() {

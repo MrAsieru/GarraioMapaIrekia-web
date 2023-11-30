@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Location } from "@angular/common";
-import { NavigationEnd, Router } from '@angular/router';
+import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 
 @Injectable({
   providedIn: 'root'
@@ -25,5 +25,15 @@ export class NavegacionService {
     } else {
       this.router.navigateByUrl("/");
     }
+  }
+
+  navegarA(ruta: string[], route: ActivatedRoute) {
+    this.router.navigate(ruta, {relativeTo: route});
+  }
+
+  redirigirA(ruta: string[], route: ActivatedRoute) {
+    this.router.navigate(ruta, {relativeTo: route}).then(() => {
+      this.history.pop();
+    });
   }
 }

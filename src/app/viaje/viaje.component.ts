@@ -15,8 +15,9 @@ import { Agencia } from '../models/agencia.model';
 import { AgenciasService } from '../services/agencias.service';
 import { TiempoRealService } from '../services/tiemporeal.service';
 import { transit_realtime } from 'gtfs-realtime-bindings';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subscription } from 'rxjs';
 import { ModalAlertasComponent } from '../modal-alertas/modal-alertas.component';
+import { NavegacionService } from '../services/navegacion.service';
 
 @Component({
     selector: 'app-viaje',
@@ -51,6 +52,8 @@ export class ViajeComponent  implements OnInit {
   congestionLevelEnum = transit_realtime.VehiclePosition.CongestionLevel;
   occupancyStatusEnum = transit_realtime.VehiclePosition.OccupancyStatus;
 
+  suscripcionTiempoReal: Subscription | undefined;
+
   constructor(private router: Router,
     private route: ActivatedRoute,
     private viajesService: ViajesService,
@@ -58,7 +61,8 @@ export class ViajeComponent  implements OnInit {
     private agenciasService: AgenciasService,
     private mapaService: MapaService,
     private tiempoRealService: TiempoRealService,
-    private modalCtrl: ModalController) { }
+    private modalCtrl: ModalController,
+    private navegacionService: NavegacionService) { }
     
   ngOnInit() {
     this.idViaje = this.route.snapshot.paramMap.get('idViaje');
@@ -144,7 +148,7 @@ export class ViajeComponent  implements OnInit {
         }, 60000);
 
         
-        this.tiempoRealService.tiempoReal.subscribe((tiempoReal) => {
+        this.suscripcionTiempoReal = this.tiempoRealService.tiempoReal.subscribe((tiempoReal) => {
           if (this.primeraCarga || tiempoReal?.idFeed === this.viaje!.idViaje.split("_")[0]) {
             this.primeraCarga = false;
             this.actualizarTiempoReal();
@@ -296,25 +300,17 @@ export class ViajeComponent  implements OnInit {
       } 
     }
 
-    // Obtener alertas
-    let selectorEntidadLinea: transit_realtime.IEntitySelector = {
+    let tmpAlertasLinea = this.tiempoRealService.getInformacionAlertas([this.viaje!.idAgencia.split("_")[0]], {
       trip: {
         tripId: this.viaje!.idViaje,
         routeId: this.viaje!.idLinea,
         directionId: this.viaje!.direccion
       }
-    };
-    this.tiempoRealService.tiempoReal.subscribe((tiempoReal) => {
-      if (this.primeraCarga || tiempoReal?.idFeed === this.viaje!.idAgencia.split("_")[0]) {
-        this.primeraCarga = false;
-        console.log(selectorEntidadLinea);
-        let tmpAlertasLinea = this.tiempoRealService.getInformacionAlertas([this.viaje!.idAgencia.split("_")[0]], selectorEntidadLinea);
-        console.log(tmpAlertasLinea);
-        if (tmpAlertasLinea) {
-          this.alertasTiempoReal = tmpAlertasLinea; 
-        }
-      }          
     });
+    console.log(tmpAlertasLinea);
+    if (tmpAlertasLinea) {
+      this.alertasTiempoReal = tmpAlertasLinea; 
+    }
   }
 
   async mostrarModalAlertas() {
@@ -331,6 +327,7 @@ export class ViajeComponent  implements OnInit {
   }
 
   ngOnDestroy() {
+    this.suscripcionTiempoReal?.unsubscribe();
     this.mapaService.setFiltrarMapa({});
   }
 
@@ -339,6 +336,6 @@ export class ViajeComponent  implements OnInit {
   }
 
   navegarA(ruta: string[]) {
-    this.router.navigate(ruta, {relativeTo: this.route});
+    this.navegacionService.navegarA(ruta, this.route);
   }
 }

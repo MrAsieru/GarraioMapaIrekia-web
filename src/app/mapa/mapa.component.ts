@@ -1,10 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { IonicModule, ModalController } from '@ionic/angular';
 import maplibregl, { ExpressionSpecification, FilterSpecification, GeoJSONSource, PointLike } from 'maplibre-gl';
 import { ModalListaLineasParadasComponent } from '../modal-lista-lineasparadas/modal-lista-lineasparadas.component';
 import { ShapeVectorProperties } from 'src/app/models/linea.model';
 import { StopVectorProperties } from 'src/app/models/parada.model';
-import { BehaviorSubject, Observable, Subject } from 'rxjs';
+import { BehaviorSubject, Observable, Subject, Subscription } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { TileService } from '../services/tile.service';
 import { Catalog, TileSet } from '../models/tileset.model';
@@ -18,6 +18,7 @@ import { FeedsService } from '../services/feeds.service';
 import { ActivatedRoute, Route, Router, RouterModule } from '@angular/router';
 import { MapaService } from '../services/mapa.service';
 import { AjusteMapa, FiltroMapa, MovimientoMapa } from '../models/mapa.model';
+import { NavegacionService } from '../services/navegacion.service';
 
 @Component({
   selector: 'app-mapa',
@@ -25,7 +26,7 @@ import { AjusteMapa, FiltroMapa, MovimientoMapa } from '../models/mapa.model';
   standalone: true,
   imports: [IonicModule, RouterModule],
 })
-export class MapaComponent implements OnInit {
+export class MapaComponent implements OnInit, OnDestroy {
   configuracion = {
     maxzoom: 19,
   }
@@ -70,6 +71,7 @@ export class MapaComponent implements OnInit {
 
   listaPosiciones: Map<string, GeoJSON.FeatureCollection<GeoJSON.Point>> | undefined = undefined; // Llave: idViaje, Valor: Lista de fechas y posiciones
 
+  suscripcionTiempoReal: Subscription | undefined;
 
   private listaAgencias: {idAgencia: string; mostrar: boolean;}[] = [];
   private listaFeedTiempoReal: string[] = [];
@@ -83,7 +85,8 @@ export class MapaComponent implements OnInit {
     private feedsService: FeedsService,
     private route: ActivatedRoute,
     private router: Router,
-    private mapaService: MapaService) {}
+    private mapaService: MapaService,
+    private navegacionService: NavegacionService) {}
 
   ngOnInit() {
     this.modalListaLineasParadasDatos = null;
@@ -389,7 +392,7 @@ export class MapaComponent implements OnInit {
       this.tiemporealService.actualizar_feeds(this.listaFeedTiempoReal);
     });
 
-    this.tiemporealService.tiempoReal.subscribe((tiempoReal) => {
+    this.suscripcionTiempoReal = this.tiemporealService.tiempoReal.subscribe((tiempoReal) => {
       console.log(tiempoReal);
       // Añadir posiciones al mapa
       if (tiempoReal !== undefined) {
@@ -659,7 +662,11 @@ export class MapaComponent implements OnInit {
     return posiciones_decodificadas;
   }
 
+  ngOnDestroy() {
+    this.suscripcionTiempoReal?.unsubscribe();
+  }
+
   navegarA(ruta: string[]) {
-    this.router.navigate(ruta, {relativeTo: this.route});
+    this.navegacionService.navegarA(ruta, this.route);
   }
 }

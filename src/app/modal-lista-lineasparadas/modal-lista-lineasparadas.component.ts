@@ -9,6 +9,7 @@ import { Linea } from '../models/linea.model';
 import { ModalInfoLineasparadasComponent } from '../modal-info-lineasparadas/modal-info-lineasparadas.component';
 import { Observable } from 'rxjs';
 import { ActivatedRoute, Route, Router } from '@angular/router';
+import { NavegacionService } from '../services/navegacion.service';
 
 @Component({
   selector: 'app-modal-lista-lineasparadas',
@@ -24,7 +25,8 @@ export class ModalListaLineasParadasComponent implements OnInit {
   constructor(private routesService: LineasService,
     private paradasService: ParadasService,
     private modalCtrl: ModalController,
-    private router: Router) { }
+    private router: Router,
+    private navegacionService: NavegacionService) { }
 
   ngOnInit(): void {
     console.log("INIT");
@@ -85,6 +87,6 @@ export class ModalListaLineasParadasComponent implements OnInit {
 
   navegarA(ruta: string[]) {
     this.modalCtrl.dismiss(undefined, undefined, 'modal-lista-lineasparadas');    
-    this.router.navigate(ruta, {relativeTo: this.route});
+    this.navegacionService.navegarA(ruta, this.route);
   }
 }

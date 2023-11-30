@@ -13,8 +13,9 @@ import { Agencia } from '../models/agencia.model';
 import { AgenciasService } from '../services/agencias.service';
 import { transit_realtime } from 'gtfs-realtime-bindings';
 import { TiempoRealService } from '../services/tiemporeal.service';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subscription } from 'rxjs';
 import { ModalAlertasComponent } from '../modal-alertas/modal-alertas.component';
+import { NavegacionService } from '../services/navegacion.service';
 
 @Component({
   selector: 'app-parada',
@@ -31,6 +32,8 @@ export class ParadaComponent  implements OnInit, OnDestroy {
   primeraCarga: boolean = true;
   alertasTiempoReal: Array<transit_realtime.IAlert> = [];
 
+  suscripcionTiempoReal: Subscription | undefined;
+
   constructor(private router: Router,
     private route: ActivatedRoute,
     private paradasService: ParadasService,
@@ -38,7 +41,8 @@ export class ParadaComponent  implements OnInit, OnDestroy {
     private lineasService: LineasService,
     private agenciasService: AgenciasService,
     private tiempoRealService: TiempoRealService,
-    private modalCtrl: ModalController) { }
+    private modalCtrl: ModalController,
+    private navegacionService: NavegacionService) { }
 
   ngOnInit() {
     this.idParada = this.route.snapshot.paramMap.get('idParada');
@@ -48,7 +52,7 @@ export class ParadaComponent  implements OnInit, OnDestroy {
         this.parada = parada;
 
         if (parada.paradaPadre) {
-          this.navegarA(['../', parada.paradaPadre])
+          this.navegacionService.redirigirA(['../', parada.paradaPadre], this.route)
         } else {
           this.mapaService.setFiltrarMapa({
             paradas: [parada.idParada],
@@ -70,7 +74,7 @@ export class ParadaComponent  implements OnInit, OnDestroy {
             let selectorEntidadParada: transit_realtime.IEntitySelector = {
               stopId: parada.idParada
             };
-            this.tiempoRealService.tiempoReal.subscribe((tiempoReal) => {
+            this.suscripcionTiempoReal = this.tiempoRealService.tiempoReal.subscribe((tiempoReal) => {
               if (this.primeraCarga || agencias.some(agencia => agencia.idAgencia.split("_")[0] === tiempoReal?.idFeed)) {
                 this.primeraCarga = false;
 
@@ -132,10 +136,11 @@ export class ParadaComponent  implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
+    this.suscripcionTiempoReal?.unsubscribe();
     this.mapaService.setFiltrarMapa({});
   }
 
   navegarA(ruta: string[]) {
-    this.router.navigate(ruta, {relativeTo: this.route});
+    this.navegacionService.navegarA(ruta, this.route);
   }
 }

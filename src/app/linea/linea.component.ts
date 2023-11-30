@@ -8,10 +8,11 @@ import { LineasService } from '../services/lineas.service';
 import { IonPopover, IonicModule, ModalController } from '@ionic/angular';
 import { transit_realtime } from 'gtfs-realtime-bindings';
 import { TiempoRealService } from '../services/tiemporeal.service';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subscription } from 'rxjs';
 import { ModalAlertasComponent } from '../modal-alertas/modal-alertas.component';
 import { AgenciasService } from '../services/agencias.service';
 import { Agencia } from '../models/agencia.model';
+import { NavegacionService } from '../services/navegacion.service';
 
 @Component({
   selector: 'app-linea',
@@ -31,13 +32,16 @@ export class LineaComponent  implements OnInit {
   primeraCarga: boolean = true;
   alertasTiempoReal: Array<transit_realtime.IAlert> = [];
 
+  suscripcionTiempoReal: Subscription | undefined;
+
   constructor(private router: Router,
     private route: ActivatedRoute,
     private lineasService: LineasService,
     private mapaService: MapaService,
     private tiempoRealService: TiempoRealService,
     private agenciasService: AgenciasService,
-    private modalCtrl: ModalController) { }
+    private modalCtrl: ModalController,
+    private navegacionService: NavegacionService) { }
 
   ngOnInit() {
     this.idLinea = this.route.snapshot.paramMap.get('idLinea');
@@ -78,7 +82,7 @@ export class LineaComponent  implements OnInit {
         let selectorEntidadLinea: transit_realtime.IEntitySelector = {
           routeId: linea.idLinea
         };
-        this.tiempoRealService.tiempoReal.subscribe((tiempoReal) => {
+        this.suscripcionTiempoReal = this.tiempoRealService.tiempoReal.subscribe((tiempoReal) => {
           if (this.primeraCarga || tiempoReal?.idFeed === linea.idAgencia.split("_")[0]) {
             this.primeraCarga = false;
             console.log(selectorEntidadLinea);
@@ -122,6 +126,7 @@ export class LineaComponent  implements OnInit {
   }
 
   ngOnDestroy() {
+    this.suscripcionTiempoReal?.unsubscribe();
     this.mapaService.setFiltrarMapa({});
   }
 
@@ -132,6 +137,6 @@ export class LineaComponent  implements OnInit {
   }
 
   navegarA(ruta: string[]) {
-    this.router.navigate(ruta, {relativeTo: this.route});
+    this.navegacionService.navegarA(ruta, this.route);
   }
 }

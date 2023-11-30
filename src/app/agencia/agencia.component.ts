@@ -10,8 +10,9 @@ import { Linea } from '../models/linea.model';
 import { LineasService } from '../services/lineas.service';
 import { TiempoRealService } from '../services/tiemporeal.service';
 import { transit_realtime } from 'gtfs-realtime-bindings';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subscription } from 'rxjs';
 import { ModalAlertasComponent } from '../modal-alertas/modal-alertas.component';
+import { NavegacionService } from '../services/navegacion.service';
 
 @Component({
     selector: 'app-agencia',
@@ -27,13 +28,16 @@ export class AgenciaComponent  implements OnInit {
   primeraCarga: boolean = true;
   alertasTiempoReal: Array<transit_realtime.IAlert> = [];
 
+  suscripcionTiempoReal: Subscription | undefined;
+
   constructor(private router: Router,
     private route: ActivatedRoute,
     private agenciasService: AgenciasService,
     private mapaService: MapaService,
     private lineasService: LineasService,
     private tiempoRealService: TiempoRealService,
-    private modalCtrl: ModalController) { }
+    private modalCtrl: ModalController,
+    private navegacionService: NavegacionService) { }
 
   ngOnInit() {
     this.idAgencia = this.route.snapshot.paramMap.get('idAgencia');
@@ -81,7 +85,8 @@ export class AgenciaComponent  implements OnInit {
         let selectorEntidadAgencia: transit_realtime.IEntitySelector = {
           agencyId: agencia.idAgencia
         };
-        this.tiempoRealService.tiempoReal.subscribe((tiempoReal) => {
+        
+        this.suscripcionTiempoReal = this.tiempoRealService.tiempoReal.subscribe((tiempoReal) => {
           if (this.primeraCarga || tiempoReal?.idFeed === agencia.idAgencia.split("_")[0]) {
             this.primeraCarga = false;
 
@@ -110,6 +115,7 @@ export class AgenciaComponent  implements OnInit {
   }
 
   ngOnDestroy() {
+    this.suscripcionTiempoReal?.unsubscribe();
     this.mapaService.setFiltrarMapa({});
   }
 
@@ -118,6 +124,6 @@ export class AgenciaComponent  implements OnInit {
   }
 
   navegarA(ruta: string[]) {
-    this.router.navigate(ruta, {relativeTo: this.route});
+    this.navegacionService.navegarA(ruta, this.route);
   }
 }

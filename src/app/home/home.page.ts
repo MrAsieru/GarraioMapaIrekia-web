@@ -7,6 +7,7 @@ import { Linea } from '../models/linea.model';
 import { AgenciasService } from '../services/agencias.service';
 import { ActivatedRoute, Router, RouterModule} from '@angular/router'
 import { MapaService } from '../services/mapa.service';
+import { NavegacionService } from '../services/navegacion.service';
 
 @Component({
   selector: 'app-home',
@@ -23,7 +24,8 @@ export class HomePage implements OnInit {
     private agenciesService: AgenciasService,
     private route: ActivatedRoute,
     private router: Router,
-    private mapaService: MapaService) {}
+    private mapaService: MapaService,
+    private navegacionService: NavegacionService) {}
 
   listaAgenciasLineas: AgencyRoutes[] = [];
 
@@ -39,7 +41,7 @@ export class HomePage implements OnInit {
   }
 
   navegarA(ruta: string[]) {
-    this.router.navigate(ruta, {relativeTo: this.route.parent});
+    this.navegacionService.navegarA(ruta, this.route);
   }
 
   agenciaCheckboxClick(event: Event, details: CheckboxChangeEventDetail<string>) {
