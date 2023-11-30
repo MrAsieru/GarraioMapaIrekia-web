@@ -8,7 +8,7 @@
           <span *ngIf="parada.codigo"> - {{parada.codigo}}</span>
         </ion-card-title>
         <ion-card-subtitle>
-          <span *ngIf="parada.idZona !== ''">Zona {{parada.idZona?.split("_")?.[1]}} - </span>
+          <span *ngIf="parada.idZona !== ''">Zona {{parada.idZona?.slice(parada.idZona!.indexOf("_")+1)?.[1]}} - </span>
           <ion-icon id="parada_accesibilidad" src="assets/img/accesibilidad_{{parada.accesibilidad ? parada.accesibilidad : '0'}}.svg"></ion-icon>
           <ion-popover trigger="parada_accesibilidad" triggerAction="click"showBackdrop="false">
             <ng-template>
@@ -17,6 +17,11 @@
               <ion-content *ngIf="parada.accesibilidad === 2" class="ion-padding">No es posible acceder en silla de ruedas</ion-content>
             </ng-template>
           </ion-popover>
+          <ng-container *ngIf="alertasTiempoReal.length > 0">
+            <ion-button id="agencia_alertas" color="warning" (click)="mostrarModalAlertas()">
+              <ion-icon slot="icon-only" src="assets/img/alerta.svg"></ion-icon>
+            </ion-button>
+          </ng-container>
         </ion-card-subtitle>
         <ion-card-content style="padding: 0 !important;">
           <ion-row style="justify-content: flex-start; flex-wrap: nowrap; overflow-x: scroll !important; overflow-y: hidden;">

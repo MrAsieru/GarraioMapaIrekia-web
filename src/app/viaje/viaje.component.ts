@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, ElementRef, Inject, LOCALE_ID, OnInit, ViewChild } from '@angular/core';
 import { DatetimeHighlight } from '@ionic/core';
-import { IonPopover, IonicModule } from '@ionic/angular';
+import { IonPopover, IonicModule, ModalController } from '@ionic/angular';
 import { LateralComponent } from '../lateral/lateral.component';
 import { Linea, PatronLinea } from '../models/linea.model';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -13,6 +13,10 @@ import * as moment from 'moment-timezone';
 import { MomentPipe } from "../moment/moment.pipe";
 import { Agencia } from '../models/agencia.model';
 import { AgenciasService } from '../services/agencias.service';
+import { TiempoRealService } from '../services/tiemporeal.service';
+import { transit_realtime } from 'gtfs-realtime-bindings';
+import { BehaviorSubject } from 'rxjs';
+import { ModalAlertasComponent } from '../modal-alertas/modal-alertas.component';
 
 @Component({
     selector: 'app-viaje',
@@ -33,16 +37,29 @@ export class ViajeComponent  implements OnInit {
     fechas?: DatetimeHighlight[],
     fechaMin?: string,
     fechaMax?: string,
-    
   } = {};
+
+  primeraCarga: boolean = true;
+  momentoActualizacion: moment.Moment | undefined = undefined;
+  vehiculoTiempoReal: transit_realtime.IVehiclePosition | undefined;
+  viajeTiempoReal: transit_realtime.ITripUpdate | undefined;
+  alertasTiempoReal: Array<transit_realtime.IAlert> = [];
+
+  tripScheduleRelationshipEnum = transit_realtime.TripDescriptor.ScheduleRelationship;
+  stopScheduleRelationshipEnum = transit_realtime.TripUpdate.StopTimeUpdate.ScheduleRelationship;
+  vehicleStopStatusEnum = transit_realtime.VehiclePosition.VehicleStopStatus;
+  congestionLevelEnum = transit_realtime.VehiclePosition.CongestionLevel;
+  occupancyStatusEnum = transit_realtime.VehiclePosition.OccupancyStatus;
 
   constructor(private router: Router,
     private route: ActivatedRoute,
     private viajesService: ViajesService,
     private lineasService: LineasService,
     private agenciasService: AgenciasService,
-    private mapaService: MapaService) { }
-
+    private mapaService: MapaService,
+    private tiempoRealService: TiempoRealService,
+    private modalCtrl: ModalController) { }
+    
   ngOnInit() {
     this.idViaje = this.route.snapshot.paramMap.get('idViaje');
 
@@ -125,11 +142,19 @@ export class ViajeComponent  implements OnInit {
           this.actualizarTiempos();
           this.actualizarPosicion();
         }, 60000);
+
+        
+        this.tiempoRealService.tiempoReal.subscribe((tiempoReal) => {
+          if (this.primeraCarga || tiempoReal?.idFeed === this.viaje!.idViaje.split("_")[0]) {
+            this.primeraCarga = false;
+            this.actualizarTiempoReal();
+          }          
+        });
       });
     }
   }
 
-  actualizarTiempos() {
+  actualizarTiempos() {   
     this.viaje?.horarios?.forEach(horario => {
       // Actualizar tiempos
       if (horario.horaLlegada) {
@@ -150,7 +175,19 @@ export class ViajeComponent  implements OnInit {
   }
 
   actualizarPosicion() {
-    if (this.viaje?.horarios) {
+    if (this.vehiculoTiempoReal?.currentStopSequence && this.vehiculoTiempoReal?.currentStopSequence >= 0) {
+      console.log(`orden: ${this.vehiculoTiempoReal?.currentStopSequence}`)
+
+      this.viaje?.horarios?.forEach(horario => {
+        if (horario.orden < this.vehiculoTiempoReal?.currentStopSequence!) {
+          horario.claseElemento = 'pasada';
+        } else if (horario.orden == this.vehiculoTiempoReal?.currentStopSequence) {
+          horario.claseElemento = 'actual';
+        } else {
+          horario.claseElemento = 'futura';
+        }          
+      });
+    } else if (this.viaje?.horarios) {
       const ahora = moment();
       let orden = -1;
       console.log(this.viaje.horarios)
@@ -192,6 +229,105 @@ export class ViajeComponent  implements OnInit {
         }          
       });
     }    
+  }
+
+  actualizarTiempoReal() {
+    let tmpVehiculo = this.tiempoRealService.getInformacionVehiculoViaje(this.viaje!.idViaje.split("_")[0], {
+      tripId: this.viaje!.idViaje,
+      routeId: this.viaje!.idLinea,
+      directionId: this.viaje!.direccion
+    });  
+    console.log(tmpVehiculo)
+    if (tmpVehiculo) {
+      this.vehiculoTiempoReal = tmpVehiculo;
+      this.momentoActualizacion = moment();
+      this.actualizarPosicion();
+
+      if (this.vehiculoTiempoReal.position?.latitude && this.vehiculoTiempoReal.position?.longitude) {
+        this.mapaService.setMovimientoMapa({
+          latitud: this.vehiculoTiempoReal.position?.latitude ?? 0,
+          longitud: this.vehiculoTiempoReal.position?.longitude ?? 0,
+          zoom: 13
+        });
+      }      
+    }
+
+    let tmpViaje = this.tiempoRealService.getInformacionActualizacionViaje(this.viaje!.idViaje.split("_")[0], {
+      tripId: this.viaje!.idViaje,
+      routeId: this.viaje!.idLinea,
+      directionId: this.viaje!.direccion
+    });  
+    console.log(tmpViaje)
+    if (tmpViaje) {
+      this.viajeTiempoReal = tmpViaje;
+      this.momentoActualizacion = moment();
+
+      if (this.viajeTiempoReal?.stopTimeUpdate && this.viajeTiempoReal?.stopTimeUpdate?.length > 0) {
+        this.viajeTiempoReal.stopTimeUpdate.forEach(stopTimeUpdate => {
+          this.viaje?.horarios?.forEach(horario => {
+            if (horario.idParada.split(/_(.*)/s)[1] == stopTimeUpdate.stopId) {
+              horario.tiempoReal = stopTimeUpdate;
+              if (stopTimeUpdate.arrival?.time) {
+                horario.momentoLlegadaTiempoReal = moment.unix((stopTimeUpdate.arrival?.time as number));
+              } else if (stopTimeUpdate.arrival?.delay) {
+                horario.momentoLlegadaTiempoReal = horario.momentoLlegada?.clone().add(stopTimeUpdate.arrival?.delay, 'seconds');
+              }
+
+              if (stopTimeUpdate.departure?.time) {
+                horario.momentoSalidaTiempoReal = moment.unix((stopTimeUpdate.departure?.time as number));
+              } else if (stopTimeUpdate.departure?.delay) {
+                horario.momentoSalidaTiempoReal = horario.momentoSalida?.clone().add(stopTimeUpdate.departure?.delay, 'seconds');
+              }
+
+              
+              if (horario.momentoLlegadaTiempoReal) {
+                horario.retrasoLlegadaTiempoReal = horario.momentoLlegadaTiempoReal.diff(horario.momentoLlegada, 'seconds');
+              }
+              if (horario.momentoSalidaTiempoReal) {
+                horario.retrasoSalidaTiempoReal = horario.momentoSalidaTiempoReal.diff(horario.momentoSalida, 'seconds');
+              }
+              if (horario.retrasoLlegadaTiempoReal && horario.retrasoSalidaTiempoReal) {
+                horario.retrasoTiempoReal = Math.max(horario.retrasoLlegadaTiempoReal, horario.retrasoSalidaTiempoReal);
+              }
+              console.log(horario)
+            }
+          });
+        });
+      } 
+    }
+
+    // Obtener alertas
+    let selectorEntidadLinea: transit_realtime.IEntitySelector = {
+      trip: {
+        tripId: this.viaje!.idViaje,
+        routeId: this.viaje!.idLinea,
+        directionId: this.viaje!.direccion
+      }
+    };
+    this.tiempoRealService.tiempoReal.subscribe((tiempoReal) => {
+      if (this.primeraCarga || tiempoReal?.idFeed === this.viaje!.idAgencia.split("_")[0]) {
+        this.primeraCarga = false;
+        console.log(selectorEntidadLinea);
+        let tmpAlertasLinea = this.tiempoRealService.getInformacionAlertas([this.viaje!.idAgencia.split("_")[0]], selectorEntidadLinea);
+        console.log(tmpAlertasLinea);
+        if (tmpAlertasLinea) {
+          this.alertasTiempoReal = tmpAlertasLinea; 
+        }
+      }          
+    });
+  }
+
+  async mostrarModalAlertas() {
+    if (this.alertasTiempoReal.length > 0) {
+      let datosModal = new BehaviorSubject<Array<transit_realtime.IAlert>>(this.alertasTiempoReal);
+      const modal = await this.modalCtrl.create({
+        id: 'modal-alertas',
+        component: ModalAlertasComponent,
+        backdropDismiss: true,
+        componentProps: { alertas: datosModal.asObservable() }
+      });
+      modal.present();
+    }
   }
 
   ngOnDestroy() {

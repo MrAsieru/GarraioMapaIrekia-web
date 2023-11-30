@@ -7,9 +7,9 @@ ion-item.parada::before {
   position: absolute;
   top: 0;
   bottom: 0;
-  left: 1.1em; /* Adjusted left position */
+  left: 1.01em; /* Adjusted left position */
   background-color: var(--actual); /* Material Design primary color */
-  width: 0.2em; /* Line thickness */
+  width: 0.4em; /* Line thickness */
   z-index: 2;
 }
   

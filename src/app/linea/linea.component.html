@@ -6,9 +6,17 @@
           <span>{{linea.nombreLargo}}</span>
         </ion-card-title>
         <ion-card-content style="padding: 0 !important;">
+          <ion-chip text-wrap (click)="navegarA(['../../agencia', linea.idAgencia])">
+            <ion-label text-wrap style="max-width: 100px; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">{{agencia?.nombre ?? linea.idAgencia}}</ion-label>
+          </ion-chip>
           <ion-button (click)="abrirUrl(linea.url)">
             <ion-icon slot="icon-only" src="assets/img/web.svg"></ion-icon>
           </ion-button>
+          <ng-container *ngIf="alertasTiempoReal.length > 0">
+            <ion-button id="agencia_alertas" color="warning" (click)="mostrarModalAlertas()">
+              <ion-icon slot="icon-only" src="assets/img/alerta.svg"></ion-icon>
+            </ion-button>
+          </ng-container>
           <br/>
           <ion-button id="linea_patron" style="width: 100%;" color="medium" (click)="abrirPopover()">
             <ion-label slot="start">Patrón</ion-label>

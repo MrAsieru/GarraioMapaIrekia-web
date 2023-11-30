@@ -11,6 +11,7 @@ export class Agencia {
     email?: string;
     lineas?: string[] | Linea[];
     bbox: number[];
+
     mostrar: boolean = true;
 }
 

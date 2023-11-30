@@ -8,8 +8,6 @@ ion-item.pasada::before, ion-item.actual::before, ion-item.futura::before {
   position: absolute;
   top: 0;
   bottom: 0;
-  left: 1.1em; /* Adjusted left position */
-  width: 0.2em; /* Line thickness */
   z-index: 2;
 }
 
@@ -41,6 +39,8 @@ ion-item.futura ion-label {
 }
 
 .pasada::before {
+  left: 1.14em; /* Adjusted left position */
+  width: 0.2em; /* Line thickness */
   background-color: var(--color-linea); /* Material Design grey for passed stations */
 }
 
@@ -49,6 +49,8 @@ ion-item.futura ion-label {
 }
 
 .actual::before {
+  left: 1.01em; /* Adjusted left position */
+  width: 0.4em; /* Line thickness */
   background-color: var(--actual); /* Material Design yellow for the current station */
 }
 
@@ -61,6 +63,8 @@ ion-item.futura ion-label {
 }
 
 .futura::before {
+  left: 1.01em; /* Adjusted left position */
+  width: 0.4em; /* Line thickness */
   background-color: var(--color-linea); /* Material Design green for upcoming stations */
 }
 

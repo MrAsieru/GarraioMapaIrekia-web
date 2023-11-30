@@ -35,6 +35,11 @@
               </ng-template>
             </ion-popover>
           </ng-container>
+          <ng-container *ngIf="alertasTiempoReal.length > 0">
+            <ion-button id="agencia_alertas" color="warning" (click)="mostrarModalAlertas()">
+              <ion-icon slot="icon-only" src="assets/img/alerta.svg"></ion-icon>
+            </ion-button>
+          </ng-container>
         </ion-card-content>
       </ion-card-header>
     </ion-card>
@@ -43,7 +48,7 @@
         <ion-item *ngFor="let linea of lineas" [button]="true" [detail]="false" (click)="navegarA(['../../linea', linea.idLinea])">
           <ion-icon src="assets/img/tipolinea_{{linea?.tipo ? linea?.tipo : 0}}.svg"></ion-icon>
           <ion-label>
-            <ion-chip [ngStyle]="{'background': linea?.color, 'color': linea?.colorTexto}">{{linea?.nombreCorto ?? linea?.idLinea?.split("_")?.[1]}}</ion-chip>
+            <ion-chip [ngStyle]="{'background': linea?.color, 'color': linea?.colorTexto}">{{linea?.nombreCorto ?? linea?.idLinea}}</ion-chip>
             <ion-text>{{linea?.nombreLargo}}</ion-text>
           </ion-label>
         </ion-item>

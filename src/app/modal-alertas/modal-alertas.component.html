@@ -1,0 +1,70 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-segment #alertaIdioma [value]="idiomasAlertas[0]" slot="start">
+      <ion-segment-button *ngFor="let idioma of idiomasAlertas" [value]="idioma">
+        <ion-label>{{idioma}}</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+    <ion-buttons slot="end">
+      <ion-button (click)="cerrar()" >
+        <ion-icon src="assets/img/cerrar.svg"></ion-icon>
+      </ion-button> 
+    </ion-buttons>         
+  </ion-toolbar>
+</ion-header>
+<ion-content>  
+  <ion-card *ngFor="let alerta of alertas | async" [color]="(alerta.severityLevel === severityLevelEnum.SEVERE) ? 'danger' : ((alerta.severityLevel === severityLevelEnum.WARNING) ? 'warning' : '')">
+    <ion-card-header>
+      <ion-label>
+        <ion-chip *ngIf="alerta.cause" [ngSwitch]="alerta.cause" style="background: rgba(128, 128, 128, 0.8); color: white;">
+          <ion-label *ngSwitchCase="causeEnum.UNKNOWN_CAUSE">Causa desconocida</ion-label>
+          <ion-label *ngSwitchCase="causeEnum.OTHER_CAUSE">Otra causa</ion-label>
+          <ion-label *ngSwitchCase="causeEnum.TECHNICAL_PROBLEM">Problema técnico</ion-label>
+          <ion-label *ngSwitchCase="causeEnum.STRIKE">Huelga</ion-label>
+          <ion-label *ngSwitchCase="causeEnum.DEMONSTRATION">Manifestación</ion-label>
+          <ion-label *ngSwitchCase="causeEnum.ACCIDENT">Accidente</ion-label>
+          <ion-label *ngSwitchCase="causeEnum.HOLIDAY">Día festivo</ion-label>
+          <ion-label *ngSwitchCase="causeEnum.WEATHER">Tiempo</ion-label>
+          <ion-label *ngSwitchCase="causeEnum.MAINTENANCE">Mantenimiento</ion-label>
+          <ion-label *ngSwitchCase="causeEnum.CONSTRUCTION">Construcción</ion-label>
+          <ion-label *ngSwitchCase="causeEnum.POLICE_ACTIVITY">Actividad policial</ion-label>
+          <ion-label *ngSwitchCase="causeEnum.MEDICAL_EMERGENCY">Emergencia médica</ion-label>
+        </ion-chip>
+      </ion-label>
+
+      <ion-label>
+        <ion-chip *ngIf="alerta.effect" [ngSwitch]="alerta.effect" style="background: rgba(128, 128, 128, 0.8); color: white;">
+          <ion-label *ngSwitchCase="effectEnum.NO_SERVICE">Sin servicio</ion-label>
+          <ion-label *ngSwitchCase="effectEnum.REDUCED_SERVICE">Servicio reducido</ion-label>
+          <ion-label *ngSwitchCase="effectEnum.SIGNIFICANT_DELAYS">Retrasos significativos</ion-label>
+          <ion-label *ngSwitchCase="effectEnum.DETOUR">Desvío</ion-label>
+          <ion-label *ngSwitchCase="effectEnum.ADDITIONAL_SERVICE">Servicio adicional</ion-label>
+          <ion-label *ngSwitchCase="effectEnum.MODIFIED_SERVICE">Servicio modificado</ion-label>
+          <ion-label *ngSwitchCase="effectEnum.OTHER_EFFECT">Otro efecto</ion-label>
+          <ion-label *ngSwitchCase="effectEnum.UNKNOWN_EFFECT">Efecto desconocido</ion-label>
+          <ion-label *ngSwitchCase="effectEnum.STOP_MOVED">Parada movida</ion-label>
+          <ion-label *ngSwitchCase="effectEnum.NO_EFFECT">Sin efecto</ion-label>
+          <ion-label *ngSwitchCase="effectEnum.ACCESSIBILITY_ISSUE">Problema de accesibilidad</ion-label>
+        </ion-chip>
+      </ion-label>                      
+      
+      <ng-container *ngFor="let translation of alerta.headerText?.translation">
+        <ion-card-title *ngIf="translation.language === alertaIdioma.value">{{translation.text}}</ion-card-title>
+      </ng-container>
+      <ion-card-subtitle *ngIf="alerta.activePeriod && alerta.activePeriod?.length! > 0">
+        Desde {{$any(alerta.activePeriod[0].start) * 1000 | date:'yyyy/MM/dd HH:mm':zonaHoraria}} hasta {{$any(alerta.activePeriod[0].end) * 1000 | date:'yyyy/MM/dd HH:mm':zonaHoraria}}
+      </ion-card-subtitle>
+    </ion-card-header>                    
+    <ion-card-content>
+      <ng-container *ngFor="let translation of alerta.descriptionText?.translation">
+        <ion-text *ngIf="translation.language === alertaIdioma.value">{{translation.text}}</ion-text>
+      </ng-container>
+      <br/>
+      <ng-container *ngFor="let translation of alerta.url?.translation">
+        <ion-button *ngIf="translation.language === alertaIdioma.value" (click)="abrirUrl(translation.text)">
+          <ion-icon slot="icon-only" src="assets/img/link.svg"></ion-icon>
+        </ion-button>
+      </ng-container>
+    </ion-card-content>
+  </ion-card>
+</ion-content>

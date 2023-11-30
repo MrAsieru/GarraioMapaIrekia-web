@@ -1,5 +1,7 @@
+import moment from "moment";
 import { Linea } from "./linea.model";
 import { Parada } from "./parada.model";
+import { transit_realtime } from "gtfs-realtime-bindings";
 
 export class Viaje {
     idAgencia: string;
@@ -38,6 +40,12 @@ export class HorarioViaje {
     momentoSalida?: moment.Moment;
     tiempoRestante?: number;
     claseElemento?: string;
+    tiempoReal?: transit_realtime.TripUpdate.IStopTimeUpdate;
+    momentoLlegadaTiempoReal?: moment.Moment;
+    momentoSalidaTiempoReal?: moment.Moment;
+    retrasoTiempoReal?: number;
+    retrasoLlegadaTiempoReal?: number;
+    retrasoSalidaTiempoReal?: number;
 }
 
 export class FrecuenciasViaje {

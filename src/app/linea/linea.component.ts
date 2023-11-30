@@ -5,7 +5,13 @@ import { Linea, PatronLinea } from '../models/linea.model';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MapaService } from '../services/mapa.service';
 import { LineasService } from '../services/lineas.service';
-import { IonPopover, IonicModule } from '@ionic/angular';
+import { IonPopover, IonicModule, ModalController } from '@ionic/angular';
+import { transit_realtime } from 'gtfs-realtime-bindings';
+import { TiempoRealService } from '../services/tiemporeal.service';
+import { BehaviorSubject } from 'rxjs';
+import { ModalAlertasComponent } from '../modal-alertas/modal-alertas.component';
+import { AgenciasService } from '../services/agencias.service';
+import { Agencia } from '../models/agencia.model';
 
 @Component({
   selector: 'app-linea',
@@ -18,13 +24,20 @@ export class LineaComponent  implements OnInit {
   @ViewChild(IonPopover) popoverPatrones: IonPopover;
   idLinea: string | null;
   linea: Linea = new Linea();
+  agencia: Agencia | undefined;
   patrones: PatronLinea[] = [];
   patronSeleccionado: PatronLinea | undefined = undefined;
+
+  primeraCarga: boolean = true;
+  alertasTiempoReal: Array<transit_realtime.IAlert> = [];
 
   constructor(private router: Router,
     private route: ActivatedRoute,
     private lineasService: LineasService,
-    private mapaService: MapaService) { }
+    private mapaService: MapaService,
+    private tiempoRealService: TiempoRealService,
+    private agenciasService: AgenciasService,
+    private modalCtrl: ModalController) { }
 
   ngOnInit() {
     this.idLinea = this.route.snapshot.paramMap.get('idLinea');
@@ -56,6 +69,26 @@ export class LineaComponent  implements OnInit {
             });
           });
         });
+
+        this.agenciasService.getAgencia(linea.idAgencia).subscribe(agencia => {
+          this.agencia = agencia;
+        });
+
+        // Obtener alertas
+        let selectorEntidadLinea: transit_realtime.IEntitySelector = {
+          routeId: linea.idLinea
+        };
+        this.tiempoRealService.tiempoReal.subscribe((tiempoReal) => {
+          if (this.primeraCarga || tiempoReal?.idFeed === linea.idAgencia.split("_")[0]) {
+            this.primeraCarga = false;
+            console.log(selectorEntidadLinea);
+            let tmpAlertasLinea = this.tiempoRealService.getInformacionAlertas([linea.idAgencia.split("_")[0]], selectorEntidadLinea);
+            console.log(tmpAlertasLinea);
+            if (tmpAlertasLinea) {
+              this.alertasTiempoReal = tmpAlertasLinea; 
+            }
+          }          
+        });
       });
     }
   }
@@ -73,6 +106,19 @@ export class LineaComponent  implements OnInit {
       paradas: this.patronSeleccionado.paradas,
       lineas: [this.linea.idLinea]
     });
+  }
+
+  async mostrarModalAlertas() {
+    if (this.alertasTiempoReal.length > 0) {
+      let datosModal = new BehaviorSubject<Array<transit_realtime.IAlert>>(this.alertasTiempoReal);
+      const modal = await this.modalCtrl.create({
+        id: 'modal-alertas',
+        component: ModalAlertasComponent,
+        backdropDismiss: true,
+        componentProps: { alertas: datosModal.asObservable() }
+      });
+      modal.present();
+    }
   }
 
   ngOnDestroy() {

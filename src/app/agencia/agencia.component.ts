@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import { IonicModule } from '@ionic/angular';
+import { IonicModule, ModalController } from '@ionic/angular';
 import { LateralComponent } from '../lateral/lateral.component';
 import { Agencia } from '../models/agencia.model';
 import { AgenciasService } from '../services/agencias.service';
@@ -8,23 +8,32 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { MapaService } from '../services/mapa.service';
 import { Linea } from '../models/linea.model';
 import { LineasService } from '../services/lineas.service';
+import { TiempoRealService } from '../services/tiemporeal.service';
+import { transit_realtime } from 'gtfs-realtime-bindings';
+import { BehaviorSubject } from 'rxjs';
+import { ModalAlertasComponent } from '../modal-alertas/modal-alertas.component';
 
 @Component({
-  selector: 'app-agencia',
-  templateUrl: './agencia.component.html',
-  standalone: true,
-  imports: [IonicModule, CommonModule, LateralComponent]
+    selector: 'app-agencia',
+    templateUrl: './agencia.component.html',
+    standalone: true,
+    imports: [IonicModule, CommonModule, LateralComponent]
 })
 export class AgenciaComponent  implements OnInit {
   idAgencia: string | null;
   agencia: Agencia = new Agencia();
   lineas: Linea[] = [];
 
+  primeraCarga: boolean = true;
+  alertasTiempoReal: Array<transit_realtime.IAlert> = [];
+
   constructor(private router: Router,
     private route: ActivatedRoute,
     private agenciasService: AgenciasService,
     private mapaService: MapaService,
-    private lineasService: LineasService) { }
+    private lineasService: LineasService,
+    private tiempoRealService: TiempoRealService,
+    private modalCtrl: ModalController) { }
 
   ngOnInit() {
     this.idAgencia = this.route.snapshot.paramMap.get('idAgencia');
@@ -67,8 +76,36 @@ export class AgenciaComponent  implements OnInit {
             }
           });
         });
-        
+
+        // Obtener alertas
+        let selectorEntidadAgencia: transit_realtime.IEntitySelector = {
+          agencyId: agencia.idAgencia
+        };
+        this.tiempoRealService.tiempoReal.subscribe((tiempoReal) => {
+          if (this.primeraCarga || tiempoReal?.idFeed === agencia.idAgencia.split("_")[0]) {
+            this.primeraCarga = false;
+
+            let tmpAlertasAgencia = this.tiempoRealService.getInformacionAlertas([agencia.idAgencia.split("_")[0]], selectorEntidadAgencia);
+            console.log(tmpAlertasAgencia);
+            if (tmpAlertasAgencia) {
+              this.alertasTiempoReal = tmpAlertasAgencia; 
+            }
+          }          
+        });
       });
+    }
+  }
+
+  async mostrarModalAlertas() {
+    if (this.alertasTiempoReal.length > 0) {
+      let datosModal = new BehaviorSubject<Array<transit_realtime.IAlert>>(this.alertasTiempoReal);
+      const modal = await this.modalCtrl.create({
+        id: 'modal-alertas',
+        component: ModalAlertasComponent,
+        backdropDismiss: true,
+        componentProps: { alertas: datosModal.asObservable() }
+      });
+      modal.present();
     }
   }
 
