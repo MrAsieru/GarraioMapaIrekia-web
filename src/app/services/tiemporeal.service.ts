@@ -163,9 +163,30 @@ export class TiempoRealService {
     return busqueda.map(entidad => entidad.alert!);
   }
 
+  getInformacionViajesParada(idParada: string): {viaje: transit_realtime.ITripDescriptor; tiempoReal: transit_realtime.TripUpdate.IStopTimeUpdate}[] {
+    const idFeed = idParada.split(/_(.*)/s)[0];
+    const idParadaFeed = idParada.split(/_(.*)/s)[1];
+
+    const entidades = this.mapaTiempoReal.get(idFeed);
+    if (!entidades) return [];
+
+    let busqueda: {viaje: transit_realtime.ITripDescriptor; tiempoReal: transit_realtime.TripUpdate.IStopTimeUpdate}[] = []
+    entidades.forEach(entidad => {
+      if (entidad.tripUpdate?.stopTimeUpdate) {
+        entidad.tripUpdate.stopTimeUpdate.forEach(stopTimeUpdate => {
+          if (stopTimeUpdate.stopId === idParadaFeed) {
+            busqueda.push({viaje: entidad.tripUpdate!.trip!, tiempoReal: stopTimeUpdate});
+          }
+        });
+      }
+    });
+
+    return busqueda;
+  }
+
   
 
-  mismoSelectorEntidad(selector1: transit_realtime.IEntitySelector, selector2: transit_realtime.IEntitySelector): boolean {
+  private mismoSelectorEntidad(selector1: transit_realtime.IEntitySelector, selector2: transit_realtime.IEntitySelector): boolean {
     const fieldNames: Array<keyof transit_realtime.IEntitySelector> = [
       'agencyId',
       'routeId',
@@ -198,7 +219,7 @@ export class TiempoRealService {
     return cont < fieldNames.length;
   }
 
-  mismoDescriptorViaje(descriptor1: transit_realtime.ITripDescriptor, descriptor2: transit_realtime.ITripDescriptor): boolean {
+  private mismoDescriptorViaje(descriptor1: transit_realtime.ITripDescriptor, descriptor2: transit_realtime.ITripDescriptor): boolean {
     const tripFieldNames: Array<keyof transit_realtime.ITripDescriptor> = [
       'tripId',
       'routeId',

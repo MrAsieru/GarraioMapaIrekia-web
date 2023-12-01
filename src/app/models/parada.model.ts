@@ -1,3 +1,4 @@
+import { transit_realtime } from "gtfs-realtime-bindings";
 import { Area } from "./area.model";
 import { Linea } from "./linea.model";
 import { HorarioViaje, Viaje } from "./viaje.model";
@@ -31,7 +32,7 @@ export class Nivel {
     nombre?: string;
 }
 
-export class StopVectorProperties {
+export class StopPropiedadesVectoriales {
     idParada: string;
     nombre: string;
     idZona: string;
@@ -46,4 +47,9 @@ export class ViajeParada extends Viaje {
     zonaHoraria: string;
     linea?: Linea;
     tiempoRestante?: number; // en minutos
+    tiempoReal?: transit_realtime.TripUpdate.IStopTimeUpdate;
+    retrasoTiempoReal?: number;
+    momentoLlegadaTiempoReal?: moment.Moment;
+    momentoSalidaTiempoReal?: moment.Moment;
+    tiempoRestanteTiempoReal?: number;
 }

@@ -29,10 +29,12 @@ export class ParadaComponent  implements OnInit, OnDestroy {
   viajes: ViajeParada[] = [];
   agencias: Agencia[] = [];
 
-  primeraCarga: boolean = true;
+  primeraCargaAlertas: boolean = true;
+  primeraCargaViajes: boolean = true;
   alertasTiempoReal: Array<transit_realtime.IAlert> = [];
 
-  suscripcionTiempoReal: Subscription | undefined;
+  suscripcionTiempoRealAlertas: Subscription | undefined;
+  suscripcionTiempoRealViajes: Subscription | undefined;
 
   constructor(private router: Router,
     private route: ActivatedRoute,
@@ -74,12 +76,12 @@ export class ParadaComponent  implements OnInit, OnDestroy {
             let selectorEntidadParada: transit_realtime.IEntitySelector = {
               stopId: parada.idParada
             };
-            this.suscripcionTiempoReal = this.tiempoRealService.tiempoReal.subscribe((tiempoReal) => {
-              if (this.primeraCarga || agencias.some(agencia => agencia.idAgencia.split("_")[0] === tiempoReal?.idFeed)) {
-                this.primeraCarga = false;
+            this.suscripcionTiempoRealAlertas = this.tiempoRealService.tiempoReal.subscribe((tiempoReal) => {
+              if (this.primeraCargaAlertas || agencias.some(agencia => agencia.idAgencia.split("_")[0] === tiempoReal?.idFeed)) {
+                this.primeraCargaAlertas = false;
 
                 let tmpAlertasParada = this.tiempoRealService.getInformacionAlertas(Array.from(new Set(agencias.map(agencia => agencia.idAgencia.split("_")[0]))), selectorEntidadParada);
-                console.log(tmpAlertasParada);
+                // console.log(tmpAlertasParada);
                 if (tmpAlertasParada) {
                   this.alertasTiempoReal = tmpAlertasParada; 
                 }
@@ -105,21 +107,94 @@ export class ParadaComponent  implements OnInit, OnDestroy {
                 viaje.horario.momentoSalida = moment().startOf('day').add(horas, 'hours').add(minutos, 'minutes').add(segundos, 'seconds');
               }
 
-              if(viaje.horario.horaSalida) {
-                viaje.tiempoRestante = (viaje.horario.momentoSalida as moment.Moment).diff(moment(), 'minutes');
-              } else {
-                viaje.tiempoRestante = (viaje.horario.momentoLlegada as moment.Moment).diff(moment(), 'minutes');
-              }
-
               if (viaje.letrero === undefined || viaje.letrero === "") {
                 viaje.letrero = viaje.horario.letrero;
               }
             });
-            this.viajes = viajes.sort((a, b) => a.tiempoRestante! - b.tiempoRestante!);
+            this.viajes = viajes;
+            
+            this.actualizarViajes();
+
+            // Obtener tiempo real de viajes
+            this.suscripcionTiempoRealViajes = this.tiempoRealService.tiempoReal.subscribe((tiempoReal) => {
+              if (this.primeraCargaViajes || tiempoReal?.idFeed === parada.idParada.split("_")[0]) {
+                this.primeraCargaViajes = false;
+
+                let tmpViajesParada = this.tiempoRealService.getInformacionViajesParada(parada.idParada);
+                
+                if (tmpViajesParada) {
+                  tmpViajesParada.forEach(viajeParada => {
+                    
+                    let viaje = this.viajes.find(viaje => viaje.idViaje.split(/_(.*)/s)[1] === viajeParada.viaje.tripId);
+                    // console.log(viaje);
+                    if (viaje) {
+                      viaje.tiempoReal = viajeParada.tiempoReal;
+                      
+                      let momento: moment.Moment | undefined;
+                      if (viaje.horario.momentoSalida) {
+                        momento = viaje.horario.momentoSalida;
+                      } else if (viaje.horario.momentoLlegada) {
+                        momento = viaje.horario.momentoLlegada;
+                      }
+                      if (momento) {
+                        if (viajeParada.tiempoReal.arrival?.time) {
+                          viaje.momentoLlegadaTiempoReal = moment.unix((viajeParada.tiempoReal.arrival?.time as number));
+                        } else if (viajeParada.tiempoReal.arrival?.delay) {
+                          viaje.momentoLlegadaTiempoReal = momento.clone().add(viajeParada.tiempoReal.arrival?.delay, 'seconds');
+                        }
+                        if (viajeParada.tiempoReal.departure?.time) {
+                          viaje.momentoSalidaTiempoReal = moment.unix((viajeParada.tiempoReal.departure?.time as number));
+                        } else if (viajeParada.tiempoReal.departure?.delay) {
+                          viaje.momentoSalidaTiempoReal = momento.clone().add(viajeParada.tiempoReal.departure?.delay, 'seconds');
+                        }
+                        
+
+                        if (viaje.momentoLlegadaTiempoReal && momento) {
+                          viaje.retrasoTiempoReal = viaje.momentoLlegadaTiempoReal.diff(momento, 'seconds');
+                        }
+                        if (viaje.momentoSalidaTiempoReal && momento) {
+                          viaje.retrasoTiempoReal = viaje.momentoSalidaTiempoReal.diff(momento, 'seconds');
+                        }
+                        if (viaje.momentoLlegadaTiempoReal && viaje.momentoSalidaTiempoReal && momento) {
+                          viaje.retrasoTiempoReal = Math.max(viaje.momentoLlegadaTiempoReal.diff(momento, 'seconds'), viaje.momentoSalidaTiempoReal.diff(momento, 'seconds'));
+                        }
+                      }                      
+                    }
+                  });
+
+                  this.actualizarViajes();
+                }
+                // console.log(viajes)
+              }          
+            });
           });
         }        
       });
+
+      setInterval(() => {
+        this.actualizarViajes();
+      }, 60000);
     }
+  }
+
+  actualizarViajes() {
+    this.viajes.forEach(viaje => {
+      if (viaje.momentoSalidaTiempoReal) {        
+        // console.log(viaje.momentoSalidaTiempoReal)
+        viaje.tiempoRestanteTiempoReal = viaje.momentoSalidaTiempoReal.diff(moment(), 'minutes');
+        // console.log(viaje.tiempoRestanteTiempoReal)
+      } else if (viaje.momentoLlegadaTiempoReal) {
+        viaje.tiempoRestanteTiempoReal = viaje.momentoLlegadaTiempoReal.diff(moment(), 'minutes');
+      }
+
+      if(viaje.horario.horaSalida) {
+        viaje.tiempoRestante = (viaje.horario.momentoSalida as moment.Moment).diff(moment(), 'minutes');
+      } else if (viaje.horario.horaLlegada) {
+        viaje.tiempoRestante = (viaje.horario.momentoLlegada as moment.Moment).diff(moment(), 'minutes');
+      }
+    });
+
+    this.viajes = this.viajes.sort((a, b) => (a.tiempoRestanteTiempoReal ?? a.tiempoRestante ?? 0) - (b.tiempoRestanteTiempoReal ?? b.tiempoRestante ?? 0));
   }
 
   async mostrarModalAlertas() {
@@ -136,7 +211,8 @@ export class ParadaComponent  implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    this.suscripcionTiempoReal?.unsubscribe();
+    this.suscripcionTiempoRealAlertas?.unsubscribe();
+    this.suscripcionTiempoRealViajes?.unsubscribe();
     this.mapaService.setFiltrarMapa({});
   }
 
