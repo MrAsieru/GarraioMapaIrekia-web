@@ -14,6 +14,7 @@ import { NavegacionService } from '../services/navegacion.service';
 })
 export class LateralComponent  implements OnInit {
   @Input() nombre: string = "";
+  @Input() nivel: number = 1;
   // Modal lateral_modal
   @ViewChild(IonModal) lateralModal: IonModal;
   constructor(private route: ActivatedRoute,
@@ -36,7 +37,7 @@ export class LateralComponent  implements OnInit {
 
   cerrar() {
     this.lateralModal?.dismiss();
-    this.navegacionService.navegarA(['../..'], this.route);
+    this.navegacionService.navegarA([Array(this.nivel).fill('..').join('/')], this.route);
   }
 
   ngOnDestroy() {

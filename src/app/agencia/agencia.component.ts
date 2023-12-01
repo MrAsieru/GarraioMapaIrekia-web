@@ -91,7 +91,7 @@ export class AgenciaComponent  implements OnInit {
             this.primeraCarga = false;
 
             let tmpAlertasAgencia = this.tiempoRealService.getInformacionAlertas([agencia.idAgencia.split("_")[0]], selectorEntidadAgencia);
-            console.log(tmpAlertasAgencia);
+            // console.log(tmpAlertasAgencia);
             if (tmpAlertasAgencia) {
               this.alertasTiempoReal = tmpAlertasAgencia; 
             }

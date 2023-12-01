@@ -66,7 +66,7 @@ export class LineaComponent  implements OnInit {
         this.lineasService.getParadasLinea(linea.idLinea).subscribe(paradas => {
           this.lineasService.getPatronesLinea(linea.idLinea).subscribe(patrones => {
             this.patrones = patrones.sort((a, b) => b.numViajes - a.numViajes);
-            console.log(this.patrones);
+            // console.log(this.patrones);
             this.seleccionarPatron(0);
             this.patrones.forEach(patron => {
               patron.paradasObj = patron.paradas.map(idParada => paradas.find(parada => parada.idParada == idParada)!);
@@ -85,9 +85,9 @@ export class LineaComponent  implements OnInit {
         this.suscripcionTiempoReal = this.tiempoRealService.tiempoReal.subscribe((tiempoReal) => {
           if (this.primeraCarga || tiempoReal?.idFeed === linea.idAgencia.split("_")[0]) {
             this.primeraCarga = false;
-            console.log(selectorEntidadLinea);
+            // console.log(selectorEntidadLinea);
             let tmpAlertasLinea = this.tiempoRealService.getInformacionAlertas([linea.idAgencia.split("_")[0]], selectorEntidadLinea);
-            console.log(tmpAlertasLinea);
+            // console.log(tmpAlertasLinea);
             if (tmpAlertasLinea) {
               this.alertasTiempoReal = tmpAlertasLinea; 
             }

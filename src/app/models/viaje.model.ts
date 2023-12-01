@@ -54,3 +54,12 @@ export class FrecuenciasViaje {
     margen: number;
     exacto?: boolean;
 }
+
+export class ViajePropiedadesVectoriales {
+    idAgencia: string;
+    idLinea: string;
+    idViaje: string;
+    proximoOrdenParada: string;
+    idServicio: string = "";
+    bbox: number[] = [];
+}

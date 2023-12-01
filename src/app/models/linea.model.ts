@@ -32,7 +32,7 @@ export class PatronLinea {
     numViajes: number;
 }
 
-export class ShapeVectorProperties {
+export class ShapePropiedadesVectoriales {
     idRecorrido: string;
     idLinea: string;
     idAgencia: string;

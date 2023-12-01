@@ -2,8 +2,8 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { IonicModule, ModalController } from '@ionic/angular';
 import maplibregl, { ExpressionSpecification, FilterSpecification, GeoJSONSource, PointLike } from 'maplibre-gl';
 import { ModalListaLineasParadasComponent } from '../modal-lista-lineasparadas/modal-lista-lineasparadas.component';
-import { ShapeVectorProperties } from 'src/app/models/linea.model';
-import { StopVectorProperties } from 'src/app/models/parada.model';
+import { ShapePropiedadesVectoriales } from 'src/app/models/linea.model';
+import { StopPropiedadesVectoriales } from 'src/app/models/parada.model';
 import { BehaviorSubject, Observable, Subject, Subscription } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { TileService } from '../services/tile.service';
@@ -19,6 +19,7 @@ import { ActivatedRoute, Route, Router, RouterModule } from '@angular/router';
 import { MapaService } from '../services/mapa.service';
 import { AjusteMapa, FiltroMapa, MovimientoMapa } from '../models/mapa.model';
 import { NavegacionService } from '../services/navegacion.service';
+import { ViajePropiedadesVectoriales } from '../models/viaje.model';
 
 @Component({
   selector: 'app-mapa',
@@ -31,7 +32,7 @@ export class MapaComponent implements OnInit, OnDestroy {
     maxzoom: 19,
   }
   map: maplibregl.Map;
-  modalListaLineasParadasDatos: BehaviorSubject<{lineas: ShapeVectorProperties[], paradas: StopVectorProperties[]}> | null;
+  modalListaLineasParadasDatos: BehaviorSubject<{lineas: ShapePropiedadesVectoriales[], paradas: StopPropiedadesVectoriales[], viajes: ViajePropiedadesVectoriales[]}> | null;
   
   // iconos_paradas = [
   //   {id: 'tram', url: 'assets/map/tram.png'},
@@ -121,20 +122,27 @@ export class MapaComponent implements OnInit, OnDestroy {
 
     this.agenciasService.getAgencias().subscribe((agencias) => {
       // Descargar posiciones de este minuto
+      console.log(`${moment().format("HH:mm:ss.SSS")} - Descargar posiciones`)
       this.descargarPosiciones(agencias.map(a => a.idAgencia));
 
       // Descargar proximas posiciones cada minuto en el segundo 30
-      let segundos = moment().seconds();
+      let millisegundos = moment().seconds() * 1000 + moment().milliseconds();
       let timeout: number;
-      if (segundos > 30) {
-        timeout = 60 - segundos;
+      console.log(`${moment().format("HH:mm:ss.SSS")} - ms: ${millisegundos}`)
+      if (millisegundos > 30000) {
+        timeout = 60000 - millisegundos + 30000;
+        console.log(`${moment().format("HH:mm:ss.SSS")} - Timeout: ${timeout}`)
+        console.log(`${moment().format("HH:mm:ss.SSS")} - Descargar posiciones`)
         this.descargarPosiciones(agencias.map(a => a.idAgencia));
       } else {
-        timeout = 30 - segundos;
+        timeout = 30000 - millisegundos;
+        console.log(`${moment().format("HH:mm:ss.SSS")} - Timeout: ${timeout}`)
       }
       setTimeout(() => {
         // Si hace falta sincronizar usar this.cadaMinuto
-        setInterval(() => this.descargarPosiciones(agencias.map(a => a.idAgencia)), 60000);
+        console.log(`${moment().format("HH:mm:ss.SSS")} - SetInterval`)
+        this.descargarPosiciones(agencias.map(a => a.idAgencia));
+        setInterval(() => {console.log(`${moment().format("HH:mm:ss.SSS")} - Intervalo segundo 30`); this.descargarPosiciones(agencias.map(a => a.idAgencia)); console.log(`${moment().format("HH:mm:ss.SSS")} - Vuelta al ciclo`);}, 60000-25); // 25ms: Lo que tarda en volver al ciclo normalmente
       }, timeout)
     });
 
@@ -254,7 +262,7 @@ export class MapaComponent implements OnInit, OnDestroy {
       // Actualizar posiciones en el mapa
       setInterval(() => {
         const posiciones = this.listaPosiciones?.get(moment().milliseconds(0).toISOString());
-        console.log(posiciones)
+        // console.log(posiciones)
         if (posiciones !== undefined) {
           // Actualizar fuente
           (this.map.getSource("posiciones") as GeoJSONSource).setData(posiciones);
@@ -263,25 +271,6 @@ export class MapaComponent implements OnInit, OnDestroy {
 
 
     });
-    // this.map.on('click', (e) => {
-    //   const ne: PointLike = [e.point.x + 10, e.point.y - 10];
-    //   const sw: PointLike = [e.point.x - 10, e.point.y + 10];
-    //   const features = this.map.queryRenderedFeatures([ne, sw]);
-
-    //   var lineas: ShapeVectorProperties[] = [];
-    //   features?.filter(f => f.layer.id.endsWith("_lineas")).map(f => f.properties as ShapeVectorProperties).forEach(f => {
-    //     if (!lineas.some(l => l.route_id === f.route_id)) {
-    //       lineas.push(f);
-    //     }
-    //   });
-    //   var paradas: StopVectorProperties[] = features?.filter(f => f.layer.id.endsWith("_paradas")).map(f => f.properties as StopVectorProperties);
-    //   console.log(lineas)
-    //   console.log(paradas)
-
-    //   if (lineas.length + paradas.length > 0) {
-    //     this.mostrarModal(lineas, paradas)
-    //   }
-    // });
 
     this.map.on('mouseenter', 'paradas', () => {
       this.map.getCanvas().style.cursor = 'pointer';
@@ -294,7 +283,7 @@ export class MapaComponent implements OnInit, OnDestroy {
 
     this.map.on('click', (e) => {
       let features = this.map.queryRenderedFeatures(e.point, { layers: ['posiciones'] });
-      console.log(JSON.stringify(features));
+      // console.log(JSON.stringify(features));
       if (features.length > 0) {
         if (features.length == 1) {
           this.navegarA(['viaje', features[0].properties["idViaje"]]);
@@ -307,6 +296,10 @@ export class MapaComponent implements OnInit, OnDestroy {
               bounds.extend({lon: coordenadas[0], lat: coordenadas[1]});
             });
             this.map.fitBounds(bounds, {padding: 50, maxZoom: this.configuracion.maxzoom});
+          } else {
+            // Mostrar modal
+            let viajes: ViajePropiedadesVectoriales[] = features.map(f => f.properties as ViajePropiedadesVectoriales);
+            this.mostrarModalSeleccion([], [], viajes);            
           }
         }
         return;
@@ -329,13 +322,17 @@ export class MapaComponent implements OnInit, OnDestroy {
               bounds.extend({lon: coordenadas[0], lat: coordenadas[1]});
             });
             this.map.fitBounds(bounds, {padding: 50, maxZoom: this.configuracion.maxzoom});
+          } else {
+            // Mostrar modal
+            let viajes: ViajePropiedadesVectoriales[] = features.map(f => f.properties as ViajePropiedadesVectoriales);
+            this.mostrarModalSeleccion([], [], viajes);            
           }
         }
         return;
       }
 
       features = this.map.queryRenderedFeatures(e.point, { layers: ['paradas'] }).filter((feature) => feature.properties["paradaPadre"] === undefined || feature.properties["paradaPadre"] === "");
-      console.log(JSON.stringify(features));
+      // console.log(JSON.stringify(features));
       if (features.length > 0) {
         if (features.length == 1) {
           this.navegarA(['parada', features[0].properties["idParada"]]);
@@ -355,8 +352,8 @@ export class MapaComponent implements OnInit, OnDestroy {
               this.navegarA(['parada', paradaUnica.values().next().value]);
             } else {
               // Mostrar modal
-              let paradas: StopVectorProperties[] = features.map(f => f.properties as StopVectorProperties);
-              this.mostrarModalSeleccion([], paradas);
+              let paradas: StopPropiedadesVectoriales[] = features.map(f => f.properties as StopPropiedadesVectoriales);
+              this.mostrarModalSeleccion([], paradas, []);
             }
             
           }
@@ -367,13 +364,13 @@ export class MapaComponent implements OnInit, OnDestroy {
       features = this.map.queryRenderedFeatures(e.point, { layers: ['lineas'] });
       if (features.length > 0) {
         const lineas = new Set(features.map(f => f.properties["idLinea"] as string));
-        console.log(lineas);
+        // console.log(lineas);
         if (lineas.size == 1) {
           this.navegarA(['linea', lineas.values().next().value]);
         } else {
           // Mostrar modal
-          let lineas: ShapeVectorProperties[] = features.map(f => f.properties as ShapeVectorProperties).filter((linea, index, self) => self.findIndex(l => l.idLinea === linea.idLinea) === index);
-          this.mostrarModalSeleccion(lineas, []);
+          let lineas: ShapePropiedadesVectoriales[] = features.map(f => f.properties as ShapePropiedadesVectoriales).filter((linea, index, self) => self.findIndex(l => l.idLinea === linea.idLinea) === index);
+          this.mostrarModalSeleccion(lineas, [], []);
         }
         return;
       }
@@ -393,7 +390,7 @@ export class MapaComponent implements OnInit, OnDestroy {
     });
 
     this.suscripcionTiempoReal = this.tiemporealService.tiempoReal.subscribe((tiempoReal) => {
-      console.log(tiempoReal);
+      // console.log(tiempoReal);
       // Añadir posiciones al mapa
       if (tiempoReal !== undefined) {
         let geojson: GeoJSON.FeatureCollection<GeoJSON.Point> = {
@@ -448,9 +445,9 @@ export class MapaComponent implements OnInit, OnDestroy {
     });
   }
 
-  async mostrarModalSeleccion(lineas: ShapeVectorProperties[], paradas: StopVectorProperties[]) {
+  async mostrarModalSeleccion(lineas: ShapePropiedadesVectoriales[], paradas: StopPropiedadesVectoriales[], viajes: ViajePropiedadesVectoriales[]) {
     if (this.modalListaLineasParadasDatos === null) {
-      this.modalListaLineasParadasDatos = new BehaviorSubject<{lineas: ShapeVectorProperties[], paradas: StopVectorProperties[]}>({lineas: lineas, paradas: paradas});
+      this.modalListaLineasParadasDatos = new BehaviorSubject<{lineas: ShapePropiedadesVectoriales[], paradas: StopPropiedadesVectoriales[], viajes: ViajePropiedadesVectoriales[]}>({lineas: lineas, paradas: paradas, viajes: viajes});
       const modal = await this.modalCtrl.create({
         id: 'modal-lista-lineasparadas',
         component: ModalListaLineasParadasComponent,
@@ -466,12 +463,12 @@ export class MapaComponent implements OnInit, OnDestroy {
         this.modalListaLineasParadasDatos = null;
       });
     } else {
-      this.modalListaLineasParadasDatos.next({lineas: [...lineas], paradas: [...paradas]});
+      this.modalListaLineasParadasDatos.next({lineas: [...lineas], paradas: [...paradas], viajes: [...viajes]});
     }
   }
 
   filtrarAgencias(agencias: {idAgencia: string; mostrar: boolean;}[]) {
-    console.log(agencias);
+    // console.log(agencias);
     this.listaAgencias = agencias;
     agencias.forEach((agencia) => {
       // idAgencia_paradas y idAgencia_lineas
@@ -490,7 +487,7 @@ export class MapaComponent implements OnInit, OnDestroy {
   }
 
   filtrarMapa(filtrosMapa: FiltroMapa) {
-    console.log(filtrosMapa);
+    // console.log(filtrosMapa);
     let agencias_lineas_posiciones = null;
     let agencias_paradas: ExpressionSpecification | null = null;
     let lineas = null;
@@ -565,15 +562,18 @@ export class MapaComponent implements OnInit, OnDestroy {
     const inicio = moment()
     let endpoint: Observable<PosicionRespuesta>;
     if (this.listaPosiciones === undefined) {
-      console.log(`Descargar (primero) - ${moment().toISOString()}`)
+      // console.log(`Descargar (primero) - ${moment().toISOString()}`)
+      console.log(`${moment().format("HH:mm:ss.SSS")} - Descargar (primero)`)
       this.listaPosiciones = new Map();
       endpoint = this.posicionesService.getPosicionesActuales(agencias);
     } else {
-      console.log(`Descargar - ${moment().toISOString()}`)
+      // console.log(`Descargar - ${moment().toISOString()}`)
+      console.log(`${moment().format("HH:mm:ss.SSS")} - Descargar (siguiente)`)
       endpoint = this.posicionesService.getPosicionesProximoMinuto(agencias);
     }
 
     endpoint.subscribe((posiciones) => {
+      console.log(`${moment().format("HH:mm:ss.SSS")} - Posiciones descargadas ${posiciones.fecha}`)
       let listaFechas: Array<{fecha: string, features: Array<GeoJSON.Feature<GeoJSON.Point>>}> = [];
       posiciones.agencias.forEach((agencia) => {
         agencia.viajes.forEach((viaje) => {
@@ -603,6 +603,7 @@ export class MapaComponent implements OnInit, OnDestroy {
       });
 
       // Guardar features
+      console.log(`${moment().format("HH:mm:ss.SSS")} - Guardar features`)
       listaFechas.forEach((t) => {
         let geojson: GeoJSON.FeatureCollection<GeoJSON.Point> = {
           'type': 'FeatureCollection',
@@ -611,16 +612,18 @@ export class MapaComponent implements OnInit, OnDestroy {
         this.listaPosiciones?.set(t.fecha, geojson);
       });
 
-      console.log(this.listaPosiciones)
+      // console.log(this.listaPosiciones)
 
       // Eliminar posiciones antiguas
+      console.log(`${moment().format("HH:mm:ss.SSS")} - Eliminar posiciones antiguas`)
       this.listaPosiciones?.forEach((_, fecha) => {
         if (moment(fecha).isBefore(moment(posiciones.fecha).subtract(1, 'minute'))) {
           this.listaPosiciones?.delete(fecha);
         }
       });
 
-      console.log("Descargado en " + moment().diff(inicio, 'milliseconds') + "ms");
+      // console.log("Descargado en " + moment().diff(inicio, 'milliseconds') + "ms");
+      console.log(`${moment().format("HH:mm:ss.SSS")} - Descargado en ${moment().diff(inicio, 'milliseconds')}ms`)
     });
   }
 

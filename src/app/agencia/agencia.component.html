@@ -1,4 +1,4 @@
-<app-lateral nombre="Agencia">
+<app-lateral nombre="Agencia" [nivel]="2">
   <div>
     <ion-card>
       <ion-card-header>
@@ -36,7 +36,7 @@
             </ion-popover>
           </ng-container>
           <ng-container *ngIf="alertasTiempoReal.length > 0">
-            <ion-button id="agencia_alertas" color="warning" (click)="mostrarModalAlertas()">
+            <ion-button color="warning" (click)="mostrarModalAlertas()">
               <ion-icon slot="icon-only" src="assets/img/alerta.svg"></ion-icon>
             </ion-button>
           </ng-container>

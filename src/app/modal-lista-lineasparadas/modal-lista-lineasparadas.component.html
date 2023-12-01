@@ -18,4 +18,14 @@
       <ion-chip [ngStyle]="{'background': l.color, 'color': l.colorTexto}">{{l.nombreAgencia}}</ion-chip>
     </ion-item>
   </ion-list>
+  <ion-list *ngIf="viajes.length > 0">
+    <ion-list-header>
+      <ion-label><b>Viajes</b></ion-label>
+    </ion-list-header>
+    <ion-item *ngFor="let v of viajes" button (click)="mostrarViaje(v, $event)">
+      <ion-chip [ngStyle]="{'background': v.linea?.color, 'color': v.linea?.colorTexto}">{{v.linea?.nombreCorto ?? v.linea?.nombreLargo ?? v.idLinea}}</ion-chip>
+      <ion-text>{{v.letrero}}</ion-text>
+      
+    </ion-item>
+  </ion-list>
 </ion-content>

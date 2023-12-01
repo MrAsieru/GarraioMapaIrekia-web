@@ -31,3 +31,9 @@
     <ion-icon src="assets/icon/linea.svg"></ion-icon>
   </ion-fab-button>
 </ion-fab>
+<ion-fab slot="fixed" vertical="top" horizontal="end">
+  <ion-chip color="primary">
+    <ion-icon src="assets/img/tiemporeal.svg"></ion-icon>
+    <ion-toggle [enableOnOffLabels]="true" [checked]="true" (ionChange)="cambiarTiempoReal($event)"></ion-toggle>
+  </ion-chip>  
+</ion-fab>

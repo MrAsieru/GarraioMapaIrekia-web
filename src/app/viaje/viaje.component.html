@@ -1,4 +1,4 @@
-<app-lateral nombre="Viaje">
+<app-lateral nombre="Viaje" [nivel]="2">
   <div>
     <ion-card>
       <ion-card-header>
@@ -156,7 +156,7 @@
             </ion-popover>
           </ng-container>
           <ng-container *ngIf="alertasTiempoReal.length > 0">
-            <ion-button id="agencia_alertas" color="warning" (click)="mostrarModalAlertas()">
+            <ion-button color="warning" (click)="mostrarModalAlertas()">
               <ion-icon slot="icon-only" src="assets/img/alerta.svg"></ion-icon>
             </ion-button>
           </ng-container>
@@ -175,7 +175,7 @@
                 <ion-text color="success" style="padding-right: 0.2em;">=</ion-text>
               </ng-container>
               <ng-container *ngIf="horario.retrasoTiempoReal < 0">
-                <ion-text color="danger" style="padding-right: 0.2em;"> (-+{{(horario.retrasoTiempoReal % 3600) / 60 | number: '1.0-0'}}m)</ion-text>
+                <ion-text color="danger" style="padding-right: 0.2em;"> (-{{(horario.retrasoTiempoReal % 3600) / 60 | number: '1.0-0'}}m)</ion-text>
               </ng-container>
               <ng-container *ngIf="horario.retrasoTiempoReal > 0">
                 <ion-text color="danger" style="padding-right: 0.2em;"> (+{{(horario.retrasoTiempoReal % 3600) / 60 | number: '1.0-0'}}m)</ion-text>
@@ -186,16 +186,16 @@
             <ion-note>
               <ion-text *ngIf="horario.tiempoRestante && horario.tiempoRestante < 0">hace {{-horario.tiempoRestante}} min </ion-text>
               <ion-text *ngIf="horario.tiempoRestante && horario.tiempoRestante >= 0">en {{horario.tiempoRestante}} min </ion-text>
-              <ion-icon id="parada_exacto_{{horario.orden}}" src="assets/img/exacto_{{horario.exacto ? '1' : '0'}}.svg" (click)="$event.stopPropagation()"></ion-icon>
-              <ion-popover trigger="parada_exacto_{{horario.orden}}" triggerAction="click" showBackdrop="false">
+              <ion-icon id="viaje_exacto_{{horario.orden}}" src="assets/img/exacto_{{horario.exacto ? '1' : '0'}}.svg" (click)="$event.stopPropagation()"></ion-icon>
+              <ion-popover trigger="viaje_exacto_{{horario.orden}}" triggerAction="click" showBackdrop="false">
                 <ng-template>
                   <ion-content *ngIf="horario.exacto === undefined || !horario.exacto" class="ion-padding">Horario aproximado</ion-content>
                   <ion-content *ngIf="horario.exacto" class="ion-padding">Horario exacto</ion-content>
                 </ng-template>
               </ion-popover>
               <ng-container *ngIf="horario.tipoRecogida != 0 || horario.tipoBajada != 0 || horario.recogidaContinua != 1 || horario.bajadaContinua != 1">
-                <ion-icon id="parada_pickup_dropoff_{{horario.orden}}" src="assets/img/pickup_dropoff.svg" (click)="$event.stopPropagation()"></ion-icon>
-                <ion-popover trigger="parada_pickup_dropoff_{{horario.orden}}" triggerAction="click" showBackdrop="false">
+                <ion-icon id="viaje_pickup_dropoff_{{horario.orden}}" src="assets/img/pickup_dropoff.svg" (click)="$event.stopPropagation()"></ion-icon>
+                <ion-popover trigger="viaje_pickup_dropoff_{{horario.orden}}" triggerAction="click" showBackdrop="false">
                   <ng-template>
                     <ion-content>
                       <ng-container *ngIf="horario.tipoRecogida != 0">
@@ -231,8 +231,8 @@
                 </ion-popover>
               </ng-container>
               <ng-container *ngIf="horario.tiempoReal">
-                <ion-icon id="parada_tiemporeal_{{horario.orden}}" src="assets/img/tiemporeal.svg" (click)="$event.stopPropagation()"></ion-icon>
-                <ion-popover trigger="parada_tiemporeal_{{horario.orden}}" triggerAction="click" showBackdrop="false">
+                <ion-icon id="viaje_tiemporeal_{{horario.orden}}" src="assets/img/tiemporeal.svg" (click)="$event.stopPropagation()"></ion-icon>
+                <ion-popover trigger="viaje_tiemporeal_{{horario.orden}}" triggerAction="click" showBackdrop="false">
                   <ng-template>
                     <ion-content>
                       <ng-container *ngIf="horario.tiempoReal.arrival">

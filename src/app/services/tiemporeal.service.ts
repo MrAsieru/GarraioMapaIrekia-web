@@ -15,13 +15,16 @@ export class TiempoRealService {
   private tiempoRealSubject = new BehaviorSubject<{idFeed: string, entidades: transit_realtime.IFeedEntity[]} | undefined>(undefined);
   tiempoReal = this.tiempoRealSubject.asObservable();
 
-  mapaTiempoReal: Map<string, transit_realtime.IFeedEntity[]> = new Map();
+  private mapaTiempoReal: Map<string, transit_realtime.IFeedEntity[]> = new Map();
+
+  private subscripciones: string[] = [];
+  private estado: boolean = true;
 
   constructor() {
     this.socket = new WebSocket(this.baseUrl);
     this.socket.binaryType = 'arraybuffer';
     this.socket.onopen = () => {
-      this.socket.send(JSON.stringify([]))
+      this.socket.send(JSON.stringify(this.subscripciones))
     }
     this.socket.onmessage = (event) => this.guardarTiempoReal(event);
   }
@@ -45,7 +48,7 @@ export class TiempoRealService {
 
     // Conseguir el valor string idFeed segun longitud idFeedLon
     const idFeed = new TextDecoder().decode(data.slice(2, 2 + idFeedLon));
-    console.log(`idFeed: ${idFeed}`);
+    // console.log(`idFeed: ${idFeed}`);
 
     // Conseguir FeedMessage
     const protobuf = data.slice(2 + idFeedLon);
@@ -56,8 +59,22 @@ export class TiempoRealService {
 
   public actualizar_feeds(listaFeeds: string[]) {
     if (this.socket.readyState === WebSocket.OPEN) {
+      this.subscripciones = listaFeeds;
       this.socket.send(JSON.stringify(listaFeeds));
     }
+  }
+
+  public setEstadoTiempoReal(estado: boolean): boolean {
+    if (this.socket.readyState === WebSocket.OPEN && estado !== this.estado) {
+      this.estado = estado;
+      if (estado) {
+        this.socket.send(JSON.stringify(this.subscripciones));
+      } else {
+        this.socket.send(JSON.stringify([]));
+      }
+    }
+
+    return this.estado;
   }
 
   public getInformacionVehiculoViaje(idFeed: string, descriptorViaje: transit_realtime.ITripDescriptor): transit_realtime.IVehiclePosition | undefined {
@@ -72,7 +89,7 @@ export class TiempoRealService {
     if (descriptorViaje.routeId) {
       descriptorViaje.routeId = descriptorViaje.routeId.split(/_(.*)/s)[1];
     }
-    console.log(descriptorViaje)
+    // console.log(descriptorViaje)
 
     const busqueda = entidades.filter(entidad => {
       if (entidad.vehicle?.trip) {
@@ -100,7 +117,7 @@ export class TiempoRealService {
     if (descriptorViaje.routeId) {
       descriptorViaje.routeId = descriptorViaje.routeId.split(/_(.*)/s)[1];
     }
-    console.log(descriptorViaje)
+    // console.log(descriptorViaje)
 
     const busqueda = entidades.filter(entidad => {
       if (entidad.tripUpdate?.trip) {
@@ -117,8 +134,8 @@ export class TiempoRealService {
   }
 
   public getInformacionAlertas(idFeeds: Array<string>, selectorEntidad: transit_realtime.IEntitySelector): Array<transit_realtime.IAlert> | undefined {
-    console.log(this.mapaTiempoReal)
-    console.log(idFeeds)
+    // console.log(this.mapaTiempoReal)
+    // console.log(idFeeds)
     // Get entidades from idFeeds as keys of mapaTiempoReal
     let entidades: transit_realtime.IFeedEntity[] | undefined = [];
     idFeeds.forEach(idFeed => {
@@ -148,7 +165,7 @@ export class TiempoRealService {
       selectorEntidad.stopId = selectorEntidad.stopId.split(/_(.*)/s)[1];
     }
     
-    console.log(selectorEntidad)
+    // console.log(selectorEntidad)
 
     const busqueda = entidades.filter(entidad => {
       if (!entidad.alert || !entidad.alert.informedEntity) return false;
@@ -159,7 +176,7 @@ export class TiempoRealService {
       });
     });
 
-    console.log(busqueda)
+    // console.log(busqueda)
     return busqueda.map(entidad => entidad.alert!);
   }
 

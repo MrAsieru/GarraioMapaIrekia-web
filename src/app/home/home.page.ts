@@ -1,5 +1,5 @@
 import { Component, ElementRef, EventEmitter, OnInit, Output, ViewChild } from '@angular/core';
-import { CheckboxChangeEventDetail, IonCheckbox, IonicModule, MenuController } from '@ionic/angular';
+import { CheckboxChangeEventDetail, IonCheckbox, IonicModule, MenuController, ToggleChangeEventDetail, ToggleCustomEvent } from '@ionic/angular';
 import { MapaComponent } from '../mapa/mapa.component';
 import { AgencyRoutes } from '../models/agencia.model';
 import { CommonModule } from '@angular/common';
@@ -8,6 +8,7 @@ import { AgenciasService } from '../services/agencias.service';
 import { ActivatedRoute, Router, RouterModule} from '@angular/router'
 import { MapaService } from '../services/mapa.service';
 import { NavegacionService } from '../services/navegacion.service';
+import { TiempoRealService } from '../services/tiemporeal.service';
 
 @Component({
   selector: 'app-home',
@@ -25,7 +26,8 @@ export class HomePage implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private mapaService: MapaService,
-    private navegacionService: NavegacionService) {}
+    private navegacionService: NavegacionService,
+    private tiempoReal: TiempoRealService) {}
 
   listaAgenciasLineas: AgencyRoutes[] = [];
 
@@ -46,19 +48,19 @@ export class HomePage implements OnInit {
 
   agenciaCheckboxClick(event: Event, details: CheckboxChangeEventDetail<string>) {
     event.stopPropagation();
-    console.log(details);
+    // console.log(details);
     let index = this.listaAgenciasLineas.findIndex(agencia => agencia.idAgencia === details.value);
     this.listaAgenciasLineas[index].mostrar = details.checked;
     if (this.listaAgenciasLineas.every(agencia => agencia.mostrar)) {
-      console.log("Todos true");
+      // console.log("Todos true");
       this.agenciasCheckboxChecked = true;
       this.agenciasCheckboxIndeterminate = false;
     } else if (this.listaAgenciasLineas.every(agencia => !agencia.mostrar)) {
-      console.log("Todos false");
+      // console.log("Todos false");
       this.agenciasCheckboxChecked = false;
       this.agenciasCheckboxIndeterminate = false;
     } else {
-      console.log("Algunos true y otros false");
+      // console.log("Algunos true y otros false");
       this.agenciasCheckboxChecked = false;
       this.agenciasCheckboxIndeterminate = true;
     }
@@ -71,7 +73,7 @@ export class HomePage implements OnInit {
 
   agenciaTodosCheckboxClick(event: Event, details: CheckboxChangeEventDetail<string>) {
     event.stopPropagation();
-    console.log(details);
+    // console.log(details);
     this.listaAgenciasLineas.forEach(agencia => agencia.mostrar = details.checked);    
 
     // Enviar datos al mapa
@@ -82,7 +84,12 @@ export class HomePage implements OnInit {
 
   mostrarLinea(event: Event, linea: Linea) {
     event.stopPropagation();
-    console.log("Mostrar linea: ", linea);
+    // console.log("Mostrar linea: ", linea);
 
+  }
+
+  cambiarTiempoReal(event: ToggleCustomEvent) {
+    event.stopPropagation();
+    event.target.checked = this.tiempoReal.setEstadoTiempoReal(event.detail.checked);
   }
 }

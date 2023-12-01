@@ -137,7 +137,7 @@ export class ViajeComponent  implements OnInit {
           this.calendario.fechas.sort((a, b) => a.date.localeCompare(b.date));
           this.calendario.fechaMin = this.calendario.fechas[0].date;
           this.calendario.fechaMax = this.calendario.fechas[viaje.fechas.length - 1].date;
-          console.log(this.calendario);
+          // console.log(this.calendario);
         }
 
         this.actualizarTiempos();
@@ -180,7 +180,7 @@ export class ViajeComponent  implements OnInit {
 
   actualizarPosicion() {
     if (this.vehiculoTiempoReal?.currentStopSequence && this.vehiculoTiempoReal?.currentStopSequence >= 0) {
-      console.log(`orden: ${this.vehiculoTiempoReal?.currentStopSequence}`)
+      // console.log(`orden: ${this.vehiculoTiempoReal?.currentStopSequence}`)
 
       this.viaje?.horarios?.forEach(horario => {
         if (horario.orden < this.vehiculoTiempoReal?.currentStopSequence!) {
@@ -194,10 +194,10 @@ export class ViajeComponent  implements OnInit {
     } else if (this.viaje?.horarios) {
       const ahora = moment();
       let orden = -1;
-      console.log(this.viaje.horarios)
-      console.log(ahora)
+      // console.log(this.viaje.horarios)
+      // console.log(ahora)
       for (let i = 0; i < this.viaje.horarios.length; i++) {
-        console.log(i)
+        // console.log(i)
         const horarioAnterior: HorarioViaje | undefined = (i > 0) ? this.viaje.horarios[i-1] : undefined;
         const horario: HorarioViaje = this.viaje.horarios[i];
 
@@ -221,7 +221,7 @@ export class ViajeComponent  implements OnInit {
         else orden = this.viaje.horarios[this.viaje.horarios.length - 1].orden;
       }
 
-      console.log(`orden: ${orden}`)
+      // console.log(`orden: ${orden}`)
 
       this.viaje.horarios?.forEach(horario => {
         if (horario.orden < orden) {
@@ -241,7 +241,7 @@ export class ViajeComponent  implements OnInit {
       routeId: this.viaje!.idLinea,
       directionId: this.viaje!.direccion
     });  
-    console.log(tmpVehiculo)
+    // console.log(tmpVehiculo)
     if (tmpVehiculo) {
       this.vehiculoTiempoReal = tmpVehiculo;
       this.momentoActualizacion = moment();
@@ -261,7 +261,7 @@ export class ViajeComponent  implements OnInit {
       routeId: this.viaje!.idLinea,
       directionId: this.viaje!.direccion
     });  
-    console.log(tmpViaje)
+    // console.log(tmpViaje)
     if (tmpViaje) {
       this.viajeTiempoReal = tmpViaje;
       this.momentoActualizacion = moment();
@@ -293,7 +293,7 @@ export class ViajeComponent  implements OnInit {
               if (horario.retrasoLlegadaTiempoReal && horario.retrasoSalidaTiempoReal) {
                 horario.retrasoTiempoReal = Math.max(horario.retrasoLlegadaTiempoReal, horario.retrasoSalidaTiempoReal);
               }
-              console.log(horario)
+              // console.log(horario)
             }
           });
         });
@@ -307,7 +307,7 @@ export class ViajeComponent  implements OnInit {
         directionId: this.viaje!.direccion
       }
     });
-    console.log(tmpAlertasLinea);
+    // console.log(tmpAlertasLinea);
     if (tmpAlertasLinea) {
       this.alertasTiempoReal = tmpAlertasLinea; 
     }
