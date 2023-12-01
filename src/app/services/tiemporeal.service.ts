@@ -9,7 +9,7 @@ import { transit_realtime } from 'gtfs-realtime-bindings';
 })
 
 export class TiempoRealService {
-  public baseUrl: string = environment.websocketBaseUrl+"/tiempoReal";
+  public baseUrl: string = environment.websocketBaseUrl+"/tiempoReal/";
   private socket: WebSocket;
 
   private tiempoRealSubject = new BehaviorSubject<{idFeed: string, entidades: transit_realtime.IFeedEntity[]} | undefined>(undefined);

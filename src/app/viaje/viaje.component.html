@@ -238,7 +238,7 @@
                       <ng-container *ngIf="horario.tiempoReal.arrival">
                         <ion-text style="font-weight: bold;">Llegada: </ion-text>
                         <ng-container *ngIf="horario.momentoLlegadaTiempoReal">
-                          <ion-text>{{horario.momentoLlegadaTiempoReal | dateFormat:'h:mm'}}</ion-text>
+                          <ion-text>{{horario.momentoLlegadaTiempoReal | dateFormat:'H:mm'}}</ion-text>
                         </ng-container>
                         <ng-container *ngIf="horario.retrasoLlegadaTiempoReal! < 0">
                           <ion-text color="danger" style="padding-right: 1em;"> ({{(-horario.retrasoLlegadaTiempoReal! / 3600) - (( -horario.retrasoLlegadaTiempoReal! % 3600 ) / 3600)}}h {{(-horario.retrasoLlegadaTiempoReal! % 3600) / 60 | number: '1.0-0'}}m antes)</ion-text>
@@ -251,7 +251,7 @@
                       <ng-container *ngIf="horario.tiempoReal.departure">
                         <ion-text style="font-weight: bold;">Salida: </ion-text>
                         <ng-container *ngIf="horario.momentoSalidaTiempoReal">
-                          <ion-text>{{horario.momentoSalidaTiempoReal | dateFormat:'h:mm'}}</ion-text>
+                          <ion-text>{{horario.momentoSalidaTiempoReal | dateFormat:'H:mm'}}</ion-text>
                         </ng-container>
                         <ng-container *ngIf="horario.retrasoSalidaTiempoReal! < 0">
                           <ion-text color="danger" style="padding-right: 1em;"> ({{(-horario.retrasoSalidaTiempoReal! / 3600) - (( -horario.retrasoSalidaTiempoReal! % 3600 ) / 3600)}}h {{(-horario.retrasoSalidaTiempoReal! % 3600) / 60 | number: '1.0-0'}}m antes)</ion-text>

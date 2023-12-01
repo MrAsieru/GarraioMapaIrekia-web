@@ -4,8 +4,8 @@
 
 export const environment = {
   production: false,
-  apiBaseUrl: 'http://localhost:8000',
-  websocketBaseUrl: 'ws://localhost:8000',
+  apiBaseUrl: 'http://localhost:8000/api',
+  websocketBaseUrl: 'ws://localhost:8000/ws',
   tilesUrl: 'http://tile.mrasieru.live'
 };
 

@@ -1,6 +1,6 @@
 export const environment = {
   production: true,
-  apiBaseUrl: "http://api.mrasieru.live",
-  websocketBaseUrl: 'ws://api.mrasieru.live',
+  apiBaseUrl: "http://api.mrasieru.live/api",
+  websocketBaseUrl: 'ws://api.mrasieru.live/ws',
   tilesUrl: 'http://tile.mrasieru.live'
 };
