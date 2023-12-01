@@ -38,7 +38,7 @@ export class HomePage implements OnInit {
     let agenciasSubscribe = this.mapaService.listaAgencias.subscribe((agencias) => {
       if (agencias.length > 0) {
         console.log(agencias);
-        this.listaAgencias = agencias.map(agencia => ({ ...agencia, mostrar: true }));
+        this.listaAgencias = agencias.map(agencia => ({ ...agencia, mostrar: true })).sort((a, b) => a.nombre.localeCompare(b.nombre));
         this.listaAgenciasBusqueda = this.listaAgencias;
         agenciasSubscribe.unsubscribe();
       }      

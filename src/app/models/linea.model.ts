@@ -39,6 +39,7 @@ export class ShapePropiedadesVectoriales {
     nombreAgencia: string;
     nombreLargo?: string;
     nombreCorto?: string;
+    orden?: number;
     tipo?: number;
     color?: string;
     colorTexto?: string;

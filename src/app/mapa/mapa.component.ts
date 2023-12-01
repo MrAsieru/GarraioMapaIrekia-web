@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { IonicModule, ModalController } from '@ionic/angular';
 import maplibregl, { ExpressionSpecification, FilterSpecification, GeoJSONSource, PointLike } from 'maplibre-gl';
-import { ModalListaLineasParadasComponent } from '../modal-lista-lineasparadas/modal-lista-lineasparadas.component';
+import { ModalListaElementosComponent } from '../modal-lista-elementos/modal-lista-elementos.component';
 import { ShapePropiedadesVectoriales } from 'src/app/models/linea.model';
 import { StopPropiedadesVectoriales } from 'src/app/models/parada.model';
 import { BehaviorSubject, Observable, Subject, Subscription, first } from 'rxjs';
@@ -32,7 +32,7 @@ export class MapaComponent implements OnInit, OnDestroy {
     maxzoom: 19,
   }
   map: maplibregl.Map;
-  modalListaLineasParadasDatos: BehaviorSubject<{lineas: ShapePropiedadesVectoriales[], paradas: StopPropiedadesVectoriales[], viajes: ViajePropiedadesVectoriales[]}> | null;
+  modalListaElementosDatos: BehaviorSubject<{lineas: ShapePropiedadesVectoriales[], paradas: StopPropiedadesVectoriales[], viajes: ViajePropiedadesVectoriales[]}> | null;
   
   // iconos_paradas = [
   //   {id: 'tram', url: 'assets/map/tram.png'},
@@ -91,7 +91,7 @@ export class MapaComponent implements OnInit, OnDestroy {
     private navegacionService: NavegacionService) {}
 
   ngOnInit() {
-    this.modalListaLineasParadasDatos = null;
+    this.modalListaElementosDatos = null;
 
     // Mapa base
     this.map = new maplibregl.Map({
@@ -103,7 +103,7 @@ export class MapaComponent implements OnInit, OnDestroy {
             "type": "raster",
             "tiles": ["https://a.tile.openstreetmap.org/{z}/{x}/{y}.png"],
             "tileSize": 256,
-            "attribution": "&copy; OpenStreetMap Contributors",
+            "attribution": "&copy; Colaboradores de OpenStreetMap",
             "maxzoom": this.configuracion.maxzoom
           }
         },
@@ -288,8 +288,41 @@ export class MapaComponent implements OnInit, OnDestroy {
     });
 
     this.map.on('click', (e) => {
-      let features = this.map.queryRenderedFeatures(e.point, { layers: ['posiciones'] });
-      // console.log(JSON.stringify(features));
+      const ne: PointLike = [e.point.x + 10, e.point.y - 10];
+      const sw: PointLike = [e.point.x - 10, e.point.y + 10];
+      console.log(`Click: ${JSON.stringify(ne)}, ${JSON.stringify(sw)}`);
+
+      const neCoords = this.map.unproject(ne);
+      const swCoords = this.map.unproject(sw);
+
+      // Insert rectangle into the map
+      this.map.addLayer({
+        'id': `rectangle-${moment().format("HH:mm:ss.SSS")}`,
+        'type': 'line',
+        'source': {
+          'type': 'geojson',
+          'data': {
+            'type': 'Feature',
+            'geometry': {
+              'type': 'LineString',
+              'coordinates': [
+                [swCoords.lng, neCoords.lat], // top left
+                [neCoords.lng, neCoords.lat], // top right
+                [neCoords.lng, swCoords.lat], // bottom right
+                [swCoords.lng, swCoords.lat], // bottom left
+                [swCoords.lng, neCoords.lat]  // back to top left
+              ]
+            }
+          }
+        },
+        'paint': {
+          'line-color': '#0000FF',
+          'line-width': 1,
+        }
+      });
+
+      let features = this.map.queryRenderedFeatures([ne, sw], { layers: ['posiciones'] });
+      console.log(JSON.stringify(features));
       if (features.length > 0) {
         if (features.length == 1) {
           this.navegarA(['viaje', features[0].properties["idViaje"]]);
@@ -311,7 +344,8 @@ export class MapaComponent implements OnInit, OnDestroy {
         return;
       }
 
-      features = this.map.queryRenderedFeatures(e.point, { layers: ['posiciones_tr'] });
+      features = this.map.queryRenderedFeatures([ne, sw], { layers: ['posiciones_tr'] });
+      console.log(JSON.stringify(features));
       if (features.length > 0) {
         if (features.length == 1) {
           if (features[0].properties["idViaje"]) {
@@ -337,7 +371,8 @@ export class MapaComponent implements OnInit, OnDestroy {
         return;
       }
 
-      features = this.map.queryRenderedFeatures(e.point, { layers: ['paradas'] }).filter((feature) => feature.properties["paradaPadre"] === undefined || feature.properties["paradaPadre"] === "");
+      features = this.map.queryRenderedFeatures([ne, sw], { layers: ['paradas'] }).filter((feature) => feature.properties["paradaPadre"] === undefined || feature.properties["paradaPadre"] === "");
+      console.log(JSON.stringify(features));
       // console.log(JSON.stringify(features));
       if (features.length > 0) {
         if (features.length == 1) {
@@ -367,7 +402,8 @@ export class MapaComponent implements OnInit, OnDestroy {
         return;
       }
 
-      features = this.map.queryRenderedFeatures(e.point, { layers: ['lineas'] });
+      features = this.map.queryRenderedFeatures([ne, sw], { layers: ['lineas'] });
+      console.log(JSON.stringify(features));
       if (features.length > 0) {
         const lineas = new Set(features.map(f => f.properties["idLinea"] as string));
         // console.log(lineas);
@@ -460,24 +496,24 @@ export class MapaComponent implements OnInit, OnDestroy {
   }
 
   async mostrarModalSeleccion(lineas: ShapePropiedadesVectoriales[], paradas: StopPropiedadesVectoriales[], viajes: ViajePropiedadesVectoriales[]) {
-    if (this.modalListaLineasParadasDatos === null) {
-      this.modalListaLineasParadasDatos = new BehaviorSubject<{lineas: ShapePropiedadesVectoriales[], paradas: StopPropiedadesVectoriales[], viajes: ViajePropiedadesVectoriales[]}>({lineas: lineas, paradas: paradas, viajes: viajes});
+    if (this.modalListaElementosDatos === null) {
+      this.modalListaElementosDatos = new BehaviorSubject<{lineas: ShapePropiedadesVectoriales[], paradas: StopPropiedadesVectoriales[], viajes: ViajePropiedadesVectoriales[]}>({lineas: lineas, paradas: paradas, viajes: viajes});
       const modal = await this.modalCtrl.create({
-        id: 'modal-lista-lineasparadas',
-        component: ModalListaLineasParadasComponent,
+        id: 'modal-lista-elementos',
+        component: ModalListaElementosComponent,
         mode: 'md',
         initialBreakpoint: 0.25,
         backdropDismiss: true,
         backdropBreakpoint: 0.5,
         breakpoints: [0, 0.25, 0.5, 0.75, 1],
-        componentProps: { route: this.route, datos: this.modalListaLineasParadasDatos.asObservable() }
+        componentProps: { route: this.route, datos: this.modalListaElementosDatos.asObservable() }
       });
       modal.present();
       modal.onDidDismiss().then(() => {
-        this.modalListaLineasParadasDatos = null;
+        this.modalListaElementosDatos = null;
       });
     } else {
-      this.modalListaLineasParadasDatos.next({lineas: [...lineas], paradas: [...paradas], viajes: [...viajes]});
+      this.modalListaElementosDatos.next({lineas: [...lineas], paradas: [...paradas], viajes: [...viajes]});
     }
   }
 

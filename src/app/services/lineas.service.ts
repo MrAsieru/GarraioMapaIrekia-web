@@ -13,12 +13,12 @@ export class LineasService {
 
   constructor(private http: HttpClient) { }
 
-  getLineas(): Observable<Linea[]> {
-    return this.http.get<Linea[]>(this.baseUrl);
-  }
-
-  getLinea(id: string): Observable<Linea> {
-    return this.http.get<Linea>(this.baseUrl+id);
+  getLinea(id: string, parametros?: {
+    incluirViajes?: boolean,
+    incluirPatrones?: boolean,
+    incluirParadas?: boolean
+  }): Observable<Linea> {
+    return this.http.get<Linea>(this.baseUrl+id, {params: parametros});
   }
 
   getParadasLinea(id: string): Observable<Parada[]> {

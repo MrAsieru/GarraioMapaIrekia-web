@@ -13,12 +13,12 @@ import { Viaje, ViajePropiedadesVectoriales } from '../models/viaje.model';
 import { ViajesService } from '../services/viajes.service';
 
 @Component({
-  selector: 'app-modal-lista-lineasparadas',
-  templateUrl: './modal-lista-lineasparadas.component.html',
+  selector: 'app-modal-lista-elementos',
+  templateUrl: './modal-lista-elementos.component.html',
   standalone: true,
   imports: [IonicModule, CommonModule],
 })
-export class ModalListaLineasParadasComponent implements OnInit {
+export class ModalListaElementosComponent implements OnInit {
   @Input("route") route: ActivatedRoute;
   @Input("datos") datos: Observable<{lineas: ShapePropiedadesVectoriales[], paradas: StopPropiedadesVectoriales[], viajes: ViajePropiedadesVectoriales[]}>;
   lineas: ShapePropiedadesVectoriales[] = [];
@@ -34,7 +34,7 @@ export class ModalListaLineasParadasComponent implements OnInit {
     // console.log("INIT");
     this.datos.subscribe((data) => {
       // console.log(data);
-      this.lineas = data.lineas;
+      this.lineas = data.lineas.sort((a, b) => (a.orden ?? 0) - (b.orden ?? 0));
       this.paradas = data.paradas;
       this.viajes = data.viajes;
 
@@ -104,7 +104,11 @@ export class ModalListaLineasParadasComponent implements OnInit {
 
   navegarA(ruta: string[]) {
     console.log(this.route.toString())
-    this.modalCtrl.dismiss(undefined, undefined, 'modal-lista-lineasparadas');    
+    this.modalCtrl.dismiss(undefined, undefined, 'modal-lista-elementos');    
     this.navegacionService.navegarA(ruta, this.route);
+  }
+
+  cerrar() {
+    this.modalCtrl.dismiss(undefined, undefined, 'modal-lista-elementos');
   }
 }
