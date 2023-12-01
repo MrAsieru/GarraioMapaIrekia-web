@@ -103,6 +103,7 @@ export class ModalListaLineasParadasComponent implements OnInit {
   }
 
   navegarA(ruta: string[]) {
+    console.log(this.route.toString())
     this.modalCtrl.dismiss(undefined, undefined, 'modal-lista-lineasparadas');    
     this.navegacionService.navegarA(ruta, this.route);
   }

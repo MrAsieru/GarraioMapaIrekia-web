@@ -1,7 +1,7 @@
 import { Component, ElementRef, EventEmitter, OnInit, Output, ViewChild } from '@angular/core';
-import { CheckboxChangeEventDetail, IonCheckbox, IonicModule, MenuController, ToggleChangeEventDetail, ToggleCustomEvent } from '@ionic/angular';
+import { CheckboxChangeEventDetail, InputChangeEventDetail, IonCheckbox, IonicModule, MenuController, ToggleChangeEventDetail, ToggleCustomEvent } from '@ionic/angular';
 import { MapaComponent } from '../mapa/mapa.component';
-import { AgencyRoutes } from '../models/agencia.model';
+import { Agencia, AgencyRoutes } from '../models/agencia.model';
 import { CommonModule } from '@angular/common';
 import { Linea } from '../models/linea.model';
 import { AgenciasService } from '../services/agencias.service';
@@ -18,23 +18,30 @@ import { TiempoRealService } from '../services/tiemporeal.service';
 })
 export class HomePage implements OnInit {  
   @ViewChild('chkbox_home_menu_agencias', { read: ElementRef }) agenciasCheckbox: IonCheckbox;
+
+  listaAgencias: Array<Agencia & {mostrar: boolean}> = [];
+  listaAgenciasBusqueda: Array<Agencia & {mostrar: boolean}> = [];
   agenciasCheckboxChecked: boolean = true;
   agenciasCheckboxIndeterminate: boolean = false;
 
   constructor(private menuCtrl: MenuController,
-    private agenciesService: AgenciasService,
+    private agenciasService: AgenciasService,
     private route: ActivatedRoute,
     private router: Router,
     private mapaService: MapaService,
     private navegacionService: NavegacionService,
-    private tiempoReal: TiempoRealService) {}
-
-  listaAgenciasLineas: AgencyRoutes[] = [];
+    private tiempoReal: TiempoRealService) {
+      this.listaAgenciasBusqueda = this.listaAgencias.map(agencia => ({ ...agencia, mostrar: true }));
+  }
 
   ngOnInit() {
-    this.agenciesService.getAgenciasConLineas().subscribe((agencies) => {
-      this.listaAgenciasLineas = agencies;
-      this.listaAgenciasLineas.forEach(agencia => agencia.mostrar = true);
+    let agenciasSubscribe = this.mapaService.listaAgencias.subscribe((agencias) => {
+      if (agencias.length > 0) {
+        console.log(agencias);
+        this.listaAgencias = agencias.map(agencia => ({ ...agencia, mostrar: true }));
+        this.listaAgenciasBusqueda = this.listaAgencias;
+        agenciasSubscribe.unsubscribe();
+      }      
     });
   }
 
@@ -43,19 +50,20 @@ export class HomePage implements OnInit {
   }
 
   navegarA(ruta: string[]) {
+    console.log(this.route.toString())
     this.navegacionService.navegarA(ruta, this.route);
   }
 
   agenciaCheckboxClick(event: Event, details: CheckboxChangeEventDetail<string>) {
     event.stopPropagation();
     // console.log(details);
-    let index = this.listaAgenciasLineas.findIndex(agencia => agencia.idAgencia === details.value);
-    this.listaAgenciasLineas[index].mostrar = details.checked;
-    if (this.listaAgenciasLineas.every(agencia => agencia.mostrar)) {
+    let index = this.listaAgencias.findIndex(agencia => agencia.idAgencia === details.value);
+    this.listaAgencias[index].mostrar = details.checked;
+    if (this.listaAgencias.every(agencia => agencia.mostrar)) {
       // console.log("Todos true");
       this.agenciasCheckboxChecked = true;
       this.agenciasCheckboxIndeterminate = false;
-    } else if (this.listaAgenciasLineas.every(agencia => !agencia.mostrar)) {
+    } else if (this.listaAgencias.every(agencia => !agencia.mostrar)) {
       // console.log("Todos false");
       this.agenciasCheckboxChecked = false;
       this.agenciasCheckboxIndeterminate = false;
@@ -66,26 +74,24 @@ export class HomePage implements OnInit {
     }
 
     // Enviar datos al mapa
-    this.mapaService.setFiltrarMapa({
-      agencias: this.listaAgenciasLineas.filter(agencia => agencia.mostrar).map(agencia => agencia.idAgencia)
-    });
+    this.mapaService.setAgenciasVisibles(this.listaAgencias.filter(agencia => agencia.mostrar).map(agencia => agencia.idAgencia));
   }
 
   agenciaTodosCheckboxClick(event: Event, details: CheckboxChangeEventDetail<string>) {
-    event.stopPropagation();
     // console.log(details);
-    this.listaAgenciasLineas.forEach(agencia => agencia.mostrar = details.checked);    
+    this.listaAgencias.forEach(agencia => agencia.mostrar = details.checked);    
 
     // Enviar datos al mapa
-    this.mapaService.setFiltrarMapa({
-      agencias: this.listaAgenciasLineas.filter(agencia => agencia.mostrar).map(agencia => agencia.idAgencia)
-    });
+    this.mapaService.setAgenciasVisibles(this.listaAgencias.filter(agencia => agencia.mostrar).map(agencia => agencia.idAgencia));
   }
 
-  mostrarLinea(event: Event, linea: Linea) {
-    event.stopPropagation();
-    // console.log("Mostrar linea: ", linea);
-
+  buscarAgencias(event: InputChangeEventDetail) {
+    if (event.value && event.value.trim() !== '') {
+      console.log(`Busqueda: '${event.value}'`)
+      this.listaAgenciasBusqueda = this.listaAgencias.filter(agencia => agencia.nombre.toLowerCase().includes(event.value!.toLowerCase()));
+    } else {
+      this.listaAgenciasBusqueda = this.listaAgencias;
+    }
   }
 
   cambiarTiempoReal(event: ToggleCustomEvent) {

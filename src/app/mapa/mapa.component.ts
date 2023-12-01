@@ -4,7 +4,7 @@ import maplibregl, { ExpressionSpecification, FilterSpecification, GeoJSONSource
 import { ModalListaLineasParadasComponent } from '../modal-lista-lineasparadas/modal-lista-lineasparadas.component';
 import { ShapePropiedadesVectoriales } from 'src/app/models/linea.model';
 import { StopPropiedadesVectoriales } from 'src/app/models/parada.model';
-import { BehaviorSubject, Observable, Subject, Subscription } from 'rxjs';
+import { BehaviorSubject, Observable, Subject, Subscription, first } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { TileService } from '../services/tile.service';
 import { Catalog, TileSet } from '../models/tileset.model';
@@ -74,7 +74,8 @@ export class MapaComponent implements OnInit, OnDestroy {
 
   suscripcionTiempoReal: Subscription | undefined;
 
-  private listaAgencias: {idAgencia: string; mostrar: boolean;}[] = [];
+  private listaAgencias: string[] = [];
+  private listaAgenciasVisibles: string[] = [];
   private listaFeedTiempoReal: string[] = [];
   private listaFeaturesTiempoReal: Map<string, Array<GeoJSON.Feature<GeoJSON.Point>>> = new Map();
 
@@ -243,6 +244,11 @@ export class MapaComponent implements OnInit, OnDestroy {
               'icon-size': 0.5,
               'icon-anchor': 'bottom'
             }
+          });
+
+          this.mapaService.getAgenciasVisibles().subscribe((agencias) => {
+            console.log(`getAgenciasVisibles(${agencias})`)
+            this.filtrarAgencias(agencias);
           });
 
           this.mapaService.getFiltrosMapa().subscribe((filtros) => {
@@ -443,6 +449,14 @@ export class MapaComponent implements OnInit, OnDestroy {
         (this.map.getSource("posiciones_tr") as GeoJSONSource)?.setData(geojson);
       }
     });
+
+    // Obtener lista de agencias
+    this.mapaService.listaAgencias.subscribe((agencias) => {
+      if (agencias.length > 0) {
+        this.listaAgencias = agencias.map(a => a.idAgencia);
+        this.listaAgenciasVisibles = this.listaAgencias;
+      }      
+    });
   }
 
   async mostrarModalSeleccion(lineas: ShapePropiedadesVectoriales[], paradas: StopPropiedadesVectoriales[], viajes: ViajePropiedadesVectoriales[]) {
@@ -467,29 +481,18 @@ export class MapaComponent implements OnInit, OnDestroy {
     }
   }
 
-  filtrarAgencias(agencias: {idAgencia: string; mostrar: boolean;}[]) {
-    // console.log(agencias);
-    this.listaAgencias = agencias;
-    agencias.forEach((agencia) => {
-      // idAgencia_paradas y idAgencia_lineas
-      this.map.getStyle().layers?.filter((layer) => layer.id.startsWith(agencia.idAgencia)).forEach((layer) => {
-        this.map.setLayoutProperty(layer.id, 'visibility', agencia.mostrar ? 'visible' : 'none');
-      });
-    });
+  filtrarAgencias(agencias: string[]) {
+    console.log(`filtrarAgencias(${agencias})`);
+    this.listaAgenciasVisibles = agencias;
 
-    // idFeed_posiciones_tr
-    // [... new Set(agencias.map(a => a.idAgencia.split("_")[0]))].forEach((feed) => {
-    //   this.map.setLayoutProperty(`${feed}_posiciones_tr`, 'visibility', agencias.filter(a => a.idAgencia.split("_")[0] == feed).every(a => !a.mostrar) ? 'none' : 'visible');
-    // });
-
-    // Actualizar suscripciones feeds tiempo real
-    this.tiemporealService.actualizar_feeds([... new Set(agencias.filter(a => a.mostrar).map(a => a.idAgencia.split("_")[0]).filter((feed) => this.listaFeedTiempoReal.includes(feed)))]);
+    this.filtrarMapa({});
   }
 
   filtrarMapa(filtrosMapa: FiltroMapa) {
     // console.log(filtrosMapa);
     let agencias_lineas_posiciones = null;
     let agencias_paradas: ExpressionSpecification | null = null;
+    let feeds_posiciones: FilterSpecification | null = null;
     let lineas = null;
     let paradas = null;
     let viajes = null;
@@ -498,7 +501,16 @@ export class MapaComponent implements OnInit, OnDestroy {
     if (filtrosMapa.agencias) {
       agencias_lineas_posiciones = ['in', 'idAgencia', ...filtrosMapa.agencias!] as FilterSpecification;
       agencias_paradas = ['any', ...filtrosMapa.agencias.map((agencia) => ['in', agencia, ['get', 'agencias']] as ExpressionSpecification)];  
+      feeds_posiciones= ['in', 'idFeed', ...filtrosMapa.agencias.map((agencia) => agencia.split(/_(.*)/s)[0])];
     } else {
+      console.trace()
+      console.log(this.listaAgencias)
+      console.log(this.listaAgenciasVisibles)
+      if (!filtrosMapa.lineas && !filtrosMapa.paradas && !filtrosMapa.recorridos && !filtrosMapa.viajes && this.listaAgencias.length - this.listaAgenciasVisibles.length > 0) {
+        agencias_lineas_posiciones = ['in', 'idAgencia', ...this.listaAgenciasVisibles] as FilterSpecification;
+        agencias_paradas = ['any', ...this.listaAgenciasVisibles.map((agencia) => ['in', agencia, ['get', 'agencias']] as ExpressionSpecification)];
+        feeds_posiciones= ['in', 'idFeed', ...this.listaAgenciasVisibles.map((agencia) => agencia.split(/_(.*)/s)[0])];
+      }
       if (filtrosMapa.lineas) {
         lineas = ['in', 'idLinea', ...filtrosMapa.lineas!] as FilterSpecification;
       }
@@ -519,7 +531,7 @@ export class MapaComponent implements OnInit, OnDestroy {
 
     this.map.setFilter("lineas", (agencias_lineas_posiciones !== null) ? agencias_lineas_posiciones : ((lineas != null) ? lineas : recorridos));
     this.map.setFilter("posiciones", (agencias_lineas_posiciones !== null) ? agencias_lineas_posiciones : ((lineas != null) ? lineas : viajes));
-    this.map.setFilter("posiciones_tr", (posiciones_tr_lineas_viajes !== null) ? posiciones_tr_lineas_viajes : ((lineas != null) ? lineas : viajes));
+    this.map.setFilter("posiciones_tr", (feeds_posiciones !== null) ? feeds_posiciones : ((posiciones_tr_lineas_viajes !== null) ? posiciones_tr_lineas_viajes : ((lineas != null) ? lineas : viajes)));
     this.map.setFilter("paradas", (agencias_paradas !== null) ? agencias_paradas : paradas);
   }
 

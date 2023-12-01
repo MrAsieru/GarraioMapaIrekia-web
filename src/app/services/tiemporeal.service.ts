@@ -3,6 +3,7 @@ import { BehaviorSubject } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { TiempoRealMensaje } from '../models/tiemporeal.model';
 import { transit_realtime } from 'gtfs-realtime-bindings';
+import { MapaService } from './mapa.service';
 
 @Injectable({
   providedIn: 'root'
@@ -20,13 +21,17 @@ export class TiempoRealService {
   private subscripciones: string[] = [];
   private estado: boolean = true;
 
-  constructor() {
+  constructor(private mapaService: MapaService) {
     this.socket = new WebSocket(this.baseUrl);
     this.socket.binaryType = 'arraybuffer';
     this.socket.onopen = () => {
       this.socket.send(JSON.stringify(this.subscripciones))
     }
     this.socket.onmessage = (event) => this.guardarTiempoReal(event);
+
+    mapaService.getAgenciasVisibles().subscribe(agenciasVisibles => {
+      this.actualizar_feeds(Array.from(new Set(agenciasVisibles.map(idAgencia => idAgencia.split(/_(.*)/s)[0]))));
+    });
   }
 
   private guardarTiempoReal(event: MessageEvent<ArrayBuffer>) {

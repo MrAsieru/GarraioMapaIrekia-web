@@ -24,8 +24,4 @@ export class AgenciasService {
   getLineasAgencia(id: string): Observable<Linea[]> {
     return this.http.get<Linea[]>(this.baseUrl+id+'/lineas');
   }
-
-  getAgenciasConLineas(): Observable<AgencyRoutes[]> {
-    return this.http.get<AgencyRoutes[]>(this.baseUrl+'lineas');
-  }
 }

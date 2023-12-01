@@ -1,29 +1,26 @@
 <ion-menu contentId="mapa_router">
   <ion-header>
     <ion-toolbar>
-      <ion-title>Filtrar líneas</ion-title>
-      <button (click)="navegarA(['parada'])"> Parada</button>
+      <ion-title>Filtrar agencias</ion-title>
+    </ion-toolbar>
+    <ion-toolbar>
+      <ion-input class="ion-padding-horizontal" label="Buscar agencia" labelPlacement="floating" type="text" [clearInput]="true" fill="solid" (ionInput)="buscarAgencias($event.detail)"></ion-input>
+      <ion-checkbox #chkbox_home_menu_agencias class="ion-padding-horizontal" labelPlacement="end" justify="start" [checked]="agenciasCheckboxChecked" [indeterminate]="agenciasCheckboxIndeterminate" (ionChange)="agenciaTodosCheckboxClick($event, $any($event).detail)" (click)="$event.stopPropagation()">Mostrar todas</ion-checkbox>
     </ion-toolbar>
   </ion-header>
-  <ion-content class="ion-padding">
-    <ion-checkbox #chkbox_home_menu_agencias labelPlacement="end" justify="start" [checked]="agenciasCheckboxChecked" [indeterminate]="agenciasCheckboxIndeterminate" (ionChange)="agenciaTodosCheckboxClick($event, $any($event).detail)" (click)="$event.stopPropagation()">Mostrar todas</ion-checkbox>
-    <ion-accordion-group [multiple]="true">
-      <ion-accordion *ngFor="let agencia of listaAgenciasLineas" [value]="agencia.idAgencia">
-        <ion-item slot="header" color="light">
-          <ion-checkbox labelPlacement="end" justify="start" [checked]="agencia.mostrar" [value]="agencia.idAgencia" (ionChange)="agenciaCheckboxClick($event, $any($event).detail)" (click)="$event.stopPropagation()">{{agencia.nombre}}</ion-checkbox>
-        </ion-item>
-        <div class="ion-padding" slot="content">
-          <ion-list>
-            <ion-item *ngFor="let linea of agencia.lineas">
-              <ion-label>{{linea.nombreCorto}}{{(linea.nombreCorto && linea.nombreLargo) ? ' - ' : ''}}{{linea.nombreLargo}}</ion-label>
-              <ion-button fill="clear">
-                <ion-icon slot="icon-only" src="assets/icon/linea.svg" [style.color]="(linea.color) ? linea.color : 'black'" (click)="mostrarLinea($event, linea)"></ion-icon>
-              </ion-button>
-            </ion-item>
-          </ion-list>
-        </div>
-      </ion-accordion>
-    </ion-accordion-group>
+  <ion-content class="ion-padding">    
+    <ion-grid>
+      <ion-row *ngFor="let agencia of listaAgenciasBusqueda">
+        <ion-col size="1" style="display: flex; align-items: center; justify-content: center;">
+          <ion-checkbox [checked]="agencia.mostrar" [value]="agencia.idAgencia" (ionChange)="agenciaCheckboxClick($event, $any($event).detail)"></ion-checkbox>
+        </ion-col>
+        <ion-col size="11">
+          <ion-item [button]="true" (click)="navegarA(['../app/agencia', agencia.idAgencia])">
+            <ion-label>{{agencia.nombre}}</ion-label>
+          </ion-item>          
+        </ion-col>
+      </ion-row>
+    </ion-grid>
   </ion-content>
 </ion-menu>
 <ion-fab slot="fixed" vertical="top" horizontal="start">

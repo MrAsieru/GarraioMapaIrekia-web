@@ -217,6 +217,7 @@ export class ParadaComponent  implements OnInit, OnDestroy {
   }
 
   navegarA(ruta: string[]) {
+    console.log(this.route.toString())
     this.navegacionService.navegarA(ruta, this.route);
   }
 }
