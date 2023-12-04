@@ -14,7 +14,8 @@ export class MapaService {
   private agenciasVisiblesSubject: Subject<string[]> = new Subject<string[]>();
   private filtrarMapaSubject: BehaviorSubject<FiltroMapa> = new BehaviorSubject<FiltroMapa>({});
   private movimientoMapaSubject: BehaviorSubject<MovimientoMapa> = new BehaviorSubject<MovimientoMapa>({});
-  private ajusteMapaSubject: BehaviorSubject<AjusteMapa> = new BehaviorSubject<AjusteMapa>({});  
+  private ajusteMapaSubject: BehaviorSubject<AjusteMapa> = new BehaviorSubject<AjusteMapa>({});
+  private localizacionSubject: Subject<boolean> = new Subject<boolean>();
 
   constructor(private agenciasService: AgenciasService) {
     this.agenciasService.getAgencias().subscribe(agencias => {
@@ -54,5 +55,13 @@ export class MapaService {
 
   public getAjusteMapa(): Observable<AjusteMapa> {
     return this.ajusteMapaSubject.asObservable();
+  }
+
+  public setLocalizacion(localizacion: boolean) {
+    this.localizacionSubject.next(localizacion);
+  }
+
+  public getLocalizacion(): Observable<boolean> {
+    return this.localizacionSubject.asObservable();
   }
 }

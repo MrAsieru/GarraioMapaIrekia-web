@@ -32,6 +32,7 @@ export class MapaComponent implements OnInit, OnDestroy {
     maxzoom: 19,
   }
   map: maplibregl.Map;
+  controlGeolocalizacion: maplibregl.GeolocateControl;
   modalListaElementosDatos: BehaviorSubject<{lineas: ShapePropiedadesVectoriales[], paradas: StopPropiedadesVectoriales[], viajes: ViajePropiedadesVectoriales[]}> | null;
   
   // iconos_paradas = [
@@ -124,6 +125,9 @@ export class MapaComponent implements OnInit, OnDestroy {
 
     this.map.on('load', () => {
       this.map.resize();
+
+      this.map.addControl(new maplibregl.ScaleControl({unit: 'metric'}), 'bottom-left');
+      this.controlGeolocalizacion = new maplibregl.GeolocateControl({positionOptions: {enableHighAccuracy: true}, trackUserLocation: true});
       this.map.addControl(new AttributionControl({compact: false}), 'bottom-right');
 
       // Añadir fuentes
@@ -237,6 +241,17 @@ export class MapaComponent implements OnInit, OnDestroy {
 
           this.mapaService.getAjusteMapa().subscribe((ajuste) => {
             this.ajustarMapa(ajuste);
+          });
+
+          this.mapaService.getLocalizacion().subscribe((localizar) => {
+            if (localizar) {
+              this.map.addControl(this.controlGeolocalizacion);
+              setTimeout(() => {
+                this.controlGeolocalizacion.trigger();
+              }, 50);
+            } else {
+              this.map.removeControl(this.controlGeolocalizacion);
+            }            
           });
         });
       });
@@ -464,7 +479,7 @@ export class MapaComponent implements OnInit, OnDestroy {
 
     // Obtener lista de agencias
     this.mapaService.listaAgencias.subscribe((agencias) => {
-      if (agencias.length > 0) {
+      if (agencias.length > 0 && this.listaAgencias.length === 0) {
         this.listaAgencias = agencias.map(a => a.idAgencia);
         this.listaAgenciasVisibles = this.listaAgencias;
 

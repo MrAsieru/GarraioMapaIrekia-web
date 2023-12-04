@@ -30,6 +30,11 @@
 .modal-info-lineasparadas {
 	--height: 50% !important;
 }
+
+button.maplibregl-ctrl-geolocate {
+	display: none !important;
+}
+
 .maplibregl-ctrl-attrib {
 	background-color: rgba(255, 255, 255, 0.75) !important;
 	color: rgba(0, 0, 0, 0.75) !important;

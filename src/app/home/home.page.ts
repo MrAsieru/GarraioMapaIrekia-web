@@ -35,12 +35,11 @@ export class HomePage implements OnInit {
   }
 
   ngOnInit() {
-    let agenciasSubscribe = this.mapaService.listaAgencias.subscribe((agencias) => {
-      if (agencias.length > 0) {
+    this.mapaService.listaAgencias.subscribe((agencias) => {
+      if (agencias.length > 0 && this.listaAgencias.length === 0) {
         console.log(agencias);
         this.listaAgencias = agencias.map(agencia => ({ ...agencia, mostrar: true })).sort((a, b) => a.nombre.localeCompare(b.nombre));
         this.listaAgenciasBusqueda = this.listaAgencias;
-        agenciasSubscribe.unsubscribe();
       }      
     });
   }
@@ -97,5 +96,10 @@ export class HomePage implements OnInit {
   cambiarTiempoReal(event: ToggleCustomEvent) {
     event.stopPropagation();
     event.target.checked = this.tiempoReal.setEstadoTiempoReal(event.detail.checked);
+  }
+
+  cambiarLocalizacion(event: ToggleCustomEvent) {
+    event.stopPropagation();
+    this.mapaService.setLocalizacion(event.detail.checked);
   }
 }

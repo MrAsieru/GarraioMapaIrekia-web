@@ -32,7 +32,12 @@
   <ion-chip color="primary">
     <ion-icon src="assets/img/tiemporeal.svg"></ion-icon>
     <ion-toggle [enableOnOffLabels]="true" [checked]="true" (ionChange)="cambiarTiempoReal($event)"></ion-toggle>
-  </ion-chip>  
+  </ion-chip>
+  <br/>
+  <ion-chip color="primary">
+    <ion-icon src="assets/img/gps.svg"></ion-icon>
+    <ion-toggle [enableOnOffLabels]="true" [checked]="false" (ionChange)="cambiarLocalizacion($event)"></ion-toggle>
+  </ion-chip> 
 </ion-fab>
 <ion-fab slot="fixed" vertical="bottom" horizontal="end" style="padding-bottom: 0.25em;">
   <ion-fab-button size="small" (click)="navegarA(['../app/atribuciones'])">
