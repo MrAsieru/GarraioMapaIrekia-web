@@ -1,13 +1,11 @@
-<ion-content>
-  <ion-row>
-    <ion-col class="ion-no-padding" size="0" size-lg="4" size-xl="3" no-padding [hidden]="!router_outlet_lateral.isActivated">
-      <router-outlet #router_outlet_lateral="outlet"></router-outlet>
-    </ion-col>
-    <ion-col class="ion-no-padding">
-      <div id="container">
-        <div id='map' style="height: 100vh;"></div>
-        <router-outlet id="mapa_router" name="inicio"></router-outlet>
-      </div>
-    </ion-col>
-  </ion-row>
-</ion-content>
+<ion-row>
+  <ion-col class="ion-no-padding" size="0" size-lg="4" size-xl="3" no-padding [hidden]="!router_outlet_lateral.isActivated">
+    <router-outlet #router_outlet_lateral="outlet"></router-outlet>
+  </ion-col>
+  <ion-col class="ion-no-padding">
+    <div id="container">
+      <div id='map' style="height: 100dvh;"></div>
+      <router-outlet id="mapa_router" name="inicio"></router-outlet>
+    </div>
+  </ion-col>
+</ion-row>

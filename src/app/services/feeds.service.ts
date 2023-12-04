@@ -12,6 +12,10 @@ export class FeedsService {
 
   constructor(private http: HttpClient) { }
 
+  getFeeds(): Observable<Feed[]> {
+    return this.http.get<Feed[]>(this.baseUrl);
+  }
+
   getFeedsTiempoReal(): Observable<Feed[]> {
     return this.http.get<Feed[]>(this.baseUrl+"tiempoReal");
   }

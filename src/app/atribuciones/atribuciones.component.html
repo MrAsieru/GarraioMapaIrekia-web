@@ -1,0 +1,132 @@
+<app-lateral nombre="Atribuciones" [nivel]="1">
+  <div>
+    <ion-card>
+      <ion-card-header>
+        <ion-label class="informacion" style="font-size: 1em;"><b>Mapa base: </b><a href="https://www.openstreetmap.org/copyright" target="_blank">© Colaboradores de OpenStreetMap</a></ion-label>
+      </ion-card-header>
+    </ion-card>
+    <ion-card>
+      <ion-accordion-group [multiple]="true">
+        <ion-accordion *ngFor="let feed of feeds">
+          <ion-item slot="header" color="light">
+            <ion-label>
+              {{feed.nombre}}
+            </ion-label>
+          </ion-item>
+          <div slot="content">
+            <ion-card class="ion-no-margin ion-margin-bottom">
+              <ion-header class="ion-padding-top ion-padding-start">
+                <ion-card-title>Fuentes de datos:</ion-card-title>
+              </ion-header>
+              <ion-card-content class="ion-no-padding">
+                <ion-list>
+                  <ion-item *ngFor="let fuente of feed.fuentes">
+                    <ion-label class="informacion"><a target="_blank" [href]="fuente.urlAtribucion">{{fuente.atribucion}}</a></ion-label>
+                  </ion-item>
+                </ion-list>
+              </ion-card-content>
+            </ion-card>            
+            <ion-card *ngIf="feed.info" class="ion-no-margin ion-margin-bottom">
+              <ion-header class="ion-padding-top ion-padding-start">
+                <ion-card-title>Información:</ion-card-title>
+              </ion-header>
+              <ion-card-content class="ion-no-padding">
+                <ion-item>
+                  <ion-label class="informacion">
+                    <b>Nombre editor: </b>{{feed.info.nombreEditor}}
+                  </ion-label>
+                </ion-item>
+                <ion-item>
+                  <ion-label class="informacion">
+                    <b>URL editor: </b><a [href]="feed.info.urlEditor" target="_blank">{{feed.info.urlEditor}}</a>
+                  </ion-label>
+                </ion-item>
+                <ion-item>
+                  <ion-label class="informacion">
+                    <b>Idioma: </b>{{feed.info.idioma}}
+                  </ion-label>
+                </ion-item>
+                <ion-item *ngIf="feed.info.idiomaPredeterminado">
+                  <ion-label class="informacion">
+                    <b>Idioma predeterminado: </b>{{feed.info.idiomaPredeterminado}}
+                  </ion-label>
+                </ion-item>
+                <ion-item *ngIf="feed.info.fechaInicio || feed.info.fechaFin">
+                  <ion-label class="informacion">
+                    <b>Rango fechas: </b>{{(feed.info.fechaInicio | date:'mediumDate') ?? '??'}} - {{(feed.info.fechaFin | date:'mediumDate') ?? '??'}}
+                  </ion-label>
+                </ion-item>
+                <ion-item *ngIf="feed.info.version">
+                  <ion-label class="informacion">
+                    <b>Versión: </b>{{feed.info.version}}
+                  </ion-label>
+                </ion-item>
+                <ion-item *ngIf="feed.info.email">
+                  <ion-label class="informacion">
+                    <b>Email: </b><a [href]="'mailto:' + feed.info.email">{{feed.info.email}}</a>
+                  </ion-label>
+                </ion-item>
+                <ion-item *ngIf="feed.info.urlContacto">
+                  <ion-label class="informacion">
+                    <b>URL Contacto: </b><a [href]="feed.info.urlContacto" target="_blank">{{feed.info.urlContacto}}</a>
+                  </ion-label>
+                </ion-item>
+              </ion-card-content>              
+            </ion-card>
+            <ion-card *ngIf="feed.atribuciones" class="ion-no-margin ion-margin-bottom">
+              <ion-header class="ion-padding-top ion-padding-start">
+                <ion-card-title>Atribuciones:</ion-card-title>
+              </ion-header>
+              <ion-card-content class="ion-no-padding">
+                <ion-accordion-group [multiple]="true" class="ion-margin-horizontal">
+                  <ion-accordion *ngFor="let atribucion of feed.atribuciones">
+                    <ion-item slot="header" color="light">
+                      <ion-label>{{atribucion.nombreOrganizacion}}</ion-label>
+                    </ion-item>
+                    <div slot="content">
+                      <ion-item *ngIf="atribucion.idAgencia">
+                        <ion-label class="informacion">
+                          <b>Agencia: </b>{{atribucion.nombre?.nombre ?? atribucion.idAgencia}}
+                        </ion-label>
+                      </ion-item>
+                      <ion-item *ngIf="atribucion.idLinea">
+                        <ion-label class="informacion">
+                          <b>Línea: </b>{{atribucion.nombre?.nombreCorto ?? atribucion.nombre?.nombreLargo ?? atribucion.idLinea}}
+                        </ion-label>
+                      </ion-item>
+                      <ion-item *ngIf="atribucion.idViaje">
+                        <ion-label class="informacion">
+                          <b>Viaje: </b>{{atribucion.nombre?.nombre ?? atribucion.idViaje}}
+                        </ion-label>
+                      </ion-item>
+                      <ion-item>
+                        <ion-label class="informacion">
+                          <b>Relación: </b>{{(atribucion.esProductor ? 'Productor' : '') + (atribucion.esProductor && (atribucion.esOperador || atribucion.esAutoridad) ? ' / ' : '') + (atribucion.esOperador ? 'Operador' : '') + (atribucion.esOperador && atribucion.esAutoridad ? ' / ' : '') + (atribucion.esAutoridad ? 'Autoridad' : '')}}
+                      </ion-label>
+                      </ion-item>
+                      <ion-item *ngIf="atribucion.url">
+                        <ion-label class="informacion">
+                          <b>URL: </b><a [href]="atribucion.url" target="_blank">{{atribucion.url}}</a>
+                        </ion-label>
+                      </ion-item>
+                      <ion-item *ngIf="atribucion.email">
+                        <ion-label class="informacion">
+                          <b>Email: </b><a [href]="'mailto:' + atribucion.email" target="_blank">{{atribucion.email}}</a>
+                        </ion-label>
+                      </ion-item>
+                      <ion-item *ngIf="atribucion.telefono">
+                        <ion-label class="informacion">
+                          <b>Teléfono: </b><a [href]="'tel:' + atribucion.telefono" target="_blank">{{atribucion.telefono}}</a>
+                        </ion-label>
+                      </ion-item>
+                    </div>
+                  </ion-accordion>
+                </ion-accordion-group>
+              </ion-card-content>
+            </ion-card>
+          </div>
+        </ion-accordion>
+      </ion-accordion-group>
+    </ion-card>
+  </div>
+</app-lateral>

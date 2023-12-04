@@ -34,3 +34,8 @@
     <ion-toggle [enableOnOffLabels]="true" [checked]="true" (ionChange)="cambiarTiempoReal($event)"></ion-toggle>
   </ion-chip>  
 </ion-fab>
+<ion-fab slot="fixed" vertical="bottom" horizontal="end" style="padding-bottom: 0.25em;">
+  <ion-fab-button size="small" (click)="navegarA(['../app/atribuciones'])">
+    <ion-icon src="assets/img/info.svg"></ion-icon>
+  </ion-fab-button>
+</ion-fab>

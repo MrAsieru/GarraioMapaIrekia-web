@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { IonicModule, ModalController } from '@ionic/angular';
-import maplibregl, { ExpressionSpecification, FilterSpecification, GeoJSONSource, PointLike } from 'maplibre-gl';
+import maplibregl, { AttributionControl, ExpressionSpecification, FilterSpecification, GeoJSONSource, PointLike } from 'maplibre-gl';
 import { ModalListaElementosComponent } from '../modal-lista-elementos/modal-lista-elementos.component';
 import { ShapePropiedadesVectoriales } from 'src/app/models/linea.model';
 import { StopPropiedadesVectoriales } from 'src/app/models/parada.model';
@@ -103,7 +103,7 @@ export class MapaComponent implements OnInit, OnDestroy {
             "type": "raster",
             "tiles": ["https://a.tile.openstreetmap.org/{z}/{x}/{y}.png"],
             "tileSize": 256,
-            "attribution": "&copy; Colaboradores de OpenStreetMap",
+            "attribution": "&copy; <a href='https://www.openstreetmap.org/copyright'>Colaboradores de OpenStreetMap</a>",
             "maxzoom": this.configuracion.maxzoom
           }
         },
@@ -118,37 +118,13 @@ export class MapaComponent implements OnInit, OnDestroy {
       },
       center: [-3, 43.1], // starting position [lng, lat]
       zoom: 9,
-      maxZoom: this.configuracion.maxzoom - 1
-    });
-
-    this.agenciasService.getAgencias().subscribe((agencias) => {
-      // Descargar posiciones de este minuto
-      console.log(`${moment().format("HH:mm:ss.SSS")} - Descargar posiciones`)
-      this.descargarPosiciones(agencias.map(a => a.idAgencia));
-
-      // Descargar proximas posiciones cada minuto en el segundo 30
-      let millisegundos = moment().seconds() * 1000 + moment().milliseconds();
-      let timeout: number;
-      console.log(`${moment().format("HH:mm:ss.SSS")} - ms: ${millisegundos}`)
-      if (millisegundos > 30000) {
-        timeout = 60000 - millisegundos + 30000;
-        console.log(`${moment().format("HH:mm:ss.SSS")} - Timeout: ${timeout}`)
-        console.log(`${moment().format("HH:mm:ss.SSS")} - Descargar posiciones`)
-        this.descargarPosiciones(agencias.map(a => a.idAgencia));
-      } else {
-        timeout = 30000 - millisegundos;
-        console.log(`${moment().format("HH:mm:ss.SSS")} - Timeout: ${timeout}`)
-      }
-      setTimeout(() => {
-        // Si hace falta sincronizar usar this.cadaMinuto
-        console.log(`${moment().format("HH:mm:ss.SSS")} - SetInterval`)
-        this.descargarPosiciones(agencias.map(a => a.idAgencia));
-        setInterval(() => {console.log(`${moment().format("HH:mm:ss.SSS")} - Intervalo segundo 30`); this.descargarPosiciones(agencias.map(a => a.idAgencia)); console.log(`${moment().format("HH:mm:ss.SSS")} - Vuelta al ciclo`);}, 60000-25); // 25ms: Lo que tarda en volver al ciclo normalmente
-      }, timeout)
+      maxZoom: this.configuracion.maxzoom - 1,
+      attributionControl: false
     });
 
     this.map.on('load', () => {
       this.map.resize();
+      this.map.addControl(new AttributionControl({compact: false}), 'bottom-right');
 
       // Añadir fuentes
       this.map.addSource("posiciones", {
@@ -491,8 +467,36 @@ export class MapaComponent implements OnInit, OnDestroy {
       if (agencias.length > 0) {
         this.listaAgencias = agencias.map(a => a.idAgencia);
         this.listaAgenciasVisibles = this.listaAgencias;
+
+        this.prepararPosiciones();
       }      
     });
+  }
+
+  prepararPosiciones() {
+    // Descargar posiciones de este minuto
+    console.log(`${moment().format("HH:mm:ss.SSS")} - Descargar posiciones`)
+    this.descargarPosiciones(this.listaAgencias);
+
+    // Descargar proximas posiciones cada minuto en el segundo 30
+    let millisegundos = moment().seconds() * 1000 + moment().milliseconds();
+    let timeout: number;
+    console.log(`${moment().format("HH:mm:ss.SSS")} - ms: ${millisegundos}`)
+    if (millisegundos > 30000) {
+      timeout = 60000 - millisegundos + 30000;
+      console.log(`${moment().format("HH:mm:ss.SSS")} - Timeout: ${timeout}`)
+      console.log(`${moment().format("HH:mm:ss.SSS")} - Descargar posiciones`)
+      this.descargarPosiciones(this.listaAgencias);
+    } else {
+      timeout = 30000 - millisegundos;
+      console.log(`${moment().format("HH:mm:ss.SSS")} - Timeout: ${timeout}`)
+    }
+    setTimeout(() => {
+      // Si hace falta sincronizar usar this.cadaMinuto
+      console.log(`${moment().format("HH:mm:ss.SSS")} - SetInterval`)
+      this.descargarPosiciones(this.listaAgencias);
+      setInterval(() => {console.log(`${moment().format("HH:mm:ss.SSS")} - Intervalo segundo 30`); this.descargarPosiciones(this.listaAgencias); console.log(`${moment().format("HH:mm:ss.SSS")} - Vuelta al ciclo`);}, 60000-25); // 25ms: Lo que tarda en volver al ciclo normalmente
+    }, timeout);
   }
 
   async mostrarModalSeleccion(lineas: ShapePropiedadesVectoriales[], paradas: StopPropiedadesVectoriales[], viajes: ViajePropiedadesVectoriales[]) {
