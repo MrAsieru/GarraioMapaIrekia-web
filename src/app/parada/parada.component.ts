@@ -16,18 +16,21 @@ import { TiempoRealService } from '../services/tiemporeal.service';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { ModalAlertasComponent } from '../modal-alertas/modal-alertas.component';
 import { NavegacionService } from '../services/navegacion.service';
+import { FloorPipe } from "../floor/floor.pipe";
+
 
 @Component({
-  selector: 'app-parada',
-  templateUrl: './parada.component.html',
-  standalone: true,
-  imports: [IonicModule, CommonModule, LateralComponent, MomentPipe]
+    selector: 'app-parada',
+    templateUrl: './parada.component.html',
+    standalone: true,
+    imports: [IonicModule, CommonModule, LateralComponent, MomentPipe, FloorPipe]
 })
 export class ParadaComponent  implements OnInit, OnDestroy {
   idParada: string | null;
   parada: Parada = new Parada();
   viajes: ViajeParada[] = [];
   agencias: Agencia[] = [];
+  horariosHasta: moment.Moment | undefined;
 
   primeraCargaAlertas: boolean = true;
   primeraCargaViajes: boolean = true;
@@ -90,84 +93,7 @@ export class ParadaComponent  implements OnInit, OnDestroy {
           });
           
 
-          this.paradasService.getHorariosParada(parada.idParada).subscribe(viajes => {
-            new Set(viajes.map(viaje => viaje.idLinea)).forEach(idLinea => {
-              this.lineasService.getLinea(idLinea).subscribe(linea => {
-                viajes.filter(viaje => viaje.idLinea == idLinea).forEach(viaje => viaje.linea = linea);
-              });
-            });
-
-            viajes.forEach(viaje => {
-              if (viaje.horario.horaLlegada) {
-                let [horas, minutos, segundos] = (viaje.horario.horaLlegada as string).split(':').map(Number);
-                viaje.horario.momentoLlegada = moment().startOf('day').add(horas, 'hours').add(minutos, 'minutes').add(segundos, 'seconds');
-              }
-              if (viaje.horario.horaSalida) {
-                let [horas, minutos, segundos] = (viaje.horario.horaSalida as string).split(':').map(Number);
-                viaje.horario.momentoSalida = moment().startOf('day').add(horas, 'hours').add(minutos, 'minutes').add(segundos, 'seconds');
-              }
-
-              if (viaje.letrero === undefined || viaje.letrero === "") {
-                viaje.letrero = viaje.horario.letrero;
-              }
-            });
-            this.viajes = viajes;
-            
-            this.actualizarViajes();
-
-            // Obtener tiempo real de viajes
-            this.suscripcionTiempoRealViajes = this.tiempoRealService.tiempoReal.subscribe((tiempoReal) => {
-              if (this.primeraCargaViajes || tiempoReal?.idFeed === parada.idParada.split("_")[0]) {
-                this.primeraCargaViajes = false;
-
-                let tmpViajesParada = this.tiempoRealService.getInformacionViajesParada(parada.idParada);
-                
-                if (tmpViajesParada) {
-                  tmpViajesParada.forEach(viajeParada => {
-                    
-                    let viaje = this.viajes.find(viaje => viaje.idViaje.split(/_(.*)/s)[1] === viajeParada.viaje.tripId);
-                    // console.log(viaje);
-                    if (viaje) {
-                      viaje.tiempoReal = viajeParada.tiempoReal;
-                      
-                      let momento: moment.Moment | undefined;
-                      if (viaje.horario.momentoSalida) {
-                        momento = viaje.horario.momentoSalida;
-                      } else if (viaje.horario.momentoLlegada) {
-                        momento = viaje.horario.momentoLlegada;
-                      }
-                      if (momento) {
-                        if (viajeParada.tiempoReal.arrival?.time) {
-                          viaje.momentoLlegadaTiempoReal = moment.unix((viajeParada.tiempoReal.arrival?.time as number));
-                        } else if (viajeParada.tiempoReal.arrival?.delay) {
-                          viaje.momentoLlegadaTiempoReal = momento.clone().add(viajeParada.tiempoReal.arrival?.delay, 'seconds');
-                        }
-                        if (viajeParada.tiempoReal.departure?.time) {
-                          viaje.momentoSalidaTiempoReal = moment.unix((viajeParada.tiempoReal.departure?.time as number));
-                        } else if (viajeParada.tiempoReal.departure?.delay) {
-                          viaje.momentoSalidaTiempoReal = momento.clone().add(viajeParada.tiempoReal.departure?.delay, 'seconds');
-                        }
-                        
-
-                        if (viaje.momentoLlegadaTiempoReal && momento) {
-                          viaje.retrasoTiempoReal = viaje.momentoLlegadaTiempoReal.diff(momento, 'seconds');
-                        }
-                        if (viaje.momentoSalidaTiempoReal && momento) {
-                          viaje.retrasoTiempoReal = viaje.momentoSalidaTiempoReal.diff(momento, 'seconds');
-                        }
-                        if (viaje.momentoLlegadaTiempoReal && viaje.momentoSalidaTiempoReal && momento) {
-                          viaje.retrasoTiempoReal = Math.max(viaje.momentoLlegadaTiempoReal.diff(momento, 'seconds'), viaje.momentoSalidaTiempoReal.diff(momento, 'seconds'));
-                        }
-                      }                      
-                    }
-                  });
-
-                  this.actualizarViajes();
-                }
-                // console.log(viajes)
-              }          
-            });
-          });
+          this.obtenerHorarios();
         }        
       });
 
@@ -175,6 +101,121 @@ export class ParadaComponent  implements OnInit, OnDestroy {
         this.actualizarViajes();
       }, 60000);
     }
+  }
+
+  obtenerHorarios() {
+    let horariosDesde: moment.Moment;
+
+    // Si es la primera vez, desde momento actual
+    // Si no, desde el último horario obtenido
+    if (this.horariosHasta === undefined) {
+      horariosDesde = moment();
+    } else {
+      horariosDesde = this.horariosHasta;
+    }
+
+    // Si el ultimo horario es el final del día, comenzar desde el siguiente día
+    if (horariosDesde.isSame(horariosDesde.clone().endOf('day'))) {
+      horariosDesde = horariosDesde.clone().add(12, 'hours').startOf('day');
+    }
+
+    // Obtener horarios hasta 2 horas después del último horario obtenido
+    let horariosHasta = horariosDesde.clone().add(2, 'hour');
+
+    // Si el último horario es del dia siguiente, obtener horarios hasta el final del día
+    if (horariosDesde.day() != horariosHasta.day()) {
+      horariosHasta = horariosDesde.clone().endOf('day');
+    }
+
+    this.paradasService.getHorariosParada(this.parada.idParada, {desde: horariosDesde.toISOString(), hasta: horariosHasta.toISOString()}).subscribe(viajes => {
+      if (viajes && viajes.length > 0) {
+        new Set(viajes.map(viaje => viaje.idLinea)).forEach(idLinea => {
+          this.lineasService.getLinea(idLinea).subscribe(linea => {
+            viajes.filter(viaje => viaje.idLinea == idLinea).forEach(viaje => viaje.linea = linea);
+          });
+        });
+  
+        viajes.forEach(viaje => {
+          if (viaje.horario.horaLlegada) {
+            let [horas, minutos, segundos] = (viaje.horario.horaLlegada as string).split(':').map(Number);
+            viaje.horario.momentoLlegada = horariosDesde.clone().startOf('day').add(horas, 'hours').add(minutos, 'minutes').add(segundos, 'seconds');
+          }
+          if (viaje.horario.horaSalida) {
+            let [horas, minutos, segundos] = (viaje.horario.horaSalida as string).split(':').map(Number);
+            viaje.horario.momentoSalida = horariosDesde.clone().startOf('day').add(horas, 'hours').add(minutos, 'minutes').add(segundos, 'seconds');
+          }
+  
+          if (viaje.letrero === undefined || viaje.letrero === "") {
+            viaje.letrero = viaje.horario.letrero;
+          }
+        });
+  
+        if (this.horariosHasta === undefined) {
+          this.viajes = viajes;
+    
+          // Obtener tiempo real de viajes
+          this.suscripcionTiempoRealViajes = this.tiempoRealService.tiempoReal.subscribe((tiempoReal) => {
+            if (this.primeraCargaViajes || tiempoReal?.idFeed === this.parada.idParada.split("_")[0]) {
+              this.primeraCargaViajes = false;
+    
+              let tmpViajesParada = this.tiempoRealService.getInformacionViajesParada(this.parada.idParada);
+              
+              if (tmpViajesParada) {
+                tmpViajesParada.forEach(viajeParada => {
+                  
+                  let viaje = this.viajes.find(viaje => viaje.idViaje.split(/_(.*)/s)[1] === viajeParada.viaje.tripId);
+                  // console.log(viaje);
+                  if (viaje) {
+                    viaje.tiempoReal = viajeParada.tiempoReal;
+                    
+                    let momento: moment.Moment | undefined;
+                    if (viaje.horario.momentoSalida) {
+                      momento = viaje.horario.momentoSalida;
+                    } else if (viaje.horario.momentoLlegada) {
+                      momento = viaje.horario.momentoLlegada;
+                    }
+                    if (momento) {
+                      if (viajeParada.tiempoReal.arrival?.time) {
+                        viaje.momentoLlegadaTiempoReal = moment.unix((viajeParada.tiempoReal.arrival?.time as number));
+                      } else if (viajeParada.tiempoReal.arrival?.delay) {
+                        viaje.momentoLlegadaTiempoReal = momento.clone().add(viajeParada.tiempoReal.arrival?.delay, 'seconds');
+                      }
+                      if (viajeParada.tiempoReal.departure?.time) {
+                        viaje.momentoSalidaTiempoReal = moment.unix((viajeParada.tiempoReal.departure?.time as number));
+                      } else if (viajeParada.tiempoReal.departure?.delay) {
+                        viaje.momentoSalidaTiempoReal = momento.clone().add(viajeParada.tiempoReal.departure?.delay, 'seconds');
+                      }
+                      
+    
+                      if (viaje.momentoLlegadaTiempoReal && momento) {
+                        viaje.retrasoTiempoReal = viaje.momentoLlegadaTiempoReal.diff(momento, 'seconds');
+                      }
+                      if (viaje.momentoSalidaTiempoReal && momento) {
+                        viaje.retrasoTiempoReal = viaje.momentoSalidaTiempoReal.diff(momento, 'seconds');
+                      }
+                      if (viaje.momentoLlegadaTiempoReal && viaje.momentoSalidaTiempoReal && momento) {
+                        viaje.retrasoTiempoReal = Math.max(viaje.momentoLlegadaTiempoReal.diff(momento, 'seconds'), viaje.momentoSalidaTiempoReal.diff(momento, 'seconds'));
+                      }
+                    }                      
+                  }
+                });
+    
+                this.actualizarViajes();
+              }
+              // console.log(viajes)
+            }          
+          });
+        } else {
+          // Append to viajes
+          if (viajes && viajes.length > 0) {
+            this.viajes = this.viajes.concat(viajes);
+          }
+        }
+      }
+      
+      this.horariosHasta = horariosHasta;
+      this.actualizarViajes();
+    });
   }
 
   actualizarViajes() {

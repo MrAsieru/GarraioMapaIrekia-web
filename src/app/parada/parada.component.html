@@ -54,7 +54,7 @@
                 <ion-text color="danger" style="padding-right: 0.2em;"> (+{{(horario.retrasoTiempoReal % 3600) / 60 | number: '1.0-0'}}m)</ion-text>
               </ng-container>
             </ng-container>
-            <ion-text id="parada_hora_{{horario.idViaje}}_{{horario.horario.orden}}">en {{horario.tiempoRestanteTiempoReal ?? horario.tiempoRestante ?? '??'}}min</ion-text>
+            <ion-text id="parada_hora_{{horario.idViaje}}_{{horario.horario.orden}}">en {{((horario.tiempoRestanteTiempoReal ?? horario.tiempoRestante ?? 0) > 60) ? (((horario.tiempoRestanteTiempoReal ?? horario.tiempoRestante ?? 0) / 60) | floor) +'h ': ''}}{{(horario.tiempoRestanteTiempoReal ?? horario.tiempoRestante) ? (horario.tiempoRestanteTiempoReal ?? horario.tiempoRestante ?? 0) % 60: '??'}}min</ion-text>
             <br/>
             <ion-note class="ion-align-self-end">
               <ion-text>a las {{horario.momentoLlegadaTiempoReal ?? horario.horario.momentoLlegada! | dateFormat:'H:mm'}}</ion-text>
@@ -124,9 +124,15 @@
               </ng-container>
             </ion-note>
           </ion-label>
-          
         </ion-item>
       </ion-list>
+      <div style="display: flex; flex-direction: column;">
+        <ion-note *ngIf="horariosHasta" style="margin: auto; padding-bottom: 0.5em;">Horarios hasta: {{horariosHasta | dateFormat:'dddd D - HH:mm'}}</ion-note>
+        <ion-button style="margin: auto; padding-bottom: 0.5em;" (click)="obtenerHorarios()">
+          <ion-icon slot="start" src="assets/img/suma.svg"></ion-icon>
+          Cargar más
+        </ion-button>        
+      </div>
     </ion-card>
   </div>
 </app-lateral>

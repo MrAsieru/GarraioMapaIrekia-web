@@ -5,6 +5,7 @@ import { environment } from 'src/environments/environment';
 import { ViajeParada, Parada } from '../models/parada.model';
 import { Linea } from '../models/linea.model';
 import { Agencia } from '../models/agencia.model';
+import * as moment from 'moment-timezone';
 
 @Injectable({
   providedIn: 'root'
@@ -31,14 +32,17 @@ export class ParadasService {
     incluirPatrones?: boolean,
     incluirParadas?: boolean
   }): Observable<Linea[]> {
-    return this.http.get<Linea[]>(this.baseUrl+id+"/lineas");
+    return this.http.get<Linea[]>(this.baseUrl+id+"/lineas", {params: parametros});
   }
 
   getAgenciasParada(id: string): Observable<Agencia[]> {
     return this.http.get<Agencia[]>(this.baseUrl+id+"/agencias");
   }
 
-  getHorariosParada(id: string): Observable<ViajeParada[]> {
-    return this.http.get<ViajeParada[]>(this.baseUrl+id+"/horarios");
+  getHorariosParada(id: string, parametros?: {
+    desde?: string,
+    hasta?: string
+  }): Observable<ViajeParada[]> {
+    return this.http.get<ViajeParada[]>(this.baseUrl+id+"/horarios", {params: parametros});
   }
 }
