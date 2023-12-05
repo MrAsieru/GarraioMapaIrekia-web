@@ -11,6 +11,7 @@ export class PosicionRespuestaAgencia {
 export class PosicionRespuestaViaje {
     idViaje: string;
     idLinea: string;
+    tipo?: number; //TODO: Quitar ?
     posiciones: string;
 }
 
@@ -25,5 +26,4 @@ export class PosicionesFechas {
 export class Posicion {
     lat: number;
     lon: number;
-    proximoOrdenParada: number;
 }

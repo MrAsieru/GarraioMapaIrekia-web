@@ -19,13 +19,13 @@ export class MapaService {
 
   constructor(private agenciasService: AgenciasService) {
     this.agenciasService.getAgencias().subscribe(agencias => {
-      console.log(agencias)
+      // console.log(agencias)
       this.listaAgenciasSubject.next(agencias);
     });
   }
 
   public setAgenciasVisibles(agenciasVisibles: string[]) {
-    console.log(`setAgenciasVisibles(${agenciasVisibles})`)
+    // console.log(`setAgenciasVisibles(${agenciasVisibles})`)
     this.agenciasVisiblesSubject.next(agenciasVisibles);
   }
 

@@ -3,7 +3,8 @@
     <ion-card>
       <ion-card-header>
         <ion-card-title>
-          <span>{{linea.nombreLargo}}</span>
+          <ion-icon src="assets/img/tipolinea_{{linea.tipo ? linea.tipo : 0}}.svg"></ion-icon>
+          <ion-label>{{linea.nombreLargo ?? linea.nombreCorto}}</ion-label>
         </ion-card-title>
         <ion-card-content style="padding: 0 !important;">
           <ion-chip text-wrap (click)="navegarA(['../../agencia', linea.idAgencia])">

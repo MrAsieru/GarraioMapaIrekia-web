@@ -37,7 +37,6 @@ export class HomePage implements OnInit {
   ngOnInit() {
     this.mapaService.listaAgencias.subscribe((agencias) => {
       if (agencias.length > 0 && this.listaAgencias.length === 0) {
-        console.log(agencias);
         this.listaAgencias = agencias.map(agencia => ({ ...agencia, mostrar: true })).sort((a, b) => a.nombre.localeCompare(b.nombre));
         this.listaAgenciasBusqueda = this.listaAgencias;
       }      
@@ -49,7 +48,6 @@ export class HomePage implements OnInit {
   }
 
   navegarA(ruta: string[]) {
-    console.log(this.route.toString())
     this.navegacionService.navegarA(ruta, this.route);
   }
 
@@ -86,7 +84,6 @@ export class HomePage implements OnInit {
 
   buscarAgencias(event: InputChangeEventDetail) {
     if (event.value && event.value.trim() !== '') {
-      console.log(`Busqueda: '${event.value}'`)
       this.listaAgenciasBusqueda = this.listaAgencias.filter(agencia => agencia.nombre.toLowerCase().includes(event.value!.toLowerCase()));
     } else {
       this.listaAgenciasBusqueda = this.listaAgencias;

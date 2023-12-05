@@ -44,31 +44,40 @@ export class MapaComponent implements OnInit, OnDestroy {
   //   {id: 'aeriallift', url: 'assets/map/aeriallift.png'},
   //   {id: 'funicular', url: 'assets/map/funicular.png'}
   // ];
-  // tipos_paradas = { // Tipos de ruta GTFS
-  //   '0': 'tram', // Tram
-  //   '1': 'subway', // Subway
-  //   '2': 'train', // Rail
-  //   '3': 'bus', // Bus
-  //   '4': 'ferry', // Ferry
-  //   '5': 'tram', // Cable Tram
-  //   '6': 'aeriallift', // Aerial Lift
-  //   '7': 'funicular', // Funicular
-  //   '11': 'bus', // Trolleybus
-  //   '12': 'train' // Monorail
-  // };
 
   iconos = [
     {id: 'parada', url: 'assets/map/parada.png'},
     {id: 'entrada', url: 'assets/map/entrada.png'},
-    {id: 'vehiculo', url: 'assets/map/bus.png'},
-    {id: 'vehiculo_tr', url: 'assets/map/tiemporeal.png'}
+    {id: 'posicion_tram', url: 'assets/map/posicion_tram.png'},
+    {id: 'posicion_subway', url: 'assets/map/posicion_subway.png'},
+    {id: 'posicion_train', url: 'assets/map/posicion_train.png'},
+    {id: 'posicion_bus', url: 'assets/map/posicion_bus.png'},
+    {id: 'posicion_ferry', url: 'assets/map/posicion_ferry.png'},
+    {id: 'posicion_aeriallift', url: 'assets/map/posicion_aeriallift.png'},
+    {id: 'posicion_funicular', url: 'assets/map/posicion_funicular.png'},
+    {id: 'posicion_trolleybus', url: 'assets/map/posicion_trolleybus.png'},
+    {id: 'posicion_monorail', url: 'assets/map/posicion_monorail.png'},
+    {id: 'posicion_tr', url: 'assets/map/posicion_tr.png'}
   ];
+
   tipos_paradas = { // Tipos de parada
     '0': 'parada', // Stop or Platform
     '1': 'parada', // Station
     '2': 'entrada', // Station Entrance/Exit
     '3': 'parada', // Generic Node
     '4': 'parada', // Boarding Area
+  };
+  tipos_posiciones = { // Tipos de ruta GTFS
+    '0': 'posicion_tram', // Tram
+    '1': 'posicion_subway', // Subway
+    '2': 'posicion_train', // Rail
+    '3': 'posicion_bus', // Bus
+    '4': 'posicion_ferry', // Ferry
+    '5': 'posicion_tram', // Cable Tram
+    '6': 'posicion_aeriallift', // Aerial Lift
+    '7': 'posicion_funicular', // Funicular
+    '11': 'posicion_trolleybus', // Trolleybus
+    '12': 'posicion_monorail' // Monorail
   };
 
   listaPosiciones: Map<string, GeoJSON.FeatureCollection<GeoJSON.Point>> | undefined = undefined; // Llave: idViaje, Valor: Lista de fechas y posiciones
@@ -193,8 +202,19 @@ export class MapaComponent implements OnInit, OnDestroy {
             'minzoom': tileset.vector_layers.find(layer => layer.id === "paradas")?.minzoom && 0,
             'layout': {
               'icon-image': ['get', ['get', 'tipo'], ['literal', this.tipos_paradas]],
-              'icon-allow-overlap': true,
-              'icon-size': 0.5
+              'icon-allow-overlap': false,
+              "icon-size": [
+                'interpolate',
+                // Set the exponential rate of change to 1.5
+                ['exponential', 1.5],
+                ['zoom'],
+                // When zoom is 10, icon will be 50% size.
+                8,
+                0.3,
+                // When zoom is 22, icon will be 10% size.
+                15,
+                0.5
+              ],
             }
           });
 
@@ -205,10 +225,21 @@ export class MapaComponent implements OnInit, OnDestroy {
             'maxzoom': this.configuracion.maxzoom,
             'minzoom': 0,
             'layout': {
-              'icon-image': 'vehiculo_tr',
+              'icon-image': ['get', ['get', 'tipo'], ['literal', this.tipos_posiciones]],
               'icon-allow-overlap': true,
-              'icon-size': 0.5,
-              'icon-anchor': 'bottom'
+              'icon-anchor': 'bottom',
+              "icon-size": [
+                'interpolate',
+                // Set the exponential rate of change to 1.5
+                ['exponential', 2],
+                ['zoom'],
+                // When zoom is 10, icon will be 50% size.
+                5,
+                0.3,
+                // When zoom is 22, icon will be 10% size.
+                15,
+                0.7
+              ],
             }
           });
 
@@ -219,15 +250,26 @@ export class MapaComponent implements OnInit, OnDestroy {
             'maxzoom': this.configuracion.maxzoom,
             'minzoom': 0,
             'layout': {
-              'icon-image': 'vehiculo_tr',
+              'icon-image': 'posicion_tr',
               'icon-allow-overlap': true,
-              'icon-size': 0.5,
-              'icon-anchor': 'bottom'
+              'icon-anchor': 'bottom',
+              "icon-size": [
+                'interpolate',
+                // Set the exponential rate of change to 1.5
+                ['exponential', 2],
+                ['zoom'],
+                // When zoom is 10, icon will be 50% size.
+                5,
+                0.3,
+                // When zoom is 22, icon will be 10% size.
+                15,
+                0.7
+              ],
             }
           });
 
           this.mapaService.getAgenciasVisibles().subscribe((agencias) => {
-            console.log(`getAgenciasVisibles(${agencias})`)
+            // console.log(`getAgenciasVisibles(${agencias})`)
             this.filtrarAgencias(agencias);
           });
 
@@ -266,7 +308,11 @@ export class MapaComponent implements OnInit, OnDestroy {
         }
       }, 1000);
 
-
+      // Actualizar lista suscripciones tiempo real
+      this.feedsService.getFeedsTiempoReal().subscribe((feeds) => {
+        this.listaFeedTiempoReal = feeds.map(f => f.idFeed);
+        this.tiemporealService.actualizar_feeds(this.listaFeedTiempoReal);
+      });
     });
 
     this.map.on('mouseenter', 'paradas', () => {
@@ -281,39 +327,9 @@ export class MapaComponent implements OnInit, OnDestroy {
     this.map.on('click', (e) => {
       const ne: PointLike = [e.point.x + 10, e.point.y - 10];
       const sw: PointLike = [e.point.x - 10, e.point.y + 10];
-      console.log(`Click: ${JSON.stringify(ne)}, ${JSON.stringify(sw)}`);
-
-      const neCoords = this.map.unproject(ne);
-      const swCoords = this.map.unproject(sw);
-
-      // Insert rectangle into the map
-      this.map.addLayer({
-        'id': `rectangle-${moment().format("HH:mm:ss.SSS")}`,
-        'type': 'line',
-        'source': {
-          'type': 'geojson',
-          'data': {
-            'type': 'Feature',
-            'geometry': {
-              'type': 'LineString',
-              'coordinates': [
-                [swCoords.lng, neCoords.lat], // top left
-                [neCoords.lng, neCoords.lat], // top right
-                [neCoords.lng, swCoords.lat], // bottom right
-                [swCoords.lng, swCoords.lat], // bottom left
-                [swCoords.lng, neCoords.lat]  // back to top left
-              ]
-            }
-          }
-        },
-        'paint': {
-          'line-color': '#0000FF',
-          'line-width': 1,
-        }
-      });
 
       let features = this.map.queryRenderedFeatures([ne, sw], { layers: ['posiciones'] });
-      console.log(JSON.stringify(features));
+      // console.log(JSON.stringify(features));
       if (features.length > 0) {
         if (features.length == 1) {
           this.navegarA(['viaje', features[0].properties["idViaje"]]);
@@ -336,7 +352,7 @@ export class MapaComponent implements OnInit, OnDestroy {
       }
 
       features = this.map.queryRenderedFeatures([ne, sw], { layers: ['posiciones_tr'] });
-      console.log(JSON.stringify(features));
+      // console.log(JSON.stringify(features));
       if (features.length > 0) {
         if (features.length == 1) {
           if (features[0].properties["idViaje"]) {
@@ -363,7 +379,6 @@ export class MapaComponent implements OnInit, OnDestroy {
       }
 
       features = this.map.queryRenderedFeatures([ne, sw], { layers: ['paradas'] }).filter((feature) => feature.properties["paradaPadre"] === undefined || feature.properties["paradaPadre"] === "");
-      console.log(JSON.stringify(features));
       // console.log(JSON.stringify(features));
       if (features.length > 0) {
         if (features.length == 1) {
@@ -394,7 +409,7 @@ export class MapaComponent implements OnInit, OnDestroy {
       }
 
       features = this.map.queryRenderedFeatures([ne, sw], { layers: ['lineas'] });
-      console.log(JSON.stringify(features));
+      // console.log(JSON.stringify(features));
       if (features.length > 0) {
         const lineas = new Set(features.map(f => f.properties["idLinea"] as string));
         // console.log(lineas);
@@ -417,13 +432,9 @@ export class MapaComponent implements OnInit, OnDestroy {
       this.map.getCanvas().style.cursor = '';
     });
 
-    this.feedsService.getFeedsTiempoReal().subscribe((feeds) => {
-      this.listaFeedTiempoReal = feeds.map(f => f.idFeed);
-      this.tiemporealService.actualizar_feeds(this.listaFeedTiempoReal);
-    });
-
+    // Obtener datos en tiempo real
     this.suscripcionTiempoReal = this.tiemporealService.tiempoReal.subscribe((tiempoReal) => {
-      // console.log(tiempoReal);
+      console.log(tiempoReal);
       // Añadir posiciones al mapa
       if (tiempoReal !== undefined) {
         let geojson: GeoJSON.FeatureCollection<GeoJSON.Point> = {
@@ -490,27 +501,27 @@ export class MapaComponent implements OnInit, OnDestroy {
 
   prepararPosiciones() {
     // Descargar posiciones de este minuto
-    console.log(`${moment().format("HH:mm:ss.SSS")} - Descargar posiciones`)
+    // console.log(`${moment().format("HH:mm:ss.SSS")} - Descargar posiciones`)
     this.descargarPosiciones(this.listaAgencias);
 
     // Descargar proximas posiciones cada minuto en el segundo 30
     let millisegundos = moment().seconds() * 1000 + moment().milliseconds();
     let timeout: number;
-    console.log(`${moment().format("HH:mm:ss.SSS")} - ms: ${millisegundos}`)
+    // console.log(`${moment().format("HH:mm:ss.SSS")} - ms: ${millisegundos}`)
     if (millisegundos > 30000) {
       timeout = 60000 - millisegundos + 30000;
-      console.log(`${moment().format("HH:mm:ss.SSS")} - Timeout: ${timeout}`)
-      console.log(`${moment().format("HH:mm:ss.SSS")} - Descargar posiciones`)
+      // console.log(`${moment().format("HH:mm:ss.SSS")} - Timeout: ${timeout}`)
+      // console.log(`${moment().format("HH:mm:ss.SSS")} - Descargar posiciones`)
       this.descargarPosiciones(this.listaAgencias);
     } else {
       timeout = 30000 - millisegundos;
-      console.log(`${moment().format("HH:mm:ss.SSS")} - Timeout: ${timeout}`)
+      // console.log(`${moment().format("HH:mm:ss.SSS")} - Timeout: ${timeout}`)
     }
     setTimeout(() => {
       // Si hace falta sincronizar usar this.cadaMinuto
-      console.log(`${moment().format("HH:mm:ss.SSS")} - SetInterval`)
+      // console.log(`${moment().format("HH:mm:ss.SSS")} - SetInterval`)
       this.descargarPosiciones(this.listaAgencias);
-      setInterval(() => {console.log(`${moment().format("HH:mm:ss.SSS")} - Intervalo segundo 30`); this.descargarPosiciones(this.listaAgencias); console.log(`${moment().format("HH:mm:ss.SSS")} - Vuelta al ciclo`);}, 60000-25); // 25ms: Lo que tarda en volver al ciclo normalmente
+      setInterval(() => {/*console.log(`${moment().format("HH:mm:ss.SSS")} - Intervalo segundo 30`);*/ this.descargarPosiciones(this.listaAgencias); /*console.log(`${moment().format("HH:mm:ss.SSS")} - Vuelta al ciclo`);*/}, 60000-25); // 25ms: Lo que tarda en volver al ciclo normalmente
     }, timeout);
   }
 
@@ -537,7 +548,7 @@ export class MapaComponent implements OnInit, OnDestroy {
   }
 
   filtrarAgencias(agencias: string[]) {
-    console.log(`filtrarAgencias(${agencias})`);
+    // console.log(`filtrarAgencias(${agencias})`);
     this.listaAgenciasVisibles = agencias;
 
     this.filtrarMapa({});
@@ -558,9 +569,8 @@ export class MapaComponent implements OnInit, OnDestroy {
       agencias_paradas = ['any', ...filtrosMapa.agencias.map((agencia) => ['in', agencia, ['get', 'agencias']] as ExpressionSpecification)];  
       feeds_posiciones= ['in', 'idFeed', ...filtrosMapa.agencias.map((agencia) => agencia.split(/_(.*)/s)[0])];
     } else {
-      console.trace()
-      console.log(this.listaAgencias)
-      console.log(this.listaAgenciasVisibles)
+      // console.log(this.listaAgencias)
+      // console.log(this.listaAgenciasVisibles)
       if (!filtrosMapa.lineas && !filtrosMapa.paradas && !filtrosMapa.recorridos && !filtrosMapa.viajes && this.listaAgencias.length - this.listaAgenciasVisibles.length > 0) {
         agencias_lineas_posiciones = ['in', 'idAgencia', ...this.listaAgenciasVisibles] as FilterSpecification;
         agencias_paradas = ['any', ...this.listaAgenciasVisibles.map((agencia) => ['in', agencia, ['get', 'agencias']] as ExpressionSpecification)];
@@ -626,21 +636,19 @@ export class MapaComponent implements OnInit, OnDestroy {
   }
 
   descargarPosiciones(agencias: string[]) {
-    const inicio = moment()
+    console.log(`${moment().format("HH:mm:ss.SSS")} - Descargar posiciones`)
     let endpoint: Observable<PosicionRespuesta>;
     if (this.listaPosiciones === undefined) {
-      // console.log(`Descargar (primero) - ${moment().toISOString()}`)
-      console.log(`${moment().format("HH:mm:ss.SSS")} - Descargar (primero)`)
+      // console.log(`${moment().format("HH:mm:ss.SSS")} - Descargar (primero)`)
       this.listaPosiciones = new Map();
       endpoint = this.posicionesService.getPosicionesActuales(agencias);
     } else {
-      // console.log(`Descargar - ${moment().toISOString()}`)
-      console.log(`${moment().format("HH:mm:ss.SSS")} - Descargar (siguiente)`)
+      // console.log(`${moment().format("HH:mm:ss.SSS")} - Descargar (siguiente)`)
       endpoint = this.posicionesService.getPosicionesProximoMinuto(agencias);
     }
 
     endpoint.subscribe((posiciones) => {
-      console.log(`${moment().format("HH:mm:ss.SSS")} - Posiciones descargadas ${posiciones.fecha}`)
+      // console.log(`${moment().format("HH:mm:ss.SSS")} - Posiciones descargadas ${posiciones.fecha}`)
       let listaFechas: Array<{fecha: string, features: Array<GeoJSON.Feature<GeoJSON.Point>>}> = [];
       posiciones.agencias.forEach((agencia) => {
         agencia.viajes.forEach((viaje) => {
@@ -662,7 +670,7 @@ export class MapaComponent implements OnInit, OnDestroy {
                 idAgencia: agencia.idAgencia,
                 idLinea: viaje.idLinea,
                 idViaje: viaje.idViaje,
-                proximoOrdenParada: posicion.proximoOrdenParada
+                tipo: viaje.tipo?.toString()
               }
             });
           });
@@ -670,7 +678,7 @@ export class MapaComponent implements OnInit, OnDestroy {
       });
 
       // Guardar features
-      console.log(`${moment().format("HH:mm:ss.SSS")} - Guardar features`)
+      // console.log(`${moment().format("HH:mm:ss.SSS")} - Guardar features`)
       listaFechas.forEach((t) => {
         let geojson: GeoJSON.FeatureCollection<GeoJSON.Point> = {
           'type': 'FeatureCollection',
@@ -682,21 +690,18 @@ export class MapaComponent implements OnInit, OnDestroy {
       // console.log(this.listaPosiciones)
 
       // Eliminar posiciones antiguas
-      console.log(`${moment().format("HH:mm:ss.SSS")} - Eliminar posiciones antiguas`)
+      // console.log(`${moment().format("HH:mm:ss.SSS")} - Eliminar posiciones antiguas`)
       this.listaPosiciones?.forEach((_, fecha) => {
         if (moment(fecha).isBefore(moment(posiciones.fecha).subtract(1, 'minute'))) {
           this.listaPosiciones?.delete(fecha);
         }
       });
-
-      // console.log("Descargado en " + moment().diff(inicio, 'milliseconds') + "ms");
-      console.log(`${moment().format("HH:mm:ss.SSS")} - Descargado en ${moment().diff(inicio, 'milliseconds')}ms`)
     });
   }
 
   decodificarPosiciones(fechaInicial: Moment, posiciones: string): PosicionesFechas {
-    // Formato: lat|lon|proximoOrdenParada~lat|lon|proximoOrdenParada~...
-    // ~: separa posiciones, |: separa lat, lon y proximoOrdenParada, @: datos vacios
+    // Formato: lat|lon~lat|lon~...
+    // ~: separa posiciones, |: separa lat y lon, @: datos vacios
     let PRECISION_COORDENADAS = 6;
 
     let posiciones_decodificadas: PosicionesFechas = {};
@@ -710,7 +715,7 @@ export class MapaComponent implements OnInit, OnDestroy {
     let i = 0;
     posiciones_separadas.forEach((posicion) => {
       let posicion_separada = posicion.split("|");
-      if (posicion_separada[0] !== '@' && posicion_separada[1] !== '@' && posicion_separada[2] !== '@') {
+      if (posicion_separada[0] !== '@' && posicion_separada[1] !== '@') {
         if (latAnterior === undefined || lonAnterior === undefined) {
           lat = parseFloat(posicion_separada[0]);
           lon = parseFloat(posicion_separada[1]);
@@ -720,9 +725,8 @@ export class MapaComponent implements OnInit, OnDestroy {
         }
         latAnterior = lat;
         lonAnterior = lon;
-        let proximoOrdenParada = parseInt(posicion_separada[2]);
         let fecha = fechaInicial.clone().add(i++, 'seconds').milliseconds(0).toISOString();
-        posiciones_decodificadas[fecha] = {lat: lat, lon: lon, proximoOrdenParada: proximoOrdenParada};
+        posiciones_decodificadas[fecha] = {lat: lat, lon: lon};
 
         latAnterior = lat;
         lonAnterior = lon;

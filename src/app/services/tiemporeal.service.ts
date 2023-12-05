@@ -53,7 +53,7 @@ export class TiempoRealService {
 
     // Conseguir el valor string idFeed segun longitud idFeedLon
     const idFeed = new TextDecoder().decode(data.slice(2, 2 + idFeedLon));
-    // console.log(`idFeed: ${idFeed}`);
+    console.log(`idFeed: ${idFeed}`);
 
     // Conseguir FeedMessage
     const protobuf = data.slice(2 + idFeedLon);
