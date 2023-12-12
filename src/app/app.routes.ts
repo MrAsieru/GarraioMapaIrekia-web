@@ -18,37 +18,44 @@ export const routes: Routes = [
   {
     path: 'app',
     component: MapaComponent,
+    title: 'App',
     children: [
       {
         path: '',
         component: HomePage,
         outlet: 'inicio',
-        pathMatch: 'full'
+        pathMatch: 'full',
+        title: 'Inicio'
       },
       {
         path: 'parada/:idParada',
         component: ParadaComponent,
-        pathMatch: 'full'
+        pathMatch: 'full',
+        title: 'Parada'
       },
       {
         path: 'linea/:idLinea',
         component: LineaComponent,
-        pathMatch: 'full'
+        pathMatch: 'full',
+        title: 'Linea'
       },
       {
         path: 'agencia/:idAgencia',
         component: AgenciaComponent,
-        pathMatch: 'full'
+        pathMatch: 'full',
+        title: 'Agencia'
       },
       {
         path: 'viaje/:idViaje',
         component: ViajeComponent,
-        pathMatch: 'full'
+        pathMatch: 'full',
+        title: 'Viaje'
       },
       {
         path: 'atribuciones',
         component: AtribucionesComponent,
-        pathMatch: 'full'
+        pathMatch: 'full',
+        title: 'Atribuciones'
       }
     ]
   }

@@ -116,7 +116,7 @@
                     <br/>
                   </ng-container>
                   <ng-container *ngIf="vehiculoTiempoReal.currentStatus">
-                    <ion-text style="font-weight: bold;">Estado del actual: </ion-text>                    
+                    <ion-text style="font-weight: bold;">Estado actual: </ion-text>                    
                     <ng-container [ngSwitch]="vehiculoTiempoReal.currentStatus">
                       <ion-text *ngSwitchCase="vehicleStopStatusEnum.INCOMING_AT">Llegando a la parada</ion-text>
                       <ion-text *ngSwitchCase="vehicleStopStatusEnum.STOPPED_AT">Detenido en la parada</ion-text>

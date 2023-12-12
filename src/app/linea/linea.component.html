@@ -6,6 +6,31 @@
           <ion-icon src="assets/img/tipolinea_{{linea.tipo ? linea.tipo : 0}}.svg"></ion-icon>
           <ion-label>{{linea.nombreLargo ?? linea.nombreCorto}}</ion-label>
         </ion-card-title>
+        <ion-card-subtitle>
+          <ng-container *ngIf="linea.recogidaContinua != 1 || linea.bajadaContinua != 1">
+            <ion-icon id="viaje_pickup_dropoff" src="assets/img/pickup_dropoff.svg" (click)="$event.stopPropagation()"></ion-icon>
+            <ion-popover trigger="viaje_pickup_dropoff" triggerAction="click" showBackdrop="false">
+              <ng-template>
+                <ion-content>
+                  <ng-container *ngIf="linea.recogidaContinua != 1">
+                    <ion-text style="font-weight: bold;">Recogida continua:</ion-text>
+                    <ion-text *ngIf="linea.recogidaContinua === 0"><br/>Recogida continua con paradas.</ion-text>
+                    <ion-text *ngIf="linea.recogidaContinua === 2"><br/>Debe llamar a la agencia para organizar la recogida continua con paradas.</ion-text>
+                    <ion-text *ngIf="linea.recogidaContinua === 3"><br/>Debe coordinar con el conductor para organizar la recogida continua con paradas.</ion-text>
+                    <br/>
+                  </ng-container>
+                  <ng-container *ngIf="linea.bajadaContinua != 1">
+                    <ion-text style="font-weight: bold;">Bajada continua:</ion-text>
+                    <ion-text *ngIf="linea.bajadaContinua === 0"><br/>Bajada continua con paradas.</ion-text>
+                    <ion-text *ngIf="linea.bajadaContinua === 2"><br/>Debe llamar a la agencia para organizar la bajada continua con paradas.</ion-text>
+                    <ion-text *ngIf="linea.bajadaContinua === 3"><br/>Debe coordinar con el conductor para organizar la bajada continua con paradas.</ion-text>
+                    <br/>
+                  </ng-container>
+                </ion-content>
+              </ng-template>
+            </ion-popover>
+          </ng-container>
+        </ion-card-subtitle>
         <ion-card-content style="padding: 0 !important;">
           <ion-chip text-wrap (click)="navegarA(['../../agencia', linea.idAgencia])">
             <ion-label text-wrap style="max-width: 100px; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">{{agencia?.nombre ?? linea.idAgencia}}</ion-label>
@@ -34,7 +59,7 @@
                   <ion-col size="1" class="ion-no-padding"><ion-label style="font-size: 0.75em;" class="ion-no-padding"><ion-icon src="assets/img/parada.svg"></ion-icon></ion-label></ion-col>
                 </ion-row>
                 <ion-row *ngFor="let patron of patrones; index as i" (click)="seleccionarPatron(i)" style="cursor: pointer;">
-                  <ion-col size="1" class="ion-no-padding" style="display: flex; align-items: center;"><ion-icon src="assets/img/direccion_{{patron.idDireccion ? patron.idDireccion : '0'}}.svg"></ion-icon></ion-col>
+                  <ion-col size="1" class="ion-no-padding" style="display: flex; align-items: center;"><ion-icon src="assets/img/direccion_{{patron.direccion ? patron.direccion : '0'}}.svg"></ion-icon></ion-col>
                   <ion-col size="5" class="ion-no-padding"><ion-item class="ion-no-padding" style="--inner-padding-end: 0.1em;"><ion-label style="font-size: 0.75em;" class="ion-no-padding">{{patron.de}}</ion-label></ion-item></ion-col>
                   <ion-col size="4" class="ion-no-padding"><ion-item class="ion-no-padding" style="--inner-padding-end: 0.1em;"><ion-label style="font-size: 0.75em;" class="ion-no-padding">{{patron.a}}</ion-label></ion-item></ion-col>
                   <ion-col size="1" class="ion-no-padding"><ion-item class="ion-no-padding" style="--inner-padding-end: 0.1em;"><ion-label style="font-size: 0.75em;" class="ion-no-padding">{{patron.numViajes}}</ion-label></ion-item></ion-col>

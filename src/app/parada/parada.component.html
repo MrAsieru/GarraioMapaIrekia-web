@@ -54,15 +54,16 @@
                 <ion-text color="danger" style="padding-right: 0.2em;"> (+{{(horario.retrasoTiempoReal % 3600) / 60 | number: '1.0-0'}}m)</ion-text>
               </ng-container>
             </ng-container>
-            <ion-text id="parada_hora_{{horario.idViaje}}_{{horario.horario.orden}}">en {{((horario.tiempoRestanteTiempoReal ?? horario.tiempoRestante ?? 0) > 60) ? (((horario.tiempoRestanteTiempoReal ?? horario.tiempoRestante ?? 0) / 60) | floor) +'h ': ''}}{{(horario.tiempoRestanteTiempoReal ?? horario.tiempoRestante) ? (horario.tiempoRestanteTiempoReal ?? horario.tiempoRestante ?? 0) % 60: '??'}}min</ion-text>
+            <ion-text id="parada_hora_{{horario.idViaje}}_{{horario.horario.orden}}" (click)="$event.stopPropagation()">en {{((horario.tiempoRestanteTiempoReal ?? horario.tiempoRestante ?? 0) > 60) ? (((horario.tiempoRestanteTiempoReal ?? horario.tiempoRestante ?? 0) / 60) | floor) +'h ': ''}}{{(horario.tiempoRestanteTiempoReal ?? horario.tiempoRestante) ? (horario.tiempoRestanteTiempoReal ?? horario.tiempoRestante ?? 0) % 60: '??'}}min</ion-text>
+            <ion-popover trigger="parada_hora_{{horario.idViaje}}_{{horario.horario.orden}}" triggerAction="click" showBackdrop="false">
+              <ng-template>
+                <ion-content class="ion-padding">A las {{horario.horario.momentoLlegada?.tz(horario.zonaHoraria)! | dateFormat:'H:mm'}} hora local</ion-content>
+              </ng-template>
+            </ion-popover>
             <br/>
             <ion-note class="ion-align-self-end">
               <ion-text>a las {{horario.momentoLlegadaTiempoReal ?? horario.horario.momentoLlegada! | dateFormat:'H:mm'}}</ion-text>
-              <ion-popover trigger="parada_hora_{{horario.idViaje}}_{{horario.horario.orden}}" triggerAction="click" showBackdrop="false">
-                <ng-template>
-                  <ion-content class="ion-padding">A las {{horario.horario.momentoLlegada?.tz(horario.zonaHoraria)! | dateFormat:'H:mm'}} hora local</ion-content>
-                </ng-template>
-              </ion-popover>
+              
               <ion-icon id="parada_exacto_{{horario.idViaje}}_{{horario.horario.orden}}" src="assets/img/exacto_{{horario.horario.exacto ? '1' : '0'}}.svg" (click)="$event.stopPropagation()"></ion-icon>
               <ion-popover trigger="parada_exacto_{{horario.idViaje}}_{{horario.horario.orden}}" triggerAction="click" showBackdrop="false">
                 <ng-template>
@@ -108,7 +109,7 @@
                       </ng-container>
                       <ng-container *ngIf="horario.retrasoTiempoReal">
                         <ion-text style="font-weight: bold;">Retraso: </ion-text>
-                        <ng-container *ngIf="horario.retrasoTiempoReal! < 0">
+                        <ng-container *ngIf="horario.retrasoTiempoReal! === 0">
                           <ion-text style="padding-right: 1em;">0 min</ion-text>
                         </ng-container>
                         <ng-container *ngIf="horario.retrasoTiempoReal! < 0">

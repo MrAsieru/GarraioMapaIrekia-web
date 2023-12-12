@@ -13,6 +13,7 @@ import { ModalAlertasComponent } from '../modal-alertas/modal-alertas.component'
 import { AgenciasService } from '../services/agencias.service';
 import { Agencia } from '../models/agencia.model';
 import { NavegacionService } from '../services/navegacion.service';
+import { Title } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-linea',
@@ -41,13 +42,15 @@ export class LineaComponent  implements OnInit {
     private tiempoRealService: TiempoRealService,
     private agenciasService: AgenciasService,
     private modalCtrl: ModalController,
-    private navegacionService: NavegacionService) { }
+    private navegacionService: NavegacionService,
+    private titleService: Title) { }
 
   ngOnInit() {
     this.idLinea = this.route.snapshot.paramMap.get('idLinea');
 
     if (this.idLinea) {
       this.lineasService.getLinea(this.idLinea).subscribe(linea => {
+        this.titleService.setTitle(`Línea | ${linea.nombreCorto ?? linea.nombreLargo}`);
         this.linea = linea;
 
         if (linea.color) {

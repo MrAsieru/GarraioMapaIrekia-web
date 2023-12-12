@@ -13,6 +13,7 @@ import { transit_realtime } from 'gtfs-realtime-bindings';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { ModalAlertasComponent } from '../modal-alertas/modal-alertas.component';
 import { NavegacionService } from '../services/navegacion.service';
+import { Title } from '@angular/platform-browser';
 
 @Component({
     selector: 'app-agencia',
@@ -37,13 +38,15 @@ export class AgenciaComponent  implements OnInit {
     private lineasService: LineasService,
     private tiempoRealService: TiempoRealService,
     private modalCtrl: ModalController,
-    private navegacionService: NavegacionService) { }
+    private navegacionService: NavegacionService,
+    private titleService: Title) { }
 
   ngOnInit() {
     this.idAgencia = this.route.snapshot.paramMap.get('idAgencia');
 
     if (this.idAgencia) {
       this.agenciasService.getAgencia(this.idAgencia).subscribe(agencia => {
+        this.titleService.setTitle(`Agencia | ${agencia.nombre}`);
         this.agencia = agencia;
 
         this.mapaService.setAjusteMapa({

@@ -17,6 +17,7 @@ import { BehaviorSubject, Subscription } from 'rxjs';
 import { ModalAlertasComponent } from '../modal-alertas/modal-alertas.component';
 import { NavegacionService } from '../services/navegacion.service';
 import { FloorPipe } from "../floor/floor.pipe";
+import { Title } from '@angular/platform-browser';
 
 
 @Component({
@@ -47,13 +48,15 @@ export class ParadaComponent  implements OnInit, OnDestroy {
     private agenciasService: AgenciasService,
     private tiempoRealService: TiempoRealService,
     private modalCtrl: ModalController,
-    private navegacionService: NavegacionService) { }
+    private navegacionService: NavegacionService,
+    private titleService: Title) { }
 
   ngOnInit() {
     this.idParada = this.route.snapshot.paramMap.get('idParada');
 
     if (this.idParada) {
       this.paradasService.getParada(this.idParada, {incluirLineas: true, incluirViajes: true}).subscribe(parada => {
+        this.titleService.setTitle(`Parada | ${parada.nombre}`);
         this.parada = parada;
 
         if (parada.paradaPadre) {

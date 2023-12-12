@@ -18,6 +18,7 @@ import { transit_realtime } from 'gtfs-realtime-bindings';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { ModalAlertasComponent } from '../modal-alertas/modal-alertas.component';
 import { NavegacionService } from '../services/navegacion.service';
+import { Title } from '@angular/platform-browser';
 
 @Component({
     selector: 'app-viaje',
@@ -62,7 +63,8 @@ export class ViajeComponent  implements OnInit {
     private mapaService: MapaService,
     private tiempoRealService: TiempoRealService,
     private modalCtrl: ModalController,
-    private navegacionService: NavegacionService) { }
+    private navegacionService: NavegacionService,
+    private titleService: Title) { }
     
   ngOnInit() {
     this.idViaje = this.route.snapshot.paramMap.get('idViaje');
@@ -72,6 +74,7 @@ export class ViajeComponent  implements OnInit {
 
     if (this.idViaje) {
       this.viajesService.getViaje(this.idViaje, {incluirHorarios: true, incluirFechas: true, incluirFrecuencias: true}).subscribe(viaje => {
+        this.titleService.setTitle(`Viaje | ${viaje.nombre}`);
         this.viaje = viaje;
         this.viaje.horarios?.sort((a, b) => a.orden - b.orden);
 
@@ -99,6 +102,7 @@ export class ViajeComponent  implements OnInit {
         });
 
         viaje.horarios?.forEach(horario => {
+          horario.tipoBajada
           if (horario.horaLlegada) {
             let [horas, minutos, segundos] = (horario.horaLlegada as string).split(':').map(Number);
             horario.momentoLlegada = moment().startOf('day').add(horas, 'hours').add(minutos, 'minutes').add(segundos, 'seconds');

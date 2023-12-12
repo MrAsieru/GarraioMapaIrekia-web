@@ -202,7 +202,14 @@ export class MapaComponent implements OnInit, OnDestroy {
             'minzoom': tileset.vector_layers.find(layer => layer.id === "paradas")?.minzoom && 0,
             'layout': {
               'icon-image': ['get', ['get', 'tipo'], ['literal', this.tipos_paradas]],
-              'icon-allow-overlap': false,
+              'text-allow-overlap': false,
+              'icon-allow-overlap': [
+                'step',
+                ['zoom'],
+                false,
+                14,
+                true
+              ],
               "icon-size": [
                 'interpolate',
                 // Set the exponential rate of change to 1.5

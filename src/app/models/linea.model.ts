@@ -15,6 +15,8 @@ export class Linea {
     color?: string;
     colorTexto?: string;
     orden?: number;
+    recogidaContinua?: number;
+    bajadaContinua?: number;
     idRed?: string;
     paradas?: string[] | Parada[];
     viajes?: string[];
@@ -25,7 +27,7 @@ export class Linea {
 export class PatronLinea {
     de: string;
     a: string;
-    idDireccion?: number;
+    direccion?: number;
     letrero?: string;
     paradas: string[];
     paradasObj?: Parada[];
