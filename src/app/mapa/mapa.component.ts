@@ -317,7 +317,7 @@ export class MapaComponent implements OnInit, OnDestroy {
 
       // Actualizar lista suscripciones tiempo real
       this.feedsService.getFeedsTiempoReal().subscribe((feeds) => {
-        this.listaFeedTiempoReal = feeds.map(f => f.idFeed);
+        this.listaFeedTiempoReal = feeds?.map(f => f.idFeed) ?? [];
         this.tiemporealService.actualizar_feeds(this.listaFeedTiempoReal);
       });
     });
