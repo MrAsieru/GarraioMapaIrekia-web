@@ -46,7 +46,7 @@
     <ion-card>
       <ion-list>
         <ion-item *ngFor="let linea of lineas" [button]="true" [detail]="false" (click)="navegarA(['../../linea', linea.idLinea])">
-          <ion-icon src="assets/img/tipolinea_{{linea?.tipo ? linea?.tipo : 0}}.svg"></ion-icon>
+          <ion-icon src="assets/img/tipolinea_{{linea?.tipo ?? ''}}.svg"></ion-icon>
           <ion-label>
             <ion-chip [ngStyle]="{'background': linea?.color, 'color': linea?.colorTexto}">{{linea?.nombreCorto ?? linea?.idLinea}}</ion-chip>
             <ion-text>{{linea?.nombreLargo}}</ion-text>

@@ -37,7 +37,7 @@
     <ion-card>
       <ion-list>
         <ion-item *ngFor="let horario of viajes" [button]="true" [detail]="false" (click)="navegarA(['../../viaje', horario.idViaje])">
-          <ion-icon src="assets/img/tipolinea_{{horario.linea?.tipo ? horario.linea?.tipo : 0}}.svg"></ion-icon>
+          <ion-icon src="assets/img/tipolinea_{{horario.linea?.tipo ?? ''}}.svg"></ion-icon>
           <ion-label style="flex-grow: 2;">
             <ion-chip [ngStyle]="{'background': horario.linea?.color, 'color': horario.linea?.colorTexto}">{{horario.linea?.nombreCorto ?? horario.linea?.idLinea?.split("_")?.[1]}}</ion-chip>
             <ion-text>{{horario.letrero ?? horario.linea?.nombreLargo}}</ion-text>

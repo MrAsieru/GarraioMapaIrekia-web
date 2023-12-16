@@ -25,7 +25,7 @@
       <ion-label><b>Lineas</b></ion-label>
     </ion-list-header>
     <ion-item *ngFor="let l of lineas" button (click)="mostrarLinea(l, $event)">
-      <ion-icon src="assets/img/tipolinea_{{l.tipo ? l.tipo : 0}}.svg"></ion-icon>
+      <ion-icon src="assets/img/tipolinea_{{l.tipo ?? ''}}.svg"></ion-icon>
       <ion-text>{{l.nombreCorto}}{{(l.nombreCorto && l.nombreLargo) ? ' - ' : ''}}{{l.nombreLargo}}</ion-text>
       <ion-chip [ngStyle]="{'background': l.color, 'color': l.colorTexto}">{{l.nombreAgencia}}</ion-chip>
     </ion-item>
