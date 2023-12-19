@@ -12,7 +12,7 @@ import { TiempoRealService } from '../services/tiemporeal.service';
 import { transit_realtime } from 'gtfs-realtime-bindings';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { ModalAlertasComponent } from '../modal-alertas/modal-alertas.component';
-import { NavegacionService } from '../services/navegacion.service';
+import { NavegacionAppService } from '../services/navegacion-app.service';
 import { Title } from '@angular/platform-browser';
 
 @Component({
@@ -38,7 +38,7 @@ export class AgenciaComponent  implements OnInit {
     private lineasService: LineasService,
     private tiempoRealService: TiempoRealService,
     private modalCtrl: ModalController,
-    private navegacionService: NavegacionService,
+    private navegacionAppService: NavegacionAppService,
     private titleService: Title) { }
 
   ngOnInit() {
@@ -127,6 +127,6 @@ export class AgenciaComponent  implements OnInit {
   }
 
   navegarA(ruta: string[]) {
-    this.navegacionService.navegarA(ruta, this.route);
+    this.navegacionAppService.navegarA(ruta, this.route);
   }
 }

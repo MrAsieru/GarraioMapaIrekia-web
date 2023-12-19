@@ -12,7 +12,7 @@ import { BehaviorSubject, Subscription } from 'rxjs';
 import { ModalAlertasComponent } from '../modal-alertas/modal-alertas.component';
 import { AgenciasService } from '../services/agencias.service';
 import { Agencia } from '../models/agencia.model';
-import { NavegacionService } from '../services/navegacion.service';
+import { NavegacionAppService } from '../services/navegacion-app.service';
 import { Title } from '@angular/platform-browser';
 
 @Component({
@@ -42,7 +42,7 @@ export class LineaComponent  implements OnInit {
     private tiempoRealService: TiempoRealService,
     private agenciasService: AgenciasService,
     private modalCtrl: ModalController,
-    private navegacionService: NavegacionService,
+    private navegacionAppService: NavegacionAppService,
     private titleService: Title) { }
 
   ngOnInit() {
@@ -140,6 +140,6 @@ export class LineaComponent  implements OnInit {
   }
 
   navegarA(ruta: string[]) {
-    this.navegacionService.navegarA(ruta, this.route);
+    this.navegacionAppService.navegarA(ruta, this.route);
   }
 }

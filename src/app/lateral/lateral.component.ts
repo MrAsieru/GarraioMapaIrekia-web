@@ -4,7 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { IonModal, IonicModule } from '@ionic/angular';
 import { BreakpointObserver, BreakpointState, Breakpoints } from '@angular/cdk/layout';
 import { Observable } from 'rxjs';
-import { NavegacionService } from '../services/navegacion.service';
+import { NavegacionAppService } from '../services/navegacion-app.service';
 
 @Component({
   selector: 'app-lateral',
@@ -20,7 +20,7 @@ export class LateralComponent  implements OnInit {
   constructor(private route: ActivatedRoute,
     private router: Router,
     private breakpointObserver: BreakpointObserver,
-    private navegacionService: NavegacionService) { }
+    private navegacionAppService: NavegacionAppService) { }
   mostrarModal: boolean = true;
 
   ngOnInit() {
@@ -32,12 +32,12 @@ export class LateralComponent  implements OnInit {
 
   back() {
     this.lateralModal?.dismiss();
-    this.navegacionService.back();
+    this.navegacionAppService.back();
   }
 
   cerrar() {
     this.lateralModal?.dismiss();
-    this.navegacionService.navegarA([Array(this.nivel).fill('..').join('/')], this.route);
+    this.navegacionAppService.navegarA([Array(this.nivel).fill('..').join('/')], this.route);
   }
 
   ngOnDestroy() {

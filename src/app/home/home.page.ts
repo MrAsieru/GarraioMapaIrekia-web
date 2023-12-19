@@ -7,7 +7,7 @@ import { Linea } from '../models/linea.model';
 import { AgenciasService } from '../services/agencias.service';
 import { ActivatedRoute, Router, RouterModule} from '@angular/router'
 import { MapaService } from '../services/mapa.service';
-import { NavegacionService } from '../services/navegacion.service';
+import { NavegacionAppService } from '../services/navegacion-app.service';
 import { TiempoRealService } from '../services/tiemporeal.service';
 
 @Component({
@@ -29,7 +29,7 @@ export class HomePage implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private mapaService: MapaService,
-    private navegacionService: NavegacionService,
+    private navegacionAppService: NavegacionAppService,
     private tiempoReal: TiempoRealService) {
       this.listaAgenciasBusqueda = this.listaAgencias.map(agencia => ({ ...agencia, mostrar: true }));
   }
@@ -48,7 +48,7 @@ export class HomePage implements OnInit {
   }
 
   navegarA(ruta: string[]) {
-    this.navegacionService.navegarA(ruta, this.route);
+    this.navegacionAppService.navegarA(ruta, this.route);
   }
 
   agenciaCheckboxClick(event: Event, details: CheckboxChangeEventDetail<string>) {

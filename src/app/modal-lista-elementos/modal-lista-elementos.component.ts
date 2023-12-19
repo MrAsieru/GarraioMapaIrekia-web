@@ -8,7 +8,7 @@ import { ParadasService } from '../services/paradas.service';
 import { Linea } from '../models/linea.model';
 import { Observable } from 'rxjs';
 import { ActivatedRoute, Route, Router } from '@angular/router';
-import { NavegacionService } from '../services/navegacion.service';
+import { NavegacionAppService } from '../services/navegacion-app.service';
 import { Viaje, ViajePropiedadesVectoriales } from '../models/viaje.model';
 import { ViajesService } from '../services/viajes.service';
 
@@ -26,7 +26,7 @@ export class ModalListaElementosComponent implements OnInit {
   viajes: Array<Viaje & ViajePropiedadesVectoriales & {linea?: Linea}> = [];
   constructor(private paradasService: ParadasService,
     private modalCtrl: ModalController,
-    private navegacionService: NavegacionService,
+    private navegacionAppService: NavegacionAppService,
     private viajesService: ViajesService,
     private lineasService: LineasService) { }
 
@@ -105,7 +105,7 @@ export class ModalListaElementosComponent implements OnInit {
   navegarA(ruta: string[]) {
     console.log(this.route.toString())
     this.modalCtrl.dismiss(undefined, undefined, 'modal-lista-elementos');    
-    this.navegacionService.navegarA(ruta, this.route);
+    this.navegacionAppService.navegarA(ruta, this.route);
   }
 
   cerrar() {

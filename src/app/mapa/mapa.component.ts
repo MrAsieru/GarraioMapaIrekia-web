@@ -18,7 +18,7 @@ import { FeedsService } from '../services/feeds.service';
 import { ActivatedRoute, Route, Router, RouterModule } from '@angular/router';
 import { MapaService } from '../services/mapa.service';
 import { AjusteMapa, FiltroMapa, MovimientoMapa } from '../models/mapa.model';
-import { NavegacionService } from '../services/navegacion.service';
+import { NavegacionAppService } from '../services/navegacion-app.service';
 import { ViajePropiedadesVectoriales } from '../models/viaje.model';
 
 @Component({
@@ -98,7 +98,7 @@ export class MapaComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private router: Router,
     private mapaService: MapaService,
-    private navegacionService: NavegacionService) {}
+    private navegacionAppService: NavegacionAppService) {}
 
   ngOnInit() {
     this.modalListaElementosDatos = null;
@@ -748,6 +748,6 @@ export class MapaComponent implements OnInit, OnDestroy {
   }
 
   navegarA(ruta: string[]) {
-    this.navegacionService.navegarA(ruta, this.route);
+    this.navegacionAppService.navegarA(ruta, this.route);
   }
 }

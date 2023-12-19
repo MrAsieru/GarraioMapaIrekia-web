@@ -15,7 +15,7 @@ import { transit_realtime } from 'gtfs-realtime-bindings';
 import { TiempoRealService } from '../services/tiemporeal.service';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { ModalAlertasComponent } from '../modal-alertas/modal-alertas.component';
-import { NavegacionService } from '../services/navegacion.service';
+import { NavegacionAppService } from '../services/navegacion-app.service';
 import { FloorPipe } from "../floor/floor.pipe";
 import { Title } from '@angular/platform-browser';
 
@@ -48,7 +48,7 @@ export class ParadaComponent  implements OnInit, OnDestroy {
     private agenciasService: AgenciasService,
     private tiempoRealService: TiempoRealService,
     private modalCtrl: ModalController,
-    private navegacionService: NavegacionService,
+    private navegacionAppService: NavegacionAppService,
     private titleService: Title) { }
 
   ngOnInit() {
@@ -60,7 +60,7 @@ export class ParadaComponent  implements OnInit, OnDestroy {
         this.parada = parada;
 
         if (parada.paradaPadre) {
-          this.navegacionService.redirigirA(['../', parada.paradaPadre], this.route)
+          this.navegacionAppService.redirigirA(['../', parada.paradaPadre], this.route)
         } else {
           this.mapaService.setFiltrarMapa({
             paradas: [parada.idParada],
@@ -262,6 +262,6 @@ export class ParadaComponent  implements OnInit, OnDestroy {
 
   navegarA(ruta: string[]) {
     console.log(this.route.toString())
-    this.navegacionService.navegarA(ruta, this.route);
+    this.navegacionAppService.navegarA(ruta, this.route);
   }
 }

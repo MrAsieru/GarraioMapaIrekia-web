@@ -7,7 +7,7 @@ import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 })
 
 // Nils Mehlhorn: https://nils-mehlhorn.de/posts/angular-navigate-back-previous-page/
-export class NavegacionService {
+export class NavegacionAppService {
   private history: string[] = [];
  
   constructor(private router: Router, private location: Location) {
