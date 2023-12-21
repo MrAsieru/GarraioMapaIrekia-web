@@ -408,7 +408,8 @@ export class MapaComponent implements OnInit, OnDestroy {
               if (navegacion.trayecto) {
                 this.filtrarMapa({
                   viajes: navegacion.trayecto.legs.map(leg => leg.trip?.gtfsId.split(/:(.*)/s)[1] ?? ""),
-                  recorridos: []
+                  recorridos: [],
+                  paradas: [],
                 })
                 navegacion.trayecto.legs.forEach((leg, i, legs) => {
                   const geometry = this.latLonALonLat(decode(leg.legGeometry?.points ?? "", 5));
@@ -468,6 +469,8 @@ export class MapaComponent implements OnInit, OnDestroy {
               } else {
                 this.filtrarMapa({})
               }
+            } else {
+              this.filtrarMapa({})
             }
 
             (this.map.getSource("navegacion_symb") as GeoJSONSource).setData(geojson_symb);
