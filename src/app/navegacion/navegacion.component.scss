@@ -1,0 +1,139 @@
+// Estilo para toggle de hora de salida/llegada
+ion-toggle.salirllegar {
+  --track-background: rgba(var(--ion-text-color-rgb, 0, 0, 0), 0.39);
+  --track-background-checked: rgba(var(--ion-text-color-rgb, 0, 0, 0), 0.39);
+
+  --handle-background: #ffffff;
+  --handle-background-checked: #ffffff;
+}
+
+
+ion-card-header.trayecto_header ion-text {
+  width: fit-content;
+  padding-right: 1em;
+}
+
+.trayecto_content.oculto {
+  max-height: 0px;
+  padding: unset;
+}
+
+// Ilustración etapas de trayecto
+div.etapa::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background-color: var(--color-etapa); /* Material Design primary color */
+  width: 0.4em; /* Line thickness */
+  z-index: 2;
+  transform: translateX(1.04em);
+}
+  
+div.etapa::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: var(--color-etapa); /* Material Design primary color */
+  color: white; /* Text color of the bullet */
+  border-radius: 50%;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.3); /* Shadow for the bullet */
+  z-index: 3;
+  height: 2.5em;
+  width: 2.5em;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  // background-image: var(--icono-etapa);
+  // background-size: 2.3em;
+  // background-position-x: 0.1em;
+  // background-position-y: 0.1em;
+}
+
+div.etapa:first-of-type::before {
+  top: 50%; /* Adjusted to have the line below the bullet for the first station */
+}
+
+div.etapa:last-of-type::before {
+  bottom: 50%; /* Adjusted to have the line below the bullet for the first station */
+}
+
+div.etapa {
+  display: block;
+  position: relative;
+  align-items: center;
+}
+
+.etapa_contenido {
+  padding-left: 2.75em;
+}
+
+.etapa_contenido {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.etapa_contenido > ion-icon {
+  font-size: 2em;
+  position: absolute;
+  left: 0.13em;
+  z-index: 5;
+  color: var(--color-icono);
+}
+
+.etapa_contenido .contenido_central {
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+}
+
+// Ilustración paradas intermedias de etapa
+.paradaIntermedia::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background-color: var(--color-linea); /* Material Design primary color */
+  width: 0.4em; /* Line thickness */
+  z-index: 2;
+  transform: translateX(1em);
+  left: 7em;
+}
+  
+.paradaIntermedia::after {
+  content: "•";
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: var(--color-linea); /* Material Design primary color */
+  color: white; /* Text color of the bullet */
+  border-radius: 50%;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.3); /* Shadow for the bullet */
+  z-index: 3;
+  height: 1.2em;
+  width: 1.2em;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  left: 7.6em;
+  // background-image: var(--icono-etapa);
+  // background-size: 2.3em;
+  // background-position-x: 0.1em;
+  // background-position-y: 0.1em;
+}
+
+.paradaIntermedia:first-of-type::before {
+  top: 50%; /* Adjusted to have the line below the bullet for the first station */
+}
+
+.paradaIntermedia:last-of-type::before {
+  bottom: 50%; /* Adjusted to have the line below the bullet for the first station */
+}
+
+.paradaIntermedia {
+  display: block;
+  position: relative;
+  align-items: center;
+}

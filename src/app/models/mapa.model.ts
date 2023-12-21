@@ -1,3 +1,6 @@
+import { LngLat } from "maplibre-gl";
+import { Trayecto } from "./navegacion.model";
+
 export class FiltroMapa {
     agencias?: string[];
     lineas?: string[];
@@ -17,4 +20,10 @@ export class AjusteMapa {
     offset?: number;
     zoomMax?: number;
     linear?: boolean;
+}
+
+export class NavegacionMapa {
+    origen?: LngLat;
+    destino?: LngLat;
+    trayecto?: Trayecto;
 }

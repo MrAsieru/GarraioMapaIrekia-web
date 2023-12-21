@@ -9,6 +9,7 @@ import { AgenciaComponent } from './agencia/agencia.component';
 import { ViajeComponent } from './viaje/viaje.component';
 import { AtribucionesComponent } from './atribuciones/atribuciones.component';
 import { PaginaNoEncontradaComponent } from './pagina-no-encontrada/pagina-no-encontrada.component';
+import { NavegacionComponent } from './navegacion/navegacion.component';
 
 export const routes: Routes = [
   {
@@ -57,6 +58,12 @@ export const routes: Routes = [
         component: AtribucionesComponent,
         pathMatch: 'full',
         title: 'Atribuciones'
+      },
+      {
+        path: 'navegacion',
+        component: NavegacionComponent,
+        pathMatch: 'full',
+        title: 'Navegación'
       },
       {
         path: 'oh',

@@ -9,11 +9,13 @@ import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 // Nils Mehlhorn: https://nils-mehlhorn.de/posts/angular-navigate-back-previous-page/
 export class NavegacionAppService {
   private history: string[] = [];
+  private actual: string = "";
  
   constructor(private router: Router, private location: Location) {
     this.router.events.subscribe((event) => {
       if (event instanceof NavigationEnd) {
         this.history.push(event.urlAfterRedirects);
+        this.actual = event.urlAfterRedirects;
       }
     });
   }
@@ -35,5 +37,11 @@ export class NavegacionAppService {
     this.router.navigate(ruta, {relativeTo: route}).then(() => {
       this.history.pop();
     });
+  }
+
+  paginaActual(): string {
+    const regex = /^\/app(?:\/([^\/]+))?/;
+    const match = this.actual.match(regex);
+    return match?.[1] ?? "";
   }
 }

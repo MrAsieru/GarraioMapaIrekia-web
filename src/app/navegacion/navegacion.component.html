@@ -1,0 +1,283 @@
+<app-lateral nombre="Navegación" [nivel]="1">
+  <div>
+    <ion-card>
+      <ion-row>
+        <ion-col size="9">
+          <!-- Boton para seleccionar origen -->
+          <ion-button expand="block" fill="outline" (click)="seleccionarOrigenDestino(true)">
+            <ion-icon slot="start" src="assets/img/origen.svg"></ion-icon>
+            <ion-label *ngIf="estadoOrigen === 0">Sin origen</ion-label>
+            <ion-label *ngIf="estadoOrigen === 1">Haz clic en el mapa</ion-label>
+            <ion-label *ngIf="estadoOrigen === 2">Origen establecido</ion-label>
+          </ion-button>
+        </ion-col>
+        <ion-col size="3">
+          <ion-button (click)="limpiarOrigenDestino()">
+            <ion-icon src="assets/img/cerrar.svg"></ion-icon>
+          </ion-button>
+        </ion-col>
+      </ion-row>
+      <ion-row>
+        <ion-col size="9">
+          <!-- Boton para seleccionar destino -->
+          <ion-button expand="block" fill="outline" (click)="seleccionarOrigenDestino(false)">
+            <ion-icon slot="start" src="assets/img/origen.svg"></ion-icon>
+            <ion-label *ngIf="estadoDestino === 0">Sin destino</ion-label>
+            <ion-label *ngIf="estadoDestino === 1">Haz clic en el mapa</ion-label>
+            <ion-label *ngIf="estadoDestino === 2">Destino establecido</ion-label>
+          </ion-button>
+        </ion-col>
+        <ion-col size="3">
+          <ion-button (click)="intercambiarOrigenDestino()">
+            <ion-icon src="assets/img/navegacion/inverso.svg"></ion-icon>
+          </ion-button>
+        </ion-col>
+      </ion-row>
+
+      <!-- Checkbox para seleccionar accesibilidad -->
+      <ion-checkbox class="ion-padding" (ionChange)="seleccionarAccesibilidad($event)">
+        <ion-label>Accesibilidad <ion-icon src="assets/img/accesibilidad_1.svg"></ion-icon></ion-label>        
+      </ion-checkbox>
+
+      
+      <div style="display: flex; justify-content: center; align-items: center;">
+        <!-- Seleccionar Salir a las / Llegar a las -->
+        <ion-segment value="salir" (ionChange)="seleccionarSalirLlegar($event)">
+          <ion-segment-button value="salir">
+            <ion-label>Salida</ion-label>
+          </ion-segment-button>
+          <ion-segment-button value="llegar">
+            <ion-label>Llegada</ion-label>
+          </ion-segment-button>
+        </ion-segment>
+
+        <!-- Boton para seleccionar fecha -->
+        <ion-datetime-button id="datetime-button" datetime="datetime"></ion-datetime-button>
+        <ion-popover arrow="false" trigger="datetime-button" [keepContentsMounted]="true">
+          <ng-template>
+            <ion-datetime id="datetime" presentation="date-time" [preferWheel]="true" (ionChange)="seleccionarFechaHora($event)"></ion-datetime>
+          </ng-template>
+        </ion-popover> 
+      </div>
+    </ion-card>
+
+    <ion-card *ngIf="plan === undefined">
+      <ion-card-content>
+        <ion-text>
+          <b>Selecciona un origen y un destino para ver las rutas disponibles</b>
+        </ion-text>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card *ngIf="plan === null">
+      <ion-card-content>
+        <ion-icon src="assets/img/navegacion/espera.svg"></ion-icon>
+        <ion-text>
+          <b>Obteniendo resultados...</b>
+        </ion-text>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card id="trayecto_{{t}}" *ngFor="let itinerario of plan?.itineraries; index as t">
+      <ion-card-header (click)="mostrarTrayecto(t)">
+        <div class="trayecto_header" style="cursor: pointer;">
+          <div>
+            <!-- Desde - hasta -->
+            <ion-text style="font-size: 1.5em; margin-right: 0.4em; display: inline-flex; align-items: baseline;">
+              {{itinerario?.startTime | dateFormat: 'HH:mm'}} - {{itinerario?.endTime | dateFormat: 'HH:mm'}}
+            </ion-text>
+
+            <!-- Duración -->
+            <ion-text style="font-size: 1.5em; display: inline-flex; align-items: baseline;">
+              <ion-icon src="assets/img/navegacion/duracion.svg" style="align-self: center;"></ion-icon>{{itinerario?.duration | durationFormat:'seconds':'h [h] m [min]'}}
+            </ion-text>
+          </div>
+
+          <div>
+            <!-- Transbordos -->
+            <ion-text *ngIf="itinerario?.numberOfTransfers" style="margin-right: 0.6em; display: inline-flex; align-items: baseline;">
+              <ion-icon src="assets/img/navegacion/transbordos.svg" style="align-self: center;"></ion-icon>{{itinerario?.numberOfTransfers ?? 0}}
+            </ion-text>
+
+            <!-- Tiempo andando -->
+            <ion-text style="margin-right: 0.6em; display: inline-flex; align-items: baseline;">
+              <ion-icon src="assets/img/navegacion/andar.svg" style="align-self: center;"></ion-icon>{{itinerario?.walkTime | durationFormat:'seconds':'h [h] m [min]'}}
+            </ion-text>
+
+            <!-- Distancia andando -->
+            <ion-text style="margin-right: 0.6em; display: inline-flex; align-items: baseline;">
+              <ion-icon src="assets/img/navegacion/andar.svg" style="align-self: center;"></ion-icon>{{itinerario?.walkDistance ?? 0 | floor}}m
+            </ion-text>
+
+            <!-- Precio billete -->
+            <ion-text *ngIf="itinerario?.fares?.[0]?.cents" style="display: inline-flex; align-items: baseline;">
+              <ion-icon src="assets/img/navegacion/ticket.svg" style="align-self: center;"></ion-icon>{{(itinerario?.fares?.[0]?.cents ?? 0) / 100 | currency:itinerario?.fares?.[0]?.currency:'symbol':'1.2-2':'es-ES'}}
+            </ion-text>
+          </div>          
+        </div>
+        
+        <!-- Lineas -->
+        <br/>
+        <ion-row style="justify-content: flex-start; flex-wrap: nowrap; overflow-x: scroll !important; overflow-y: hidden;">
+          <ng-container *ngFor="let etapa of itinerario.legs">
+            <ion-col *ngIf="etapa.mode !== 'WALK'" style="display: flex; flex-wrap: nowrap; max-width: fit-content;">
+              <ion-chip text-wrap [ngStyle]="{'background': '#'+etapa.route?.color, 'color': '#'+etapa.route?.textColor}">
+                <ion-icon src="assets/img/tipolinea_{{etapa.route?.type}}.svg" [color]="'#'+etapa.route?.textColor"></ion-icon>
+                <ion-label text-wrap style="max-width: 100px; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">{{etapa.route?.shortName ?? etapa.route?.longName}}</ion-label>
+              </ion-chip>
+            </ion-col>
+          </ng-container>          
+        </ion-row>
+      </ion-card-header>
+      <ion-card-content class="trayecto_content oculto" id="trayecto_{{t}}_content" style="line-height: 1;">
+        <div *ngFor="let etapa of itinerario.legs; index as e" class="etapa" style="cursor: pointer;" (click)="mostrarEtapa(t, e)" [ngStyle]="{'--color-etapa': (etapa.mode === 'WALK') ? '#939393' : '#'+etapa.route?.color}">
+          <ion-row *ngIf="etapa.mode === 'WALK'" class="etapa_contenido">
+            <ion-icon src="assets/img/navegacion/andar.svg" [ngStyle]="{'--color-icono': '#000000'}"></ion-icon>
+            <ion-col size="10" class="contenido_central">
+              <div style="font-size: 1.2em;">
+                <!-- Llegada - salida -->
+                <ion-text>
+                  {{etapa?.from?.departureTime | dateFormat:'HH:mm'}} - {{etapa?.to?.arrivalTime | dateFormat:'HH:mm'}}
+                </ion-text>
+              </div>
+              <div style="font-size: 1.5em;">
+                <!-- Distancia -->
+                <ion-text>
+                  {{etapa?.distance ?? 0 | floor}}m
+                </ion-text>
+                <!-- Duracion -->
+                <ion-text>
+                  {{etapa?.duration | durationFormat:'seconds':'h [h] m [min]'}}
+                </ion-text>
+              </div>
+              <div>
+                <!-- Hacia -->
+                <ion-text>
+                  Hacia: {{etapa?.to?.name}}
+                </ion-text>
+              </div>
+            </ion-col>
+            
+            <ion-col size="2">
+              <!-- Icono direcciones -->
+              <ion-button id="direcciones_{{t}}_{{e}}" size="small">
+                <ion-icon src="assets/img/navegacion/direcciones.svg"></ion-icon>
+              </ion-button>
+              <ion-modal trigger="direcciones_{{t}}_{{e}}" class="ion-datetime-button-overlay" [backdropDismiss]="true">
+                <ng-template>
+                  <div style="max-height: 80dvh; overflow-y: scroll !important;">
+                    <ion-list>
+                      <ion-item *ngFor="let paso of etapa?.steps">
+                        <!-- Icono -->
+                        <ion-icon src="assets/img/direcciones/direcciones_{{paso.relativeDirection}}.svg"></ion-icon>
+                      
+                        <ion-text *ngIf="paso.relativeDirection === 'DEPART'">Comienza en</ion-text>
+                        <ion-text *ngIf="paso.relativeDirection === 'HARD_LEFT' || paso.relativeDirection === 'LEFT' || paso.relativeDirection === 'SLIGHTLY_LEFT'">Gira a la izquierda dirección</ion-text>
+                        <ion-text *ngIf="paso.relativeDirection === 'CONTINUE'">Continúa</ion-text>
+                        <ion-text *ngIf="paso.relativeDirection === 'SLIGHTLY_RIGHT' || paso.relativeDirection === 'RIGHT' || paso.relativeDirection === 'HARD_RIGHT'">Gira a la derecha dirección</ion-text>
+                        <ion-text *ngIf="paso.relativeDirection === 'CIRCLE_CLOCKWISE' || paso.relativeDirection === 'CIRCLE_COUNTERCLOCKWISE'">Gira en círculo dirección</ion-text>
+                        <ion-text *ngIf="paso.relativeDirection === 'ELEVATOR'">Toma el ascensor</ion-text>
+                        <ion-text *ngIf="paso.relativeDirection === 'UTURN_LEFT' || paso.relativeDirection === 'UTURN_RIGHT'">Da la vuelta dirección</ion-text>
+                        <ion-text *ngIf="paso.relativeDirection === 'ENTER_STATION'">Entra en la estación</ion-text>
+                        <ion-text *ngIf="paso.relativeDirection === 'EXIT_STATION'">Sal de la estación</ion-text>
+                        <ion-text *ngIf="paso.relativeDirection === 'FOLLOW_SIGNS'">Sigue las señales</ion-text>
+
+                        <ion-text>&nbsp;<b>{{paso.streetName}}</b>&nbsp;</ion-text>
+
+                        <ion-text *ngIf="paso.distance">durante {{paso.distance | floor}} metros</ion-text>
+                      </ion-item>
+                    </ion-list>
+                  </div>                    
+                </ng-template>
+              </ion-modal>
+            </ion-col>
+          </ion-row>
+          <ion-row *ngIf="etapa.mode !== 'WALK'" class="etapa_contenido">
+            <ion-icon src="assets/img/tipolinea_{{etapa.route?.type ?? 0}}.svg" [ngStyle]="{'--color-icono':'#'+etapa.route?.textColor}"></ion-icon>
+            <ion-col size="10" class="contenido_central">
+              <div style="font-size: 1.2em;">
+                <!-- Llegada - salida -->
+                <ion-text>
+                  {{etapa?.from?.departureTime | dateFormat:'HH:mm'}} - {{etapa?.to?.arrivalTime | dateFormat:'HH:mm'}}
+                </ion-text>
+              </div>
+              <div style="font-size: 1.5em;">
+                <!-- Nombre linea -->
+                <ion-text>
+                  {{etapa?.route?.shortName ?? etapa?.route?.longName}}
+                </ion-text>
+                <!-- Direccion (letrero) -->
+                <ion-text *ngIf="etapa.headsign">
+                  - {{etapa.headsign}}
+                </ion-text>
+              </div>
+              <div>
+                <!-- Paradas -->
+                <ion-text>
+                  {{etapa?.intermediatePlaces?.length}} paradas
+                </ion-text>
+
+                <!-- Duración -->
+                <ion-text>
+                  {{etapa?.duration | durationFormat:'seconds':'h [h] m [min]'}}
+                </ion-text>
+              </div>
+              <div>
+                <!-- Desde -->
+                <ion-text>
+                  Desde: {{etapa?.from?.name}}
+                </ion-text>
+              </div>
+              <div>
+                <!-- Hacia -->
+                <ion-text>
+                  Hacia: {{etapa?.to?.name}}
+                </ion-text>
+              </div>
+            </ion-col>
+            
+            
+            <ion-col size="2">
+              <!-- Icono ruta intermedia -->
+              <ion-button id="paradas_{{t}}_{{e}}" size="small">
+                <ion-icon src="assets/img/navegacion/ruta.svg"></ion-icon>
+              </ion-button>
+              <ion-modal trigger="paradas_{{t}}_{{e}}" class="ion-datetime-button-overlay" [backdropDismiss]="true">
+                <ng-template>
+                  <div style="max-height: 80dvh; overflow-y: scroll !important;">
+                    <ion-list>
+                      <ion-item class="paradaIntermedia" [ngStyle]="{'--color-linea':'#'+etapa.route?.color}">
+                        <ion-text style="margin-right: 2.9em;">
+                          {{etapa.from.arrivalTime | dateFormat: 'HH:mm'}} - {{etapa.from.departureTime | dateFormat: 'HH:mm'}}
+                        </ion-text>
+                        <ion-text>
+                          {{etapa.from.name}}
+                        </ion-text>
+                      </ion-item>
+                      <ion-item *ngFor="let parada of etapa?.intermediatePlaces" class="paradaIntermedia" [ngStyle]="{'--color-linea':'#'+etapa.route?.color}">
+                        <ion-text style="margin-right: 2.9em;">
+                          {{parada.arrivalTime | dateFormat: 'HH:mm'}} - {{parada.departureTime | dateFormat: 'HH:mm'}}
+                        </ion-text>
+                        <ion-text>
+                          {{parada.name}}
+                        </ion-text>
+                      </ion-item>
+                      <ion-item class="paradaIntermedia" [ngStyle]="{'--color-linea':'#'+etapa.route?.color}">
+                        <ion-text style="margin-right: 2.9em;">
+                          {{etapa.to.arrivalTime | dateFormat: 'HH:mm'}} - {{etapa.to.departureTime | dateFormat: 'HH:mm'}}
+                        </ion-text>
+                        <ion-text>
+                          {{etapa.to.name}}
+                        </ion-text>
+                      </ion-item>
+                    </ion-list>
+                  </div>
+                </ng-template>
+              </ion-modal>
+            </ion-col>              
+          </ion-row>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
+</app-lateral>

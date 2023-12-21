@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
 import { Observable, BehaviorSubject, Subject } from 'rxjs';
-import { AjusteMapa, FiltroMapa, MovimientoMapa } from '../models/mapa.model';
+import { AjusteMapa, FiltroMapa, MovimientoMapa, NavegacionMapa } from '../models/mapa.model';
 import { AgenciasService } from './agencias.service';
 import { Agencia } from '../models/agencia.model';
+import { LngLat } from 'maplibre-gl';
 
 @Injectable({
   providedIn: 'root'
@@ -16,6 +17,8 @@ export class MapaService {
   private movimientoMapaSubject: BehaviorSubject<MovimientoMapa> = new BehaviorSubject<MovimientoMapa>({});
   private ajusteMapaSubject: BehaviorSubject<AjusteMapa> = new BehaviorSubject<AjusteMapa>({});
   private localizacionSubject: Subject<boolean> = new Subject<boolean>();
+  private clickMapaSubject: Subject<LngLat> = new Subject<LngLat>();
+  private navegacionSubject: BehaviorSubject<NavegacionMapa | null> = new BehaviorSubject<NavegacionMapa | null>(null);
 
   constructor(private agenciasService: AgenciasService) {
     this.agenciasService.getAgencias().subscribe(agencias => {
@@ -63,5 +66,21 @@ export class MapaService {
 
   public getLocalizacion(): Observable<boolean> {
     return this.localizacionSubject.asObservable();
+  }
+
+  public setClickMapa(clickMapa: LngLat) {
+    this.clickMapaSubject.next(clickMapa);
+  }
+
+  public getClickMapa(): Observable<LngLat> {
+    return this.clickMapaSubject.asObservable();
+  }
+
+  public setNavegacion(navegacion: NavegacionMapa | null) {
+    this.navegacionSubject.next(navegacion);
+  }
+
+  public getNavegacion(): Observable<NavegacionMapa | null> {
+    return this.navegacionSubject.asObservable();
   }
 }

@@ -20,10 +20,12 @@ import { MapaService } from '../services/mapa.service';
 import { AjusteMapa, FiltroMapa, MovimientoMapa } from '../models/mapa.model';
 import { NavegacionAppService } from '../services/navegacion-app.service';
 import { ViajePropiedadesVectoriales } from '../models/viaje.model';
+import { decode } from "@googlemaps/polyline-codec";
 
 @Component({
   selector: 'app-mapa',
   templateUrl: './mapa.component.html',
+  styleUrls: ['./mapa.component.scss'],
   standalone: true,
   imports: [IonicModule, RouterModule],
 })
@@ -57,7 +59,10 @@ export class MapaComponent implements OnInit, OnDestroy {
     {id: 'posicion_funicular', url: 'assets/map/posicion_funicular.png'},
     {id: 'posicion_trolleybus', url: 'assets/map/posicion_trolleybus.png'},
     {id: 'posicion_monorail', url: 'assets/map/posicion_monorail.png'},
-    {id: 'posicion_tr', url: 'assets/map/posicion_tr.png'}
+    {id: 'posicion_tr', url: 'assets/map/posicion_tr.png'},
+    {id: 'navegacion_parada', url: 'assets/map/navegacion_parada.png'},
+    {id: 'navegacion_inicio', url: 'assets/map/navegacion_inicio.png'},
+    {id: 'navegacion_fin', url: 'assets/map/navegacion_fin.png'}
   ];
 
   tipos_paradas = { // Tipos de parada
@@ -156,6 +161,22 @@ export class MapaComponent implements OnInit, OnDestroy {
         }
       });
 
+      this.map.addSource("navegacion_symb", {
+        'type': 'geojson',
+        'data': {
+          'type': 'FeatureCollection',
+          'features': []
+        }
+      });
+
+      this.map.addSource("navegacion_lin", {
+        'type': 'geojson',
+        'data': {
+          'type': 'FeatureCollection',
+          'features': []
+        }
+      });
+
       Promise.all(
         this.iconos.map(img => new Promise<void>((resolve, reject) => {
           this.map.loadImage(img.url, (error, res) => {
@@ -222,6 +243,35 @@ export class MapaComponent implements OnInit, OnDestroy {
                 15,
                 0.5
               ],
+            }
+          });
+
+          this.map.addLayer({
+            'id': "navegacion_lin", // Nombre de la capa
+            'type': 'line',
+            'source': "navegacion_lin", // Nombre de la fuente
+            'maxzoom': this.configuracion.maxzoom,
+            'minzoom': 0,
+            'paint': {
+              'line-color': ['get', 'color'],
+              'line-width': 10,
+              'line-opacity': 0.9,
+            }
+          });
+
+          this.map.addLayer({
+            'id': "navegacion_symb",
+            'type': 'symbol',
+            'source': "navegacion_symb", // Nombre de la fuente
+            'maxzoom': this.configuracion.maxzoom,
+            'minzoom': 0,
+            'layout': {
+              'icon-image': ['get', 'icono'],
+              'icon-allow-overlap': true,
+              'icon-anchor': ['get', 'anchor'],
+              'icon-size': ['get', 'size'],
+              'icon-offset': ['get', 'offset'],
+              'symbol-sort-key': ['get', 'orden']
             }
           });
 
@@ -302,6 +352,131 @@ export class MapaComponent implements OnInit, OnDestroy {
               this.map.removeControl(this.controlGeolocalizacion);
             }            
           });
+
+          this.mapaService.getNavegacion().subscribe((navegacion) => {
+            console.log(navegacion)
+            let geojson_symb: GeoJSON.FeatureCollection<GeoJSON.Point> = {
+              'type': 'FeatureCollection',
+              'features': []
+            };
+
+            let geojson_lin: GeoJSON.FeatureCollection<GeoJSON.LineString> = {
+              'type': 'FeatureCollection',
+              'features': []
+            };
+
+            let bbox = new maplibregl.LngLatBounds();
+            if (navegacion !== null) {
+              if (navegacion.origen) {
+                bbox.extend([navegacion.origen.lng, navegacion.origen.lat]);
+                let descripcion = `<strong>Origen</strong><br/>Salida: ${moment(navegacion.trayecto?.startTime).locale("es").format("HH:mm") ?? ''}`;
+                geojson_symb.features.push({
+                  type: 'Feature',
+                  geometry: {
+                    'type': 'Point',
+                    'coordinates': [navegacion.origen.lng, navegacion.origen.lat]
+                  },
+                  properties: {
+                    'descripcion': descripcion,
+                    'icono': 'navegacion_inicio',
+                    'size': 0.6,
+                    'anchor': 'bottom-left',
+                    'offset': [3, 0],
+                    'orden': 2
+                  }
+                });
+              }
+              if (navegacion.destino) {
+                bbox.extend([navegacion.destino.lng, navegacion.destino.lat]);
+                let descripcion = `<strong>Origen</strong><br/>Llegada: ${moment(navegacion.trayecto?.endTime).locale("es").format("HH:mm") ?? ''}`;
+                geojson_symb.features.push({
+                  type: 'Feature',
+                  geometry: {
+                    'type': 'Point',
+                    'coordinates': [navegacion.destino.lng, navegacion.destino.lat]
+                  },
+                  properties: {
+                    'descripcion': descripcion,
+                    'icono': 'navegacion_fin',
+                    'size': 0.6,
+                    'anchor': 'bottom-left',
+                    'offset': [3, 0],
+                    'orden': 2
+                  }
+                });
+              }
+              if (navegacion.trayecto) {
+                this.filtrarMapa({
+                  viajes: navegacion.trayecto.legs.map(leg => leg.trip?.gtfsId.split(/:(.*)/s)[1] ?? ""),
+                  recorridos: []
+                })
+                navegacion.trayecto.legs.forEach((leg, i, legs) => {
+                  const geometry = this.latLonALonLat(decode(leg.legGeometry?.points ?? "", 5));
+                  geometry.forEach((coordenadas) => {
+                    bbox.extend(coordenadas);
+                  });
+                  console.log(geometry)
+                  geojson_lin.features.push({
+                    type: 'Feature',
+                    geometry: {
+                      'type': 'LineString',
+                      'coordinates': geometry
+                    },
+                    properties: {
+                      'color': '#'+(leg.route?.color ?? 'FFFF00')
+                    }
+                  });
+
+                  if (i > 0) {
+                    let descripcion = `<strong>${leg.from.name ?? ''}</strong>`;
+                    if (legs[i-1].mode !== 'WALK') descripcion += `<br/>Llegada: ${moment(legs[i-1].to.arrivalTime).locale("es").format("HH:mm") ?? ''} (${legs[i-1].route?.shortName ?? legs[i-1].route?.longName ?? ''})`
+                    if (legs[i-1].mode !== 'WALK' && leg.mode !== 'WALK') descripcion += `<br/>Cambio de vehículo`
+                    if (leg.mode !== 'WALK') descripcion += `<br/>Salida: ${moment(leg.from.departureTime).locale("es").format("HH:mm") ?? ''} (${leg.route?.shortName ?? leg.route?.longName ?? ''})`
+                    geojson_symb.features.push({
+                      type: 'Feature',
+                      geometry: {
+                        'type': 'Point',
+                        'coordinates': [leg.from.lon, leg.from.lat]
+                      },
+                      properties: {
+                        'descripcion': descripcion,
+                        'icono': 'navegacion_parada',
+                        'size': 0.5,
+                        'anchor': 'center',
+                        'orden': 1
+                      }
+                    });
+                  }   
+                  leg.intermediatePlaces?.forEach((parada) => {
+                    const descripcion = `<strong>${parada.name ?? ''}</strong><br/>Llegada: ${moment(parada.arrivalTime).locale("es").format("HH:mm") ?? ''}<br/>Salida: ${moment(parada.departureTime).locale("es").format("HH:mm") ?? ''}`;
+                    geojson_symb.features.push({
+                      type: 'Feature',
+                      geometry: {
+                        'type': 'Point',
+                        'coordinates': [parada.lon, parada.lat]
+                      },
+                      properties: {
+                        'descripcion': descripcion,
+                        'icono': 'navegacion_parada',
+                        'size': 0.2,
+                        'anchor': 'center',
+                        'orden': 0
+                      }
+                    });
+                  });
+                });
+              } else {
+                this.filtrarMapa({})
+              }
+            }
+
+            (this.map.getSource("navegacion_symb") as GeoJSONSource).setData(geojson_symb);
+            (this.map.getSource("navegacion_lin") as GeoJSONSource).setData(geojson_lin);
+
+            if (navegacion?.origen && navegacion.destino) {
+              this.ajustarMapa({bbox: [bbox.getWest(), bbox.getSouth(), bbox.getEast(), bbox.getNorth()]});
+            }            
+          });
         });
       });
 
@@ -323,120 +498,155 @@ export class MapaComponent implements OnInit, OnDestroy {
     });
 
     this.map.on('mouseenter', 'paradas', () => {
-      this.map.getCanvas().style.cursor = 'pointer';
+      if (this.navegacionAppService.paginaActual() !== "navegacion") {
+        this.map.getCanvas().style.cursor = 'pointer';
+      }      
     });
 
     // Change it back to a pointer when it leaves.
     this.map.on('mouseleave', 'paradas', () => {
-      this.map.getCanvas().style.cursor = '';
-    });
-
-    this.map.on('click', (e) => {
-      const ne: PointLike = [e.point.x + 10, e.point.y - 10];
-      const sw: PointLike = [e.point.x - 10, e.point.y + 10];
-
-      let features = this.map.queryRenderedFeatures([ne, sw], { layers: ['posiciones'] });
-      // console.log(JSON.stringify(features));
-      if (features.length > 0) {
-        if (features.length == 1) {
-          this.navegarA(['viaje', features[0].properties["idViaje"]]);
-        } else {
-          if (this.map.getZoom() < this.map.getMaxZoom() - 2) {
-            // Ajustar mapa a posiciones
-            let bounds = new maplibregl.LngLatBounds();
-            features.forEach((feature) => {
-              const coordenadas = (feature.geometry as GeoJSON.Point).coordinates as [number, number];
-              bounds.extend({lon: coordenadas[0], lat: coordenadas[1]});
-            });
-            this.map.fitBounds(bounds, {padding: 50, maxZoom: this.configuracion.maxzoom});
-          } else {
-            // Mostrar modal
-            let viajes: ViajePropiedadesVectoriales[] = features.map(f => f.properties as ViajePropiedadesVectoriales);
-            this.mostrarModalSeleccion([], [], viajes);            
-          }
-        }
-        return;
-      }
-
-      features = this.map.queryRenderedFeatures([ne, sw], { layers: ['posiciones_tr'] });
-      // console.log(JSON.stringify(features));
-      if (features.length > 0) {
-        if (features.length == 1) {
-          if (features[0].properties["idViaje"]) {
-            this.navegarA(['viaje', features[0].properties["idViaje"]]);
-          } else if (features[0].properties["idLinea"]) {
-            this.navegarA(['linea', features[0].properties["idLinea"]]);
-          }
-        } else {
-          if (this.map.getZoom() < this.map.getMaxZoom() - 2) {
-            // Ajustar mapa a posiciones
-            let bounds = new maplibregl.LngLatBounds();
-            features.forEach((feature) => {
-              const coordenadas = (feature.geometry as GeoJSON.Point).coordinates as [number, number];
-              bounds.extend({lon: coordenadas[0], lat: coordenadas[1]});
-            });
-            this.map.fitBounds(bounds, {padding: 50, maxZoom: this.configuracion.maxzoom});
-          } else {
-            // Mostrar modal
-            let viajes: ViajePropiedadesVectoriales[] = features.map(f => f.properties as ViajePropiedadesVectoriales);
-            this.mostrarModalSeleccion([], [], viajes);            
-          }
-        }
-        return;
-      }
-
-      features = this.map.queryRenderedFeatures([ne, sw], { layers: ['paradas'] }).filter((feature) => feature.properties["paradaPadre"] === undefined || feature.properties["paradaPadre"] === "");
-      // console.log(JSON.stringify(features));
-      if (features.length > 0) {
-        if (features.length == 1) {
-          this.navegarA(['parada', features[0].properties["idParada"]]);
-        } else {
-          if (this.map.getZoom() < this.map.getMaxZoom() - 2) {
-            // Ajustar mapa a paradas
-            let bounds = new maplibregl.LngLatBounds();
-            features.forEach((feature) => {
-              const coordenadas = (feature.geometry as GeoJSON.Point).coordinates as [number, number];
-              bounds.extend({lon: coordenadas[0], lat: coordenadas[1]});
-            });
-            this.map.fitBounds(bounds, {padding: 50, maxZoom: this.configuracion.maxzoom});
-          } else {
-            const paradaUnica = new Set(...features.map(f => (f.properties["paradaPadre"] === "") ?  f.properties["idParada"] : f.properties["paradaPadre"] ));
-
-            if (paradaUnica.size == 1) {
-              this.navegarA(['parada', paradaUnica.values().next().value]);
-            } else {
-              // Mostrar modal
-              let paradas: StopPropiedadesVectoriales[] = features.map(f => f.properties as StopPropiedadesVectoriales);
-              this.mostrarModalSeleccion([], paradas, []);
-            }
-            
-          }
-        }
-        return;
-      }
-
-      features = this.map.queryRenderedFeatures([ne, sw], { layers: ['lineas'] });
-      // console.log(JSON.stringify(features));
-      if (features.length > 0) {
-        const lineas = new Set(features.map(f => f.properties["idLinea"] as string));
-        // console.log(lineas);
-        if (lineas.size == 1) {
-          this.navegarA(['linea', lineas.values().next().value]);
-        } else {
-          // Mostrar modal
-          let lineas: ShapePropiedadesVectoriales[] = features.map(f => f.properties as ShapePropiedadesVectoriales).filter((linea, index, self) => self.findIndex(l => l.idLinea === linea.idLinea) === index);
-          this.mostrarModalSeleccion(lineas, [], []);
-        }
-        return;
-      }
+      if (this.navegacionAppService.paginaActual() !== "navegacion") {
+        this.map.getCanvas().style.cursor = '';
+      }      
     });
 
     this.map.on('mouseenter', 'lineas', () => {
-      this.map.getCanvas().style.cursor = 'pointer';
+      if (this.navegacionAppService.paginaActual() !== "navegacion") {
+        this.map.getCanvas().style.cursor = 'pointer';
+      }      
     });
 
     this.map.on('mouseleave', 'lineas', () => {
-      this.map.getCanvas().style.cursor = '';
+      if (this.navegacionAppService.paginaActual() !== "navegacion") {
+        this.map.getCanvas().style.cursor = '';
+      }      
+    });
+
+    this.map.on('mouseenter', 'navegacion_symb', () => {
+      this.map.getCanvas().style.cursor = 'pointer';      
+    });
+
+    // Change it back to a pointer when it leaves.
+    this.map.on('mouseleave', 'navegacion_symb', () => {
+      this.map.getCanvas().style.cursor = '';    
+    });
+
+    this.map.on('click', (e) => {
+      if (this.navegacionAppService.paginaActual() === "navegacion") {
+        console.log("navegacion")
+        this.mapaService.setClickMapa(e.lngLat);
+
+        let features = this.map.queryRenderedFeatures(e.point, { layers: ['navegacion_symb'] });
+        if (features.length > 0) {
+          const feature = features[0];
+          const coordenadas = (feature.geometry as GeoJSON.Point).coordinates;
+          const offsetV = (feature.properties["anchor"] === 'center' ? 24 : 48) * feature.properties["size"];
+          const offsetH = (feature.properties["anchor"] === 'bottom-left' ? 24 : 0) * feature.properties["size"];
+          new maplibregl.Popup({ className: 'popup-navegacion' })
+                .setOffset([offsetH, -offsetV])
+                .setLngLat([coordenadas[0], coordenadas[1]])
+                .setHTML(feature.properties["descripcion"] ?? "")
+                .addTo(this.map);
+        }
+      } else {
+        const ne: PointLike = [e.point.x + 10, e.point.y - 10];
+        const sw: PointLike = [e.point.x - 10, e.point.y + 10];
+  
+        let features = this.map.queryRenderedFeatures([ne, sw], { layers: ['posiciones'] });
+        // console.log(JSON.stringify(features));
+        if (features.length > 0) {
+          if (features.length == 1) {
+            this.navegarA(['viaje', features[0].properties["idViaje"]]);
+          } else {
+            if (this.map.getZoom() < this.map.getMaxZoom() - 2) {
+              // Ajustar mapa a posiciones
+              let bounds = new maplibregl.LngLatBounds();
+              features.forEach((feature) => {
+                const coordenadas = (feature.geometry as GeoJSON.Point).coordinates as [number, number];
+                bounds.extend({lon: coordenadas[0], lat: coordenadas[1]});
+              });
+              this.map.fitBounds(bounds, {padding: 50, maxZoom: this.configuracion.maxzoom});
+            } else {
+              // Mostrar modal
+              let viajes: ViajePropiedadesVectoriales[] = features.map(f => f.properties as ViajePropiedadesVectoriales);
+              this.mostrarModalSeleccion([], [], viajes);            
+            }
+          }
+          return;
+        }
+  
+        features = this.map.queryRenderedFeatures([ne, sw], { layers: ['posiciones_tr'] });
+        // console.log(JSON.stringify(features));
+        if (features.length > 0) {
+          if (features.length == 1) {
+            if (features[0].properties["idViaje"]) {
+              this.navegarA(['viaje', features[0].properties["idViaje"]]);
+            } else if (features[0].properties["idLinea"]) {
+              this.navegarA(['linea', features[0].properties["idLinea"]]);
+            }
+          } else {
+            if (this.map.getZoom() < this.map.getMaxZoom() - 2) {
+              // Ajustar mapa a posiciones
+              let bounds = new maplibregl.LngLatBounds();
+              features.forEach((feature) => {
+                const coordenadas = (feature.geometry as GeoJSON.Point).coordinates as [number, number];
+                bounds.extend({lon: coordenadas[0], lat: coordenadas[1]});
+              });
+              this.map.fitBounds(bounds, {padding: 50, maxZoom: this.configuracion.maxzoom});
+            } else {
+              // Mostrar modal
+              let viajes: ViajePropiedadesVectoriales[] = features.map(f => f.properties as ViajePropiedadesVectoriales);
+              this.mostrarModalSeleccion([], [], viajes);            
+            }
+          }
+          return;
+        }
+  
+        features = this.map.queryRenderedFeatures([ne, sw], { layers: ['paradas'] }).filter((feature) => feature.properties["paradaPadre"] === undefined || feature.properties["paradaPadre"] === "");
+        // console.log(JSON.stringify(features));
+        if (features.length > 0) {
+          if (features.length == 1) {
+            this.navegarA(['parada', features[0].properties["idParada"]]);
+          } else {
+            if (this.map.getZoom() < this.map.getMaxZoom() - 2) {
+              // Ajustar mapa a paradas
+              let bounds = new maplibregl.LngLatBounds();
+              features.forEach((feature) => {
+                const coordenadas = (feature.geometry as GeoJSON.Point).coordinates as [number, number];
+                bounds.extend({lon: coordenadas[0], lat: coordenadas[1]});
+              });
+              this.map.fitBounds(bounds, {padding: 50, maxZoom: this.configuracion.maxzoom});
+            } else {
+              const paradaUnica = new Set(...features.map(f => (f.properties["paradaPadre"] === "") ?  f.properties["idParada"] : f.properties["paradaPadre"] ));
+  
+              if (paradaUnica.size == 1) {
+                this.navegarA(['parada', paradaUnica.values().next().value]);
+              } else {
+                // Mostrar modal
+                let paradas: StopPropiedadesVectoriales[] = features.map(f => f.properties as StopPropiedadesVectoriales);
+                this.mostrarModalSeleccion([], paradas, []);
+              }
+              
+            }
+          }
+          return;
+        }
+  
+        features = this.map.queryRenderedFeatures([ne, sw], { layers: ['lineas'] });
+        // console.log(JSON.stringify(features));
+        if (features.length > 0) {
+          const lineas = new Set(features.map(f => f.properties["idLinea"] as string));
+          // console.log(lineas);
+          if (lineas.size == 1) {
+            this.navegarA(['linea', lineas.values().next().value]);
+          } else {
+            // Mostrar modal
+            let lineas: ShapePropiedadesVectoriales[] = features.map(f => f.properties as ShapePropiedadesVectoriales).filter((linea, index, self) => self.findIndex(l => l.idLinea === linea.idLinea) === index);
+            this.mostrarModalSeleccion(lineas, [], []);
+          }
+          return;
+        }
+      }      
     });
 
     // Obtener datos en tiempo real
@@ -655,6 +865,8 @@ export class MapaComponent implements OnInit, OnDestroy {
     }
 
     endpoint.subscribe((posiciones) => {
+      if (posiciones === null) return;
+
       // console.log(`${moment().format("HH:mm:ss.SSS")} - Posiciones descargadas ${posiciones.fecha}`)
       let listaFechas: Array<{fecha: string, features: Array<GeoJSON.Feature<GeoJSON.Point>>}> = [];
       posiciones.agencias.forEach((agencia) => {
@@ -741,6 +953,14 @@ export class MapaComponent implements OnInit, OnDestroy {
     });
 
     return posiciones_decodificadas;
+  }
+
+  latLonALonLat(latLon: [number, number][]): [number, number][] {
+    let lonlat: [number, number][] = [];
+    latLon.forEach((coordenadas) => {
+      lonlat.push([coordenadas[1], coordenadas[0]]);
+    });
+    return lonlat;
   }
 
   ngOnDestroy() {

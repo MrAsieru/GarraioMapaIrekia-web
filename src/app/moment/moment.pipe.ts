@@ -6,7 +6,7 @@ import * as moment from 'moment-timezone';
     standalone: true
 })
 export class MomentPipe implements PipeTransform {
-    transform(value: Date | moment.Moment | undefined, dateFormat: string): any {
+    transform(value: moment.MomentInput, dateFormat: string): any {
         if (!value) return '';
         return moment(value).locale("es").format(dateFormat);
     }
