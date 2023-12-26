@@ -279,5 +279,12 @@
         </div>
       </ion-card-content>
     </ion-card>
+
+    <div *ngIf="plan?.itineraries?.length ?? 0 > 0" style="display: flex; flex-direction: column;">
+      <ion-button style="margin: auto; padding-bottom: 0.5em;" (click)="masTrayectos()">
+        <ion-icon slot="start" src="assets/img/suma.svg"></ion-icon>
+        Cargar más trayectos
+      </ion-button>        
+    </div>
   </div>
 </app-lateral>

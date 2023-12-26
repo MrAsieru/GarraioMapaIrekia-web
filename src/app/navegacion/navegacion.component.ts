@@ -158,6 +158,33 @@ export class NavegacionComponent  implements OnInit {
     this.consultarTrayectos();
   }
 
+  masTrayectos() {
+    if (this.origen && this.destino && this.plan) {
+      const peticion: PeticionNavegacion = {
+        fecha: this.fechaHora.format('YYYY-MM-DD'),
+        hora: this.fechaHora.format('HH:mm'),
+        origen: {
+          lat: this.origen.lat,
+          lon: this.origen.lng
+        },
+        destino: {
+          lat: this.destino.lat,
+          lon: this.destino.lng
+        },
+        accesibleSillaDeRuedas: this.accesibilidad,
+        llegada: this.llegar,
+        locale: 'es',
+        cursorPagina: this.plan?.nextPageCursor
+      }
+
+      this.navegacionService.getNavegacion(peticion).subscribe((respuesta: RespuestaNavegacion) => {
+        // Merge plan and respuesta.data.plan
+        this.plan!.itineraries = this.plan!.itineraries.concat(respuesta.data.plan.itineraries);
+        console.log(respuesta)
+      });
+    }
+  }
+
   ngOnDestroy() {
     this.mapaService.setNavegacion(null);
   }

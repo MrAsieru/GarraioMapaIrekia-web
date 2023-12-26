@@ -34,6 +34,7 @@ export class PlanNavegacion {
         lon: number;
     }
     itineraries: Trayecto[];
+    nextPageCursor?: string;
 }
 
 export class Trayecto {
