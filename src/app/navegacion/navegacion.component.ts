@@ -92,7 +92,8 @@ export class NavegacionComponent  implements OnInit {
         },
         accesibleSillaDeRuedas: this.accesibilidad,
         llegada: this.llegar,
-        locale: 'es'
+        locale: 'es',
+        respuestaMaxItinerarios: 3
       }
       this.plan = null
       this.navegacionService.getNavegacion(peticion).subscribe((respuesta: RespuestaNavegacion) => {
@@ -174,12 +175,14 @@ export class NavegacionComponent  implements OnInit {
         accesibleSillaDeRuedas: this.accesibilidad,
         llegada: this.llegar,
         locale: 'es',
+        respuestaMaxItinerarios: 3,
         cursorPagina: this.plan?.nextPageCursor
       }
 
       this.navegacionService.getNavegacion(peticion).subscribe((respuesta: RespuestaNavegacion) => {
         // Merge plan and respuesta.data.plan
         this.plan!.itineraries = this.plan!.itineraries.concat(respuesta.data.plan.itineraries);
+        this.plan!.nextPageCursor = respuesta.data.plan.nextPageCursor;
         console.log(respuesta)
       });
     }
