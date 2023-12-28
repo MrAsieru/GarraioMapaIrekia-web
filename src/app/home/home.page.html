@@ -1,11 +1,11 @@
 <ion-menu contentId="mapa_router">
   <ion-header>
     <ion-toolbar>
-      <ion-title>Filtrar agencias</ion-title>
+      <ion-title>{{'home.tituloFiltro' | translate}}</ion-title>
     </ion-toolbar>
     <ion-toolbar>
-      <ion-input class="ion-padding-horizontal" label="Buscar agencia" labelPlacement="floating" type="text" [clearInput]="true" fill="solid" (ionInput)="buscarAgencias($event.detail)"></ion-input>
-      <ion-checkbox #chkbox_home_menu_agencias class="ion-padding-horizontal" labelPlacement="end" justify="start" [checked]="agenciasCheckboxChecked" [indeterminate]="agenciasCheckboxIndeterminate" (ionChange)="agenciaTodosCheckboxClick($event, $any($event).detail)" (click)="$event.stopPropagation()">Mostrar todas</ion-checkbox>
+      <ion-input class="ion-padding-horizontal" label="{{'home.textoBusqueda' | translate}}" labelPlacement="floating" type="text" [clearInput]="true" fill="solid" (ionInput)="buscarAgencias($event.detail)"></ion-input>
+      <ion-checkbox #chkbox_home_menu_agencias class="ion-padding-horizontal" labelPlacement="end" justify="start" [checked]="agenciasCheckboxChecked" [indeterminate]="agenciasCheckboxIndeterminate" (ionChange)="agenciaTodosCheckboxClick($event, $any($event).detail)" (click)="$event.stopPropagation()">{{'home.mostrarTodas' | translate}}</ion-checkbox>
     </ion-toolbar>
   </ion-header>
   <ion-content class="ion-padding">    

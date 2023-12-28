@@ -14,12 +14,13 @@ import { BehaviorSubject, Subscription } from 'rxjs';
 import { ModalAlertasComponent } from '../modal-alertas/modal-alertas.component';
 import { NavegacionAppService } from '../services/navegacion-app.service';
 import { Title } from '@angular/platform-browser';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
     selector: 'app-agencia',
     templateUrl: './agencia.component.html',
     standalone: true,
-    imports: [IonicModule, CommonModule, LateralComponent]
+    imports: [IonicModule, CommonModule, LateralComponent, TranslateModule]
 })
 export class AgenciaComponent  implements OnInit {
   idAgencia: string | null;

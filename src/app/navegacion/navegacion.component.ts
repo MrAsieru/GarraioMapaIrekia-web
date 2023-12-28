@@ -12,13 +12,14 @@ import { PeticionNavegacion, PlanNavegacion, RespuestaNavegacion } from '../mode
 import { MomentDurationPipe } from '../moment-duration/moment-duration.pipe';
 import { FloorPipe } from '../floor/floor.pipe';
 import { decode } from "@googlemaps/polyline-codec";
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-navegacion',
   templateUrl: './navegacion.component.html',
   styleUrls: ['./navegacion.component.scss'],
   standalone: true,
-  imports: [CommonModule, IonicModule, LateralComponent, MomentPipe, MomentDurationPipe, FloorPipe]
+  imports: [CommonModule, IonicModule, LateralComponent, MomentPipe, MomentDurationPipe, FloorPipe, TranslateModule]
 })
 export class NavegacionComponent  implements OnInit {
   public origen: LngLat | undefined;

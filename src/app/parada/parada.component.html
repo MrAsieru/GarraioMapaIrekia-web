@@ -1,4 +1,4 @@
-<app-lateral nombre="Parada" [nivel]="2">
+<app-lateral nombre="{{'parada.titulo' | translate}}" [nivel]="2">
   <div>
     <ion-card>
       <ion-card-header>
@@ -8,13 +8,11 @@
           <span *ngIf="parada.codigo"> - {{parada.codigo}}</span>
         </ion-card-title>
         <ion-card-subtitle>
-          <span *ngIf="parada.idZona !== ''">Zona {{parada.idZona?.slice(parada.idZona!.indexOf("_")+1)?.[1]}} - </span>
+          <span *ngIf="parada.idZona !== ''">{{'parada.zona' | translate:({"zona": parada.idZona?.slice(parada.idZona!.indexOf("_")+1)})}} - </span>
           <ion-icon id="parada_accesibilidad" src="assets/img/accesibilidad_{{parada.accesibilidad ? parada.accesibilidad : '0'}}.svg"></ion-icon>
           <ion-popover trigger="parada_accesibilidad" triggerAction="click"showBackdrop="false">
             <ng-template>
-              <ion-content *ngIf="parada.accesibilidad === undefined || parada.accesibilidad === 0" class="ion-padding">Sin información sobre accesibilidad</ion-content>
-              <ion-content *ngIf="parada.accesibilidad === 1" class="ion-padding">Algunos vehiculos permiten acceder en silla de ruedas</ion-content>
-              <ion-content *ngIf="parada.accesibilidad === 2" class="ion-padding">No es posible acceder en silla de ruedas</ion-content>
+              <ion-content class="ion-padding">{{'gtfs.wheelchairBoarding.'+(parada.accesibilidad ?? 0) | translate}}</ion-content>
             </ng-template>
           </ion-popover>
           <ng-container *ngIf="alertasTiempoReal.length > 0">
@@ -48,43 +46,42 @@
                 <ion-text color="success" style="padding-right: 0.2em;">=</ion-text>
               </ng-container>
               <ng-container *ngIf="horario.retrasoTiempoReal < 0">
-                <ion-text color="danger" style="padding-right: 0.2em;"> (-{{(horario.retrasoTiempoReal % 3600) / 60 | number: '1.0-0'}}m)</ion-text>
+                <ion-text color="danger" style="padding-right: 0.2em;"> (-{{horario.retrasoTiempoReal | durationFormat:'seconds':'h[h] m[min]'}})</ion-text>
               </ng-container>
               <ng-container *ngIf="horario.retrasoTiempoReal > 0">
-                <ion-text color="danger" style="padding-right: 0.2em;"> (+{{(horario.retrasoTiempoReal % 3600) / 60 | number: '1.0-0'}}m)</ion-text>
+                <ion-text color="danger" style="padding-right: 0.2em;"> (+{{horario.retrasoTiempoReal | durationFormat:'seconds':'h[h] m[min]'}})</ion-text>
               </ng-container>
             </ng-container>
-            <ion-text id="parada_hora_{{horario.idViaje}}_{{horario.horario.orden}}" (click)="$event.stopPropagation()">en {{((horario.tiempoRestanteTiempoReal ?? horario.tiempoRestante ?? 0) > 60) ? (((horario.tiempoRestanteTiempoReal ?? horario.tiempoRestante ?? 0) / 60) | floor) +'h ': ''}}{{(horario.tiempoRestanteTiempoReal ?? horario.tiempoRestante) ? (horario.tiempoRestanteTiempoReal ?? horario.tiempoRestante ?? 0) % 60: '??'}}min</ion-text>
+            <ion-text id="parada_hora_{{horario.idViaje}}_{{horario.horario.orden}}" (click)="$event.stopPropagation()">
+              {{'parada.tiempoRestante' | translate:({"tiempo": horario.tiempoRestanteTiempoReal ?? horario.tiempoRestante | durationFormat:'minutes':'h[h] m[min]'})}}
+            </ion-text>
             <ion-popover trigger="parada_hora_{{horario.idViaje}}_{{horario.horario.orden}}" triggerAction="click" showBackdrop="false">
               <ng-template>
-                <ion-content class="ion-padding">A las {{horario.horario.momentoLlegada?.tz(horario.zonaHoraria)! | dateFormat:'H:mm'}} hora local</ion-content>
+                <ion-content class="ion-padding">
+                  {{'parada.llegadaLocal' | translate:({"hora": horario.horario.momentoLlegada?.tz(horario.zonaHoraria)! | dateFormat:'H:mm'})}}
+                </ion-content>
               </ng-template>
             </ion-popover>
             <br/>
             <ion-note class="ion-align-self-end">
-              <ion-text>a las {{horario.momentoLlegadaTiempoReal ?? horario.horario.momentoLlegada! | dateFormat:'H:mm'}}</ion-text>
+              <ion-text>{{'parada.llegada' | translate:({"hora": horario.momentoLlegadaTiempoReal ?? horario.horario.momentoLlegada! | dateFormat:'H:mm'})}}</ion-text>
               
               <ion-icon id="parada_exacto_{{horario.idViaje}}_{{horario.horario.orden}}" src="assets/img/exacto_{{horario.horario.exacto ? '1' : '0'}}.svg" (click)="$event.stopPropagation()"></ion-icon>
               <ion-popover trigger="parada_exacto_{{horario.idViaje}}_{{horario.horario.orden}}" triggerAction="click" showBackdrop="false">
                 <ng-template>
-                  <ion-content *ngIf="horario.horario.exacto === undefined || !horario.horario.exacto" class="ion-padding">Horario aproximado</ion-content>
-                  <ion-content *ngIf="horario.horario.exacto" class="ion-padding">Horario exacto</ion-content>
+                  <ion-content class="ion-padding">{{'gtfs.timepoint.'+((horario.horario.exacto === undefined || !horario.horario.exacto) ? 0 : 1) | translate}}</ion-content>
                 </ng-template>
               </ion-popover>
               <ion-icon id="parada_bici_{{horario.idViaje}}_{{horario.horario.orden}}" src="assets/img/bici_{{horario.bicicletas ? horario.bicicletas : '0'}}.svg" (click)="$event.stopPropagation()"></ion-icon>
               <ion-popover trigger="parada_bici_{{horario.idViaje}}_{{horario.horario.orden}}" triggerAction="click"showBackdrop="false">
                 <ng-template>
-                  <ion-content *ngIf="horario.bicicletas === undefined || horario.bicicletas === 0" class="ion-padding">Sin información</ion-content>
-                  <ion-content *ngIf="horario.bicicletas === 1" class="ion-padding">Se permite acceder con una bicicleta</ion-content>
-                  <ion-content *ngIf="horario.bicicletas === 2" class="ion-padding">No es posible acceder con una bicicleta</ion-content>
+                  <ion-content class="ion-padding">{{'gtfs.bikesAllowed.'+(horario.bicicletas ?? 0) | translate}}</ion-content>
                 </ng-template>
               </ion-popover>
               <ion-icon id="parada_accesibilidad_{{horario.idViaje}}_{{horario.horario.orden}}" src="assets/img/accesibilidad_{{horario.accesibilidad ? horario.accesibilidad : '0'}}.svg" (click)="$event.stopPropagation()"></ion-icon>
               <ion-popover trigger="parada_accesibilidad_{{horario.idViaje}}_{{horario.horario.orden}}" triggerAction="click"showBackdrop="false">
                 <ng-template>
-                  <ion-content *ngIf="horario.accesibilidad === undefined || horario.accesibilidad === 0" class="ion-padding">Sin información</ion-content>
-                  <ion-content *ngIf="horario.accesibilidad === 1" class="ion-padding">Es posible acceder en silla de ruedas</ion-content>
-                  <ion-content *ngIf="horario.accesibilidad === 2" class="ion-padding">No es posible acceder en silla de ruedas</ion-content>
+                  <ion-content class="ion-padding">{{'gtfs.wheelchairAccessible.'+(horario.accesibilidad ?? 0) | translate}}</ion-content>
                 </ng-template>
               </ion-popover>
               <ng-container *ngIf="horario.tiempoReal">
@@ -93,30 +90,23 @@
                   <ng-template>
                     <ion-content>
                       <ng-container *ngIf="horario.tiempoReal.arrival">
-                        <ion-text style="font-weight: bold;">Llegada: </ion-text>
-                        <ng-container *ngIf="horario.momentoLlegadaTiempoReal">
-                          <ion-text>{{horario.momentoLlegadaTiempoReal | dateFormat:'H:mm'}}</ion-text>
-                        </ng-container>
-                        
+                        <ion-text [innerHTML]="'parada.llegadaTiempoReal' | translate:({'hora': (horario.momentoLlegadaTiempoReal | dateFormat:'H:mm')})"></ion-text>                        
                         <br/>
                       </ng-container>
                       <ng-container *ngIf="horario.tiempoReal.departure">
-                        <ion-text style="font-weight: bold;">Salida: </ion-text>
-                        <ng-container *ngIf="horario.momentoSalidaTiempoReal">
-                          <ion-text>{{horario.momentoSalidaTiempoReal | dateFormat:'H:mm'}}</ion-text>
-                        </ng-container>
+                        <ion-text [innerHTML]="'parada.salidaTiempoReal' | translate:({'hora': (horario.momentoSalidaTiempoReal | dateFormat:'H:mm')})"></ion-text>
                         <br/>
                       </ng-container>
                       <ng-container *ngIf="horario.retrasoTiempoReal">
-                        <ion-text style="font-weight: bold;">Retraso: </ion-text>
+                        <ion-text style="font-weight: bold;">{{'parada.retrasoTiempoReal' | translate}}</ion-text>
                         <ng-container *ngIf="horario.retrasoTiempoReal! === 0">
                           <ion-text style="padding-right: 1em;">0 min</ion-text>
                         </ng-container>
                         <ng-container *ngIf="horario.retrasoTiempoReal! < 0">
-                          <ion-text color="danger" style="padding-right: 1em;">{{(-horario.retrasoTiempoReal! / 3600) - (( -horario.retrasoTiempoReal! % 3600 ) / 3600)}}h {{(-horario.retrasoTiempoReal! % 3600) / 60 | number: '1.0-0'}} min</ion-text>
+                          <ion-text color="danger" style="padding-right: 1em;">{{-horario.retrasoTiempoReal | durationFormat:'seconds':'h[h] m[min]'}}</ion-text>
                         </ng-container>
                         <ng-container *ngIf="horario.retrasoTiempoReal! > 0">
-                          <ion-text color="danger" style="padding-right: 1em;">{{(horario.retrasoTiempoReal! / 3600) - (( horario.retrasoTiempoReal! % 3600 ) / 3600)}}h {{(horario.retrasoTiempoReal! % 3600) / 60 | number: '1.0-0'}} min</ion-text>
+                          <ion-text color="danger" style="padding-right: 1em;">{{horario.retrasoTiempoReal | durationFormat:'seconds':'h[h] m[min]'}}</ion-text>
                         </ng-container>
                       </ng-container>                      
                     </ion-content>
@@ -128,10 +118,10 @@
         </ion-item>
       </ion-list>
       <div style="display: flex; flex-direction: column;">
-        <ion-note *ngIf="horariosHasta" style="margin: auto; padding-bottom: 0.5em;">Horarios hasta: {{horariosHasta | dateFormat:'dddd D - HH:mm'}}</ion-note>
+        <ion-note *ngIf="horariosHasta" style="margin: auto; padding-bottom: 0.5em;">{{'parada.horariosHasta' | translate:({'hora': horariosHasta | dateFormat:'dddd D - HH:mm'})}}</ion-note>
         <ion-button style="margin: auto; padding-bottom: 0.5em;" (click)="obtenerHorarios()">
           <ion-icon slot="start" src="assets/img/suma.svg"></ion-icon>
-          Cargar más
+          {{'parada.cargarMas' | translate}}
         </ion-button>        
       </div>
     </ion-card>

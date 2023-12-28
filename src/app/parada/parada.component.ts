@@ -18,13 +18,15 @@ import { ModalAlertasComponent } from '../modal-alertas/modal-alertas.component'
 import { NavegacionAppService } from '../services/navegacion-app.service';
 import { FloorPipe } from "../floor/floor.pipe";
 import { Title } from '@angular/platform-browser';
+import { TranslateModule } from '@ngx-translate/core';
+import { MomentDurationPipe } from '../moment-duration/moment-duration.pipe';
 
 
 @Component({
     selector: 'app-parada',
     templateUrl: './parada.component.html',
     standalone: true,
-    imports: [IonicModule, CommonModule, LateralComponent, MomentPipe, FloorPipe]
+    imports: [IonicModule, CommonModule, LateralComponent, MomentPipe, FloorPipe, TranslateModule, MomentDurationPipe]
 })
 export class ParadaComponent  implements OnInit, OnDestroy {
   idParada: string | null;

@@ -14,13 +14,14 @@ import { AgenciasService } from '../services/agencias.service';
 import { Agencia } from '../models/agencia.model';
 import { NavegacionAppService } from '../services/navegacion-app.service';
 import { Title } from '@angular/platform-browser';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-linea',
   templateUrl: './linea.component.html',
   styleUrls: ['./linea.component.scss'],
   standalone: true,
-  imports: [IonicModule, CommonModule, LateralComponent]
+  imports: [IonicModule, CommonModule, LateralComponent, TranslateModule]
 })
 export class LineaComponent  implements OnInit {
   @ViewChild(IonPopover) popoverPatrones: IonPopover;

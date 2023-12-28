@@ -4,13 +4,14 @@ import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
 import { FeedsService } from '../services/feeds.service';
 import { Feed } from '../models/feed.model';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-atribuciones',
   templateUrl: './atribuciones.component.html',
   styleUrls: ['./atribuciones.component.scss'],
   standalone: true,
-  imports: [CommonModule, IonicModule, LateralComponent],
+  imports: [CommonModule, IonicModule, LateralComponent, TranslateModule],
 })
 export class AtribucionesComponent  implements OnInit {
   feeds: Feed[] = [];

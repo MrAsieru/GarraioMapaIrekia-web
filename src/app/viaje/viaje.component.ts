@@ -19,13 +19,15 @@ import { BehaviorSubject, Subscription } from 'rxjs';
 import { ModalAlertasComponent } from '../modal-alertas/modal-alertas.component';
 import { NavegacionAppService } from '../services/navegacion-app.service';
 import { Title } from '@angular/platform-browser';
+import { TranslateModule } from '@ngx-translate/core';
+import { MomentDurationPipe } from '../moment-duration/moment-duration.pipe';
 
 @Component({
     selector: 'app-viaje',
     templateUrl: './viaje.component.html',
     styleUrls: ['./viaje.component.scss'],
     standalone: true,
-    imports: [IonicModule, CommonModule, LateralComponent, MomentPipe]
+    imports: [IonicModule, CommonModule, LateralComponent, MomentPipe, MomentDurationPipe, TranslateModule]
 })
 export class ViajeComponent  implements OnInit {
   @Inject(LOCALE_ID) public locale: string

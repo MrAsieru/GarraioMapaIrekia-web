@@ -1,15 +1,15 @@
-<app-lateral nombre="Página no encontrada" [nivel]="1">
+<app-lateral nombre="{{'paginaNoEncontrada.titulo' | translate}}" [nivel]="1">
   <div class="ion-padding">
     <ion-title>
-      Vaya...
+      {{'paginaNoEncontrada.linea1' | translate}}
     </ion-title>
     <ion-icon src="assets/img/oh.svg" style="width: 100%; display: contents;"></ion-icon>
     <ion-text>
       <p>
-        Parece que la página que estás buscando no existe.
+        {{'paginaNoEncontrada.linea2' | translate}}
       </p>
       <p>
-        Puedes volver a la página anterior o ir a la página principal.
+        {{'paginaNoEncontrada.linea3' | translate}}
       </p>
     </ion-text>
   </div>

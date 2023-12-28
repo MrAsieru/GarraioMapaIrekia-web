@@ -1,0 +1,248 @@
+{
+    "agencia": {
+        "titulo": "Agencia",
+        "tarifa": "Tarifas",
+        "email": "Email",
+        "telefono": "Teléfono"
+    },
+    "atribuciones": {
+        "titulo": "Atribuciones",
+        "mapaBase": "Mapa base",
+        "iconosDe": "Iconos de",
+        "fuentesDatos": "Fuentes de datos",
+        "informacion": "Información",
+        "nombreEditor": "Nombre editor",
+        "urlEditor": "URL editor",
+        "idioma": "Idioma",
+        "idiomaPredeterminado": "Idioma predeterminado",
+        "rangoFechas": "Rango de fechas",
+        "version": "Versión",
+        "email": "Email",
+        "urlContacto": "URL contacto",
+        "atribuciones": "Atribuciones",
+        "agencia": "Agencia",
+        "linea": "Línea",
+        "viajes": "Viaje",
+        "relacion": "Relación",
+        "url": "URL",
+        "telefono": "Teléfono",
+        "productor": "Productor",
+        "operador": "Operador",
+        "autoridad": "Autoridad"
+    },
+    "home": {
+        "tituloFiltro": "Filtrar agencias",
+        "textoBusqueda": "Buscar agencia",
+        "mostrarTodas": "Mostrar todas"
+    },
+    "linea": {
+        "titulo": "Línea",
+        "recogidaContinua": "Recogida continua",
+        "bajadaContinua": "Bajada continua",
+        "patron": "Patrón",
+        "de": "De",
+        "a": "A",
+        "desde": "Desde",
+        "hasta": "Hasta"
+    },
+    "modalAlertas": {
+        "periodo": "Desde {{desde}} hasta {{hasta}}"
+    },
+    "modalLista": {
+        "titulo": "Elementos",
+        "paradas": "Paradas",
+        "lineas": "Líneas",
+        "viajes": "Viajes"
+    },
+    "navegacion": {
+        "titulo": "Navegación",
+        "origenSin": "Sin origen",
+        "clicEnMapa": "Haz clic en el mapa",
+        "origenEstablecido": "Origen establecido",
+        "destinoSin": "Sin destino",
+        "destinoEstablecido": "Destino establecido",
+        "accesibilidad": "Accesibilidad",
+        "salida": "Salida",
+        "llegada": "Llegada",
+        "infoVacio": "Selecciona un origen y un destino para ver las rutas disponibles",
+        "infoObteniendo": "Obteniendo resultados...",
+        "desde": "Desde: {{nombre}}",
+        "hacia": "Hacia: {{nombre}}",
+        "cantidadParadas": "{{cantidad}} parada(s)",
+        "cargarMas": "Cargar más trayectos"
+    },
+    "paginaNoEncontrada": {
+        "titulo": "Página no encontrada",
+        "linea1": "Vaya...",
+        "linea2": "Parece que la página que estás buscando no existe.",
+        "linea3": "Puedes volver a la página anterior o ir a la página principal."
+    },
+    "parada": {
+        "titulo": "Parada",
+        "zona": "Zona {{zona}}",
+        "tiempoRestante": "en {{tiempo}}",
+        "llegada": "a las {{hora}}",
+        "llegadaLocal": "A las {{hora}} hora local",
+        "llegadaTiempoReal": "<b>Llegada:</b> {{hora}}",
+        "salidaTiempoReal": "<b>Salida:</b> {{hora}}",
+        "retrasoTiempoReal": "Retraso:",
+        "horariosHasta": "Horarios hasta {{hora}}",
+        "cargarMas": "Cargar más"
+    },
+    "viaje": {
+        "titulo": "Viaje",
+        "otrosLetreros": "Otros letreros usados durante el recorrido",
+        "enHora": "En hora",
+        "adelantado": "Adelantado {{tiempo}}",
+        "atrasado": "Retraso de {{tiempo}}",
+        "frecuencias": {
+            "desde": "Desde",
+            "hasta": "Hasta",
+            "cada": "Cada"
+        },
+        "relacionHorario": "Relación con horario",
+        "matricula": "Matrícula",
+        "rumbo": "Rumbo",
+        "velocidad": "Velocidad",
+        "estadoActual": "Estado actual",
+        "congestion": "Congestión",
+        "ocupacion": "Ocupación",
+        "hace": "hace {{tiempo}} min",
+        "en": "en {{tiempo}} min",
+        "tipoRecogida": "Tipo de recogida",
+        "tipoBajada": "Tipo de bajada",
+        "recogidaContinua": "Recogida continua",
+        "bajadaContinua": "Bajada continua",
+        "llegada": "Llegada",
+        "salida": "Salida",
+        "tiempoRealAntes": "{{tiempo}} antes",
+        "tiempoRealTarde": "{{tiempo}} tarde"
+    },
+    "gtfs": {
+        "pickupType": {
+            "1": "No hay recogida disponible",
+            "2": "Debe llamar a la agencia para organizar la recogida",
+            "3": "Debe coordinar con el conductor para organizar la recogida"
+        },
+        "dropOffType": {
+            "1": "No hay bajada disponible",
+            "2": "Debe llamar a la agencia para organizar la bajada",
+            "3": "Debe coordinar con el conductor para organizar la bajada"
+        },
+        "continuousPickup": {
+            "0": "Recogida continua con paradas",
+            "2": "Debe llamar a la agencia para organizar la recogida continua con paradas",
+            "3": "Debe coordinar con el conductor para organizar la recogida continua con paradas"
+        },
+        "continuousDropOff": {
+            "0": "Bajada continua con paradas",
+            "2": "Debe llamar a la agencia para organizar la bajada continua con paradas",
+            "3": "Debe coordinar con el conductor para organizar la bajada continua con paradas"
+        },
+        "wheelchairBoarding": {
+            "0": "Sin información sobre accesibilidad",
+            "1": "Algunos vehiculos permiten acceder en silla de ruedas",
+            "2": "No es posible acceder en silla de ruedas"
+        },
+        "timepoint": {
+            "0": "Horario aproximado",
+            "1": "Horario exacto"
+        },
+        "bikesAllowed": {
+            "0": "Sin información sobre bicicletas",
+            "1": "Se permite acceder con una bicicleta",
+            "2": "No es posible acceder con una bicicleta"
+        },
+        "wheelchairAccessible": {
+            "0": "Sin información sobre accesibilidad",
+            "1": "Es posible acceder en silla de ruedas",
+            "2": "No es posible acceder en silla de ruedas"
+        },
+        "alert": {
+            "severityLevel": {
+                "UNKNOWN_CAUSE": "Causa desconocida",
+                "OTHER_CAUSE": "Otra causa",
+                "TECHNICAL_PROBLEM": "Problema técnico",
+                "STRIKE": "Huelga",
+                "DEMONSTRATION": "Manifestación",
+                "ACCIDENT": "Accidente",
+                "HOLIDAY": "Día festivo",
+                "WEATHER": "Tiempo",
+                "MAINTENANCE": "Mantenimiento",
+                "CONSTRUCTION": "Construcción",
+                "POLICE_ACTIVITY": "Actividad policial",
+                "MEDICAL_EMERGENCY": "Emergencia médica"
+            },
+            "effect": {
+                "NO_SERVICE": "Sin servicio",
+                "REDUCED_SERVICE": "Servicio reducido",
+                "SIGNIFICANT_DELAYS": "Retrasos significativos",
+                "DETOUR": "Desvío",
+                "ADDITIONAL_SERVICE": "Servicio adicional",
+                "MODIFIED_SERVICE": "Servicio modificado",
+                "OTHER_EFFECT": "Otro efecto",
+                "UNKNOWN_EFFECT": "Efecto desconocido",
+                "STOP_MOVED": "Parada movida",
+                "NO_EFFECT": "Sin efecto",
+                "ACCESSIBILITY_ISSUE": "Problema de accesibilidad"
+            }
+        },
+        "tripShceduleRelationship": {
+            "SCHEDULED": "Programado",
+            "ADDED": "Añadido",
+            "UNSCHEDULED": "No programado",
+            "CANCELED": "Cancelado",
+            "DUPLICATED": "Duplicado",
+            "DELETED": "Eliminado"
+        },
+        "stopScheduleRelationship": {
+            "SCHEDULED": "Programado",
+            "SKIPPED": "Parada omitida",
+            "NO_DATA": "Sin datos",
+            "UNSCHEDULED": "No programado"
+        },
+        "currentStatus": {
+            "INCOMING_AT": "Llegando a la parada",
+            "STOPPED_AT": "Detenido en la parada",
+            "IN_TRANSIT_TO": "En tránsito a la parada"
+        },
+        "congestionLevel": {
+            "UNKNOWN_CONGESTION_LEVEL": "Sin datos",
+            "RUNNING_SMOOTHLY": "Circulando de manera fluida",
+            "STOP_AND_GO": "Circulación lenta",
+            "CONGESTION": "Congestión",
+            "SEVERE_CONGESTION": "Congestión severa"
+        },
+        "occupancyStatus": {
+            "EMPTY": "Vacío",
+            "MANY_SEATS_AVAILABLE": "Muchos asientos disponibles",
+            "FEW_SEATS_AVAILABLE": "Pocos asientos disponibles",
+            "STANDING_ROOM_ONLY": "Solo espacio de pie",
+            "CRUSHED_STANDING_ROOM_ONLY": "Solo de pie, muy lleno",
+            "FULL": "Lleno",
+            "NOT_ACCEPTING_PASSENGERS": "No se aceptan más pasajeros",
+            "NO_DATA_AVAILABLE": "Sin datos",
+            "NOT_BOARDABLE": "No se permite el embarque"
+        }
+    },
+    "otp": {
+        "direcciones": {
+            "DEPART": "Comienza en <b>{{calle}}</b> durante <b>{{distancia}}</b> metros",
+            "HARD_LEFT": "Gira a la izquierda en <b>{{calle}}</b> durante <b>{{distancia}}</b> metros",
+            "LEFT": "Gira a la izquierda en <b>{{calle}}</b> durante <b>{{distancia}}</b> metros",
+            "SLIGHTLY_LEFT": "Gira ligeramente a la izquierda en <b>{{calle}}</b> durante <b>{{distancia}}</b> metros",
+            "CONTINUE": "Continúa por <b>{{calle}}</b> durante <b>{{distancia}}</b> metros",
+            "HARD_RIGHT": "Gira a la derecha en <b>{{calle}}</b> durante <b>{{distancia}}</b> metros",
+            "RIGHT": "Gira a la derecha en <b>{{calle}}</b> durante <b>{{distancia}}</b> metros",
+            "SLIGHTLY_RIGHT": "Gira ligeramente a la derecha en <b>{{calle}}</b> durante <b>{{distancia}}</b> metros",
+            "CIRCLE_CLOCKWISE": "Gira en círculo dirección a <b>{{calle}}</b> durante <b>{{distancia}}</b> metros",
+            "CIRCLE_COUNTERCLOCKWISE": "Gira en círculo dirección <b>{{calle}}</b> durante <b>{{distancia}}</b> metros",
+            "ELEVATOR": "Toma el ascensor",
+            "UTURN_LEFT": "Da la vuelta dirección <b>{{calle}}</b> durante <b>{{distancia}}</b> metros",
+            "UTURN_RIGHT": "Da la vuelta dirección <b>{{calle}}</b> durante <b>{{distancia}}</b> metros",
+            "ENTER_STATION": "Entra en la estación",
+            "EXIT_STATION": "Sal de la estación",
+            "FOLLOW_SIGNS": "Sigue las señales hacia <b>{{calle}}</b> durante <b>{{distancia}}</b> metros"
+        }
+    }
+}

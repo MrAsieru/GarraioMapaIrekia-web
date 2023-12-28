@@ -16,7 +16,7 @@ import { first } from 'rxjs';
   selector: 'app-home',
   templateUrl: 'home.page.html',
   standalone: true,
-  imports: [CommonModule, IonicModule, RouterModule],
+  imports: [CommonModule, IonicModule, RouterModule, TranslateModule],
 })
 export class HomePage implements OnInit {  
   @ViewChild('chkbox_home_menu_agencias', { read: ElementRef }) agenciasCheckbox: IonCheckbox;

@@ -1,7 +1,7 @@
 <ion-header>
   <ion-toolbar>
     <ion-title>
-      Elementos
+      {{'modalLista.titulo' | translate}}
     </ion-title>
     <ion-buttons slot="end">
       <ion-button (click)="cerrar()">
@@ -13,7 +13,7 @@
 <ion-content>
   <ion-list *ngIf="paradas.length > 0">
     <ion-list-header>
-      <ion-label><b>Paradas</b></ion-label>
+      <ion-label><b>{{'modalLista.paradas' | translate}}</b></ion-label>
     </ion-list-header>
     <ion-item *ngFor="let p of paradas" button (click)="mostrarParada(p, $event)">
       <ion-text>{{p.nombre}}</ion-text><ion-text *ngIf="p.codigoPlataforma && p.codigoPlataforma !== ''"> [{{p.codigoPlataforma}}]</ion-text>
@@ -22,7 +22,7 @@
   </ion-list>
   <ion-list *ngIf="lineas.length > 0">
     <ion-list-header>
-      <ion-label><b>Lineas</b></ion-label>
+      <ion-label><b>{{'modalLista.lineas' | translate}}</b></ion-label>
     </ion-list-header>
     <ion-item *ngFor="let l of lineas" button (click)="mostrarLinea(l, $event)">
       <ion-icon src="assets/img/tipolinea_{{l.tipo ?? ''}}.svg"></ion-icon>
@@ -32,7 +32,7 @@
   </ion-list>
   <ion-list *ngIf="viajes.length > 0">
     <ion-list-header>
-      <ion-label><b>Viajes</b></ion-label>
+      <ion-label><b>{{'modalLista.viajes' | translate}}</b></ion-label>
     </ion-list-header>
     <ion-item *ngFor="let v of viajes" button (click)="mostrarViaje(v, $event)">
       <ion-chip [ngStyle]="{'background': v.linea?.color, 'color': v.linea?.colorTexto}">{{v.linea?.nombreCorto ?? v.linea?.nombreLargo ?? v.idLinea}}</ion-chip>

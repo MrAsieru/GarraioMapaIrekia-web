@@ -1,4 +1,4 @@
-<app-lateral nombre="Navegación" [nivel]="1">
+<app-lateral nombre="{{'navegacion.titulo' | translate}}" [nivel]="1">
   <div>
     <ion-card>
       <ion-row>
@@ -6,9 +6,9 @@
           <!-- Boton para seleccionar origen -->
           <ion-button expand="block" fill="outline" (click)="seleccionarOrigenDestino(true)">
             <ion-icon slot="start" src="assets/img/origen.svg"></ion-icon>
-            <ion-label *ngIf="estadoOrigen === 0">Sin origen</ion-label>
-            <ion-label *ngIf="estadoOrigen === 1">Haz clic en el mapa</ion-label>
-            <ion-label *ngIf="estadoOrigen === 2">Origen establecido</ion-label>
+            <ion-label *ngIf="estadoOrigen === 0">{{'navegacion.origenSin' | translate}}</ion-label>
+            <ion-label *ngIf="estadoOrigen === 1">{{'navegacion.clicEnMapa' | translate}}</ion-label>
+            <ion-label *ngIf="estadoOrigen === 2">{{'navegacion.origenEstablecido' | translate}}</ion-label>
           </ion-button>
         </ion-col>
         <ion-col size="3">
@@ -22,9 +22,9 @@
           <!-- Boton para seleccionar destino -->
           <ion-button expand="block" fill="outline" (click)="seleccionarOrigenDestino(false)">
             <ion-icon slot="start" src="assets/img/origen.svg"></ion-icon>
-            <ion-label *ngIf="estadoDestino === 0">Sin destino</ion-label>
-            <ion-label *ngIf="estadoDestino === 1">Haz clic en el mapa</ion-label>
-            <ion-label *ngIf="estadoDestino === 2">Destino establecido</ion-label>
+            <ion-label *ngIf="estadoDestino === 0">{{'navegacion.destinoSin' | translate}}</ion-label>
+            <ion-label *ngIf="estadoDestino === 1">{{'navegacion.clicEnMapa' | translate}}</ion-label>
+            <ion-label *ngIf="estadoDestino === 2">{{'navegacion.destinoEstablecido' | translate}}</ion-label>
           </ion-button>
         </ion-col>
         <ion-col size="3">
@@ -36,7 +36,7 @@
 
       <!-- Checkbox para seleccionar accesibilidad -->
       <ion-checkbox class="ion-padding" (ionChange)="seleccionarAccesibilidad($event)">
-        <ion-label>Accesibilidad <ion-icon src="assets/img/accesibilidad_1.svg"></ion-icon></ion-label>        
+        <ion-label>{{'navegacion.accesibilidad' | translate}} <ion-icon src="assets/img/accesibilidad_1.svg"></ion-icon></ion-label>        
       </ion-checkbox>
 
       
@@ -44,10 +44,10 @@
         <!-- Seleccionar Salir a las / Llegar a las -->
         <ion-segment value="salir" (ionChange)="seleccionarSalirLlegar($event)">
           <ion-segment-button value="salir">
-            <ion-label>Salida</ion-label>
+            <ion-label>{{'navegacion.salida' | translate}}</ion-label>
           </ion-segment-button>
           <ion-segment-button value="llegar">
-            <ion-label>Llegada</ion-label>
+            <ion-label>{{'navegacion.llegada' | translate}}</ion-label>
           </ion-segment-button>
         </ion-segment>
 
@@ -64,7 +64,7 @@
     <ion-card *ngIf="plan === undefined">
       <ion-card-content>
         <ion-text>
-          <b>Selecciona un origen y un destino para ver las rutas disponibles</b>
+          <b>{{'navegacion.infoVacio' | translate}}</b>
         </ion-text>
       </ion-card-content>
     </ion-card>
@@ -73,7 +73,7 @@
       <ion-card-content>
         <ion-icon src="assets/img/navegacion/espera.svg"></ion-icon>
         <ion-text>
-          <b>Obteniendo resultados...</b>
+          <b>{{'navegacion.infoObteniendo' | translate}}</b>
         </ion-text>
       </ion-card-content>
     </ion-card>
@@ -153,7 +153,7 @@
               <div>
                 <!-- Hacia -->
                 <ion-text>
-                  Hacia: {{etapa?.to?.name}}
+                  {{'navegacion.hacia' | translate:({"nombre": etapa?.to?.name})}}
                 </ion-text>
               </div>
             </ion-col>
@@ -171,20 +171,7 @@
                         <!-- Icono -->
                         <ion-icon src="assets/img/direcciones/direcciones_{{paso.relativeDirection}}.svg"></ion-icon>
                       
-                        <ion-text *ngIf="paso.relativeDirection === 'DEPART'">Comienza en</ion-text>
-                        <ion-text *ngIf="paso.relativeDirection === 'HARD_LEFT' || paso.relativeDirection === 'LEFT' || paso.relativeDirection === 'SLIGHTLY_LEFT'">Gira a la izquierda dirección</ion-text>
-                        <ion-text *ngIf="paso.relativeDirection === 'CONTINUE'">Continúa</ion-text>
-                        <ion-text *ngIf="paso.relativeDirection === 'SLIGHTLY_RIGHT' || paso.relativeDirection === 'RIGHT' || paso.relativeDirection === 'HARD_RIGHT'">Gira a la derecha dirección</ion-text>
-                        <ion-text *ngIf="paso.relativeDirection === 'CIRCLE_CLOCKWISE' || paso.relativeDirection === 'CIRCLE_COUNTERCLOCKWISE'">Gira en círculo dirección</ion-text>
-                        <ion-text *ngIf="paso.relativeDirection === 'ELEVATOR'">Toma el ascensor</ion-text>
-                        <ion-text *ngIf="paso.relativeDirection === 'UTURN_LEFT' || paso.relativeDirection === 'UTURN_RIGHT'">Da la vuelta dirección</ion-text>
-                        <ion-text *ngIf="paso.relativeDirection === 'ENTER_STATION'">Entra en la estación</ion-text>
-                        <ion-text *ngIf="paso.relativeDirection === 'EXIT_STATION'">Sal de la estación</ion-text>
-                        <ion-text *ngIf="paso.relativeDirection === 'FOLLOW_SIGNS'">Sigue las señales</ion-text>
-
-                        <ion-text>&nbsp;<b>{{paso.streetName}}</b>&nbsp;</ion-text>
-
-                        <ion-text *ngIf="paso.distance">durante {{paso.distance | floor}} metros</ion-text>
+                        <ion-text [innerHtml]="'otp.direcciones.'+paso.relativeDirection | translate:({'calle': paso.streetName, 'distancia': (paso.distance) ? (paso.distance | floor) : '??'})"></ion-text>
                       </ion-item>
                     </ion-list>
                   </div>                    
@@ -214,7 +201,7 @@
               <div>
                 <!-- Paradas -->
                 <ion-text>
-                  {{etapa?.intermediatePlaces?.length}} paradas
+                  {{'navegacion.cantidadParadas' | translate:({"cantidad": etapa?.intermediatePlaces?.length})}}
                 </ion-text>
 
                 <!-- Duración -->
@@ -225,13 +212,13 @@
               <div>
                 <!-- Desde -->
                 <ion-text>
-                  Desde: {{etapa?.from?.name}}
+                  {{'navegacion.desde' | translate:({"nombre": etapa?.from?.name})}}
                 </ion-text>
               </div>
               <div>
                 <!-- Hacia -->
                 <ion-text>
-                  Hacia: {{etapa?.to?.name}}
+                  {{'navegacion.hacia' | translate:({"nombre": etapa?.to?.name})}}
                 </ion-text>
               </div>
             </ion-col>
@@ -283,7 +270,7 @@
     <div *ngIf="plan?.itineraries?.length ?? 0 > 0" style="display: flex; flex-direction: column;">
       <ion-button style="margin: auto; padding-bottom: 0.5em;" (click)="masTrayectos()">
         <ion-icon slot="start" src="assets/img/suma.svg"></ion-icon>
-        Cargar más trayectos
+        {{'navegacion.cargarMas' | translate}}
       </ion-button>        
     </div>
   </div>

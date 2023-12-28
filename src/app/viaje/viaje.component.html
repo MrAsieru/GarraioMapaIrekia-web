@@ -1,4 +1,4 @@
-<app-lateral nombre="Viaje" [nivel]="2">
+<app-lateral nombre="{{'viaje.titulo' | translate}}" [nivel]="2">
   <div>
     <ion-card>
       <ion-card-header>
@@ -9,7 +9,7 @@
             <ion-text id="viaje_letrero">{{viaje?.letrero ?? linea?.nombreLargo}}</ion-text>
             <ion-popover trigger="viaje_letrero" triggerAction="click" showBackdrop="false">
               <ng-template>
-                <ion-text>Otros letreros usados durante el recorrido:</ion-text>
+                <ion-text>{{'viaje.otrosLetreros' | translate}}:</ion-text>
                 <ng-container *ngFor="let letrero of letreros;">
                   <br/>
                   <ion-text>{{letrero}}</ion-text>                  
@@ -21,29 +21,25 @@
         <ion-card-subtitle>
           <ng-container *ngIf="viajeTiempoReal?.delay || viajeTiempoReal?.delay === 0">
             <ng-container *ngIf="viajeTiempoReal?.delay === 0">
-              <ion-text color="success" style="padding-right: 1em;">En hora</ion-text>
+              <ion-text color="success" style="padding-right: 1em;">{{'viaje.enHora' | translate}}</ion-text>
             </ng-container>
             <ng-container *ngIf="viajeTiempoReal?.delay! < 0">
-              <ion-text color="danger" style="padding-right: 1em;">Adelantado {{(-viajeTiempoReal?.delay! / 3600) - (( -viajeTiempoReal?.delay! % 3600 ) / 3600)}}h {{(-viajeTiempoReal?.delay! % 3600) / 60 | number: '1.0-0'}}m</ion-text>
+              <ion-text color="danger" style="padding-right: 1em;">{{'viaje.adelantado' | translate:({'tiempo': -viajeTiempoReal?.delay! | durationFormat:'seconds':'h[h] m[min]'})}}</ion-text>
             </ng-container>
             <ng-container *ngIf="viajeTiempoReal?.delay! > 0">
-              <ion-text color="danger" style="padding-right: 1em;">Retraso de {{(viajeTiempoReal?.delay! / 3600) - (( viajeTiempoReal?.delay! % 3600 ) / 3600)}}h {{(viajeTiempoReal?.delay! % 3600) / 60 | number: '1.0-0'}}m</ion-text>
+              <ion-text color="danger" style="padding-right: 1em;">{{'viaje.atrasado' | translate:({'tiempo': viajeTiempoReal?.delay! | durationFormat:'seconds':'h[h] m[min]'})}}</ion-text>
             </ng-container>
           </ng-container>
           <ion-icon id="viaje_accesibilidad" src="assets/img/accesibilidad_{{viaje?.accesibilidad ? viaje?.accesibilidad : '0'}}.svg"></ion-icon>
           <ion-popover trigger="viaje_accesibilidad" triggerAction="click"showBackdrop="false">
             <ng-template>
-              <ion-content *ngIf="viaje?.accesibilidad === undefined || viaje?.accesibilidad === 0" class="ion-padding">Sin información sobre accesibilidad</ion-content>
-              <ion-content *ngIf="viaje?.accesibilidad === 1" class="ion-padding">Algunos vehiculos permiten acceder en silla de ruedas</ion-content>
-              <ion-content *ngIf="viaje?.accesibilidad === 2" class="ion-padding">No es posible acceder en silla de ruedas</ion-content>
+              <ion-content class="ion-padding">{{'gtfs.wheelchairAccessible.'+(viaje?.accesibilidad ?? 0) | translate}}</ion-content>
             </ng-template>
           </ion-popover>
           <ion-icon id="viaje_bici" src="assets/img/bici_{{viaje?.bicicletas ? viaje?.bicicletas : '0'}}.svg"></ion-icon>
           <ion-popover trigger="viaje_bici" triggerAction="click"showBackdrop="false">
             <ng-template>
-              <ion-content *ngIf="viaje?.bicicletas === undefined || viaje?.bicicletas === 0" class="ion-padding">Sin información sobre bicicletas</ion-content>
-                <ion-content *ngIf="viaje?.bicicletas === 1" class="ion-padding">Se permite acceder con una bicicleta</ion-content>
-                <ion-content *ngIf="viaje?.bicicletas === 2" class="ion-padding">No es posible acceder con una bicicleta</ion-content>
+              <ion-content class="ion-padding">{{'gtfs.bikesAllowed.'+(viaje?.bicicletas ?? 0) | translate}}</ion-content>
             </ng-template>
           </ion-popover>
         </ion-card-subtitle>
@@ -67,9 +63,9 @@
               <ng-template>
                 <ion-grid>
                   <ion-row>
-                    <ion-col size="3" class="ion-no-padding"><ion-label style="font-size: 0.75em; padding-inline: 0.75em; overflow: visible;">Desde</ion-label></ion-col>
-                    <ion-col size="3" class="ion-no-padding"><ion-label style="font-size: 0.75em; padding-inline: 0.75em; overflow: visible;">Hasta</ion-label></ion-col>
-                    <ion-col size="4" class="ion-no-padding"><ion-label style="font-size: 0.75em; padding-inline: 0.75em; overflow: visible;">Cada</ion-label></ion-col>
+                    <ion-col size="3" class="ion-no-padding"><ion-label style="font-size: 0.75em; padding-inline: 0.75em; overflow: visible;">{{'viaje.frecuencias.desde' | translate}}</ion-label></ion-col>
+                    <ion-col size="3" class="ion-no-padding"><ion-label style="font-size: 0.75em; padding-inline: 0.75em; overflow: visible;">{{'viaje.frecuencias.hasta' | translate}}</ion-label></ion-col>
+                    <ion-col size="4" class="ion-no-padding"><ion-label style="font-size: 0.75em; padding-inline: 0.75em; overflow: visible;">{{'viaje.frecuencias.cada' | translate}}</ion-label></ion-col>
                     <ion-col size="2" class="ion-no-padding"><ion-label style="font-size: 0.75em; padding-inline: 0.75em; overflow: visible;"><ion-icon src="assets/img/exacto_1.svg"></ion-icon></ion-label></ion-col>
                   </ion-row>
                   <ion-row *ngFor="let frecuencia of viaje?.frecuencias">
@@ -90,63 +86,45 @@
               <ng-template>
                 <ion-content>
                   <ng-container *ngIf="vehiculoTiempoReal.trip?.scheduleRelationship">
-                    <ion-text style="font-weight: bold;">Relación con horario: </ion-text>
-                    <ng-container [ngSwitch]="vehiculoTiempoReal.trip?.scheduleRelationship">
-                      <ion-text *ngSwitchCase="tripScheduleRelationshipEnum.SCHEDULED">Programado</ion-text>
-                      <ion-text *ngSwitchCase="tripScheduleRelationshipEnum.ADDED">Añadido</ion-text>
-                      <ion-text *ngSwitchCase="tripScheduleRelationshipEnum.UNSCHEDULED">No programado</ion-text>
-                      <ion-text *ngSwitchCase="tripScheduleRelationshipEnum.CANCELED">Cancelado</ion-text>
-                      <ion-text *ngSwitchCase="tripScheduleRelationshipEnum.DUPLICATED">Duplicado</ion-text>  
+                    <ion-text style="font-weight: bold;">{{'viaje.relacionHorario' | translate}}: </ion-text>
+                    <ng-container>
+                      <ion-text>{{'gtfs.tripShceduleRelationship.'+tripScheduleRelationshipEnum[vehiculoTiempoReal.trip?.scheduleRelationship ?? tripScheduleRelationshipEnum.SCHEDULED] | translate}}</ion-text>
                     </ng-container>
                     <br/>
                   </ng-container>
                   <ng-container *ngIf="vehiculoTiempoReal.vehicle?.licensePlate">
-                    <ion-text style="font-weight: bold;">Matrícula: </ion-text>
+                    <ion-text style="font-weight: bold;">{{'viaje.matricula' | translate}}: </ion-text>
                     <ion-text>{{vehiculoTiempoReal.vehicle?.licensePlate}}</ion-text>
                     <br/>
                   </ng-container>
                   <ng-container *ngIf="vehiculoTiempoReal.position?.bearing">
-                    <ion-text style="font-weight: bold;">Rumbo: </ion-text>
+                    <ion-text style="font-weight: bold;">{{'viaje.rumbo' | translate}}: </ion-text>
                     <ion-text>{{vehiculoTiempoReal.position?.bearing}}</ion-text>
                     <br/>
                   </ng-container>
                   <ng-container *ngIf="vehiculoTiempoReal.position?.speed">
-                    <ion-text style="font-weight: bold;">Velocidad: </ion-text>
+                    <ion-text style="font-weight: bold;">{{'viaje.velocidad' | translate}}: </ion-text>
                     <ion-text>{{vehiculoTiempoReal.position?.speed}}</ion-text>
                     <br/>
                   </ng-container>
                   <ng-container *ngIf="vehiculoTiempoReal.currentStatus">
-                    <ion-text style="font-weight: bold;">Estado actual: </ion-text>                    
-                    <ng-container [ngSwitch]="vehiculoTiempoReal.currentStatus">
-                      <ion-text *ngSwitchCase="vehicleStopStatusEnum.INCOMING_AT">Llegando a la parada</ion-text>
-                      <ion-text *ngSwitchCase="vehicleStopStatusEnum.STOPPED_AT">Detenido en la parada</ion-text>
-                      <ion-text *ngSwitchCase="vehicleStopStatusEnum.IN_TRANSIT_TO">En tránsito a la parada</ion-text>
+                    <ion-text style="font-weight: bold;">{{'viaje.estadoActual' | translate}}: </ion-text>                    
+                    <ng-container>
+                      <ion-text>{{'gtfs.currentStatus.'+vehicleStopStatusEnum[vehiculoTiempoReal.currentStatus] | translate}}</ion-text>
                     </ng-container>
                     <br/>
                   </ng-container>
                   <ng-container *ngIf="vehiculoTiempoReal.congestionLevel">
-                    <ion-text style="font-weight: bold;">Congestión: </ion-text>
-                    <ng-container [ngSwitch]="vehiculoTiempoReal.congestionLevel">
-                      <ion-text *ngSwitchCase="congestionLevelEnum.UNKNOWN_CONGESTION_LEVEL">Sin datos</ion-text>
-                      <ion-text *ngSwitchCase="congestionLevelEnum.RUNNING_SMOOTHLY">Circulando de manera fluida</ion-text>
-                      <ion-text *ngSwitchCase="congestionLevelEnum.STOP_AND_GO">Paradas intermitentes</ion-text>
-                      <ion-text *ngSwitchCase="congestionLevelEnum.CONGESTION">Congestión</ion-text>
-                      <ion-text *ngSwitchCase="congestionLevelEnum.SEVERE_CONGESTION">Congestión severa</ion-text>  
+                    <ion-text style="font-weight: bold;">{{'viaje.congestion' | translate}}: </ion-text>
+                    <ng-container>
+                      <ion-text>{{'gtfs.congestionLevel.'+congestionLevelEnum[vehiculoTiempoReal.congestionLevel] | translate}}</ion-text>
                     </ng-container>
                     <br/>
                   </ng-container>
                   <ng-container *ngIf="vehiculoTiempoReal.occupancyStatus">
-                    <ion-text style="font-weight: bold;">Ocupación: </ion-text>
-                    <ng-container [ngSwitch]="vehiculoTiempoReal.occupancyStatus">
-                      <ion-text *ngSwitchCase="occupancyStatusEnum.EMPTY">Vacío</ion-text>
-                      <ion-text *ngSwitchCase="occupancyStatusEnum.MANY_SEATS_AVAILABLE">Muchos asientos disponibles</ion-text>
-                      <ion-text *ngSwitchCase="occupancyStatusEnum.FEW_SEATS_AVAILABLE">Pocos asientos disponibles</ion-text>
-                      <ion-text *ngSwitchCase="occupancyStatusEnum.STANDING_ROOM_ONLY">Solo espacio de pie</ion-text>
-                      <ion-text *ngSwitchCase="occupancyStatusEnum.CRUSHED_STANDING_ROOM_ONLY">Solo espacio de pie limitado</ion-text>
-                      <ion-text *ngSwitchCase="occupancyStatusEnum.FULL">Lleno</ion-text>
-                      <ion-text *ngSwitchCase="occupancyStatusEnum.NOT_ACCEPTING_PASSENGERS">No se aceptan más pasajeros</ion-text>
-                      <ion-text *ngSwitchCase="occupancyStatusEnum.NO_DATA_AVAILABLE">Sin datos</ion-text>
-                      <ion-text *ngSwitchCase="occupancyStatusEnum.NOT_BOARDABLE">No se permite el embarque</ion-text>
+                    <ion-text style="font-weight: bold;">{{'viaje.ocupacion' | translate}}: </ion-text>
+                    <ng-container>
+                      <ion-text>{{'gtfs.occupancyStatus.'+occupancyStatusEnum[vehiculoTiempoReal.occupancyStatus] | translate}}</ion-text>
                     </ng-container>
                     <ion-text *ngIf="vehiculoTiempoReal.occupancyPercentage"> ({{vehiculoTiempoReal.occupancyPercentage}}%)</ion-text>
                     <br/>
@@ -175,22 +153,21 @@
                 <ion-text color="success" style="padding-right: 0.2em;">=</ion-text>
               </ng-container>
               <ng-container *ngIf="horario.retrasoTiempoReal < 0">
-                <ion-text color="danger" style="padding-right: 0.2em;"> (-{{(horario.retrasoTiempoReal % 3600) / 60 | number: '1.0-0'}}m)</ion-text>
+                <ion-text color="danger" style="padding-right: 0.2em;"> (-{{-horario.retrasoTiempoReal | durationFormat:'seconds':'h[h] m[min]'}})</ion-text>
               </ng-container>
               <ng-container *ngIf="horario.retrasoTiempoReal > 0">
-                <ion-text color="danger" style="padding-right: 0.2em;"> (+{{(horario.retrasoTiempoReal % 3600) / 60 | number: '1.0-0'}}m)</ion-text>
+                <ion-text color="danger" style="padding-right: 0.2em;"> (+{{horario.retrasoTiempoReal | durationFormat:'seconds':'h[h] m[min]'}})</ion-text>
               </ng-container>
             </ng-container>
             <ion-text>{{horario.momentoLlegadaTiempoReal ?? horario.momentoLlegada | dateFormat:'H:mm'}} <ion-text *ngIf="(horario.momentoLlegadaTiempoReal || horario.momentoLlegada) && (horario.momentoSalidaTiempoReal || horario.momentoSalida)"> - </ion-text> {{horario.momentoSalidaTiempoReal ?? horario.momentoSalida | dateFormat:'H:mm'}}</ion-text>
             <br/>
             <ion-note>
-              <ion-text *ngIf="horario.tiempoRestante && horario.tiempoRestante < 0">hace {{-horario.tiempoRestante}} min </ion-text>
-              <ion-text *ngIf="horario.tiempoRestante && horario.tiempoRestante >= 0">en {{horario.tiempoRestante}} min </ion-text>
+              <ion-text *ngIf="horario.tiempoRestante && horario.tiempoRestante < 0">{{'viaje.hace' | translate:({'tiempo': -horario.tiempoRestante})}}</ion-text>
+              <ion-text *ngIf="horario.tiempoRestante && horario.tiempoRestante >= 0">{{'viaje.en' | translate:({'tiempo': horario.tiempoRestante})}}</ion-text>
               <ion-icon id="viaje_exacto_{{horario.orden}}" src="assets/img/exacto_{{horario.exacto ? '1' : '0'}}.svg" (click)="$event.stopPropagation()"></ion-icon>
               <ion-popover trigger="viaje_exacto_{{horario.orden}}" triggerAction="click" showBackdrop="false">
                 <ng-template>
-                  <ion-content *ngIf="horario.exacto === undefined || !horario.exacto" class="ion-padding">Horario aproximado</ion-content>
-                  <ion-content *ngIf="horario.exacto" class="ion-padding">Horario exacto</ion-content>
+                  <ion-content *ngIf="horario.exacto" class="ion-padding">{{'gtfs.timepoint.'+((horario.exacto === undefined || !horario.exacto) ? 0 : 1) | translate}}</ion-content>
                 </ng-template>
               </ion-popover>
               <ng-container *ngIf="horario.tipoRecogida != 0 || horario.tipoBajada != 0 || horario.recogidaContinua != 1 || horario.bajadaContinua != 1">
@@ -199,31 +176,23 @@
                   <ng-template>
                     <ion-content>
                       <ng-container *ngIf="horario.tipoRecogida != 0">
-                        <ion-text style="font-weight: bold;">Tipo de recogida:</ion-text>
-                        <ion-text *ngIf="horario.tipoRecogida === 1"><br/>No hay recogida disponible.</ion-text>
-                        <ion-text *ngIf="horario.tipoRecogida === 2"><br/>Debe llamar a la agencia para organizar la recogida.</ion-text>
-                        <ion-text *ngIf="horario.tipoRecogida === 3"><br/>Debe coordinar con el conductor para organizar la recogida.</ion-text>
+                        <ion-text style="font-weight: bold;">{{'viaje.tipoRecogida' | translate}}:</ion-text>
+                        <ion-text><br/>{{'gtfs.pickupType.'+horario.tipoRecogida | translate}}.</ion-text>
                         <br/>
                       </ng-container>
                       <ng-container *ngIf="horario.tipoBajada != 0">
-                        <ion-text style="font-weight: bold;">Tipo de bajada:</ion-text>
-                        <ion-text *ngIf="horario.tipoBajada === 1"><br/>No hay bajada disponible.</ion-text>
-                        <ion-text *ngIf="horario.tipoBajada === 2"><br/>Debe llamar a la agencia para organizar la bajada.</ion-text>
-                        <ion-text *ngIf="horario.tipoBajada === 3"><br/>Debe coordinar con el conductor para organizar la bajada.</ion-text>
+                        <ion-text style="font-weight: bold;">{{'viaje.tipoBajada' | translate}}:</ion-text>
+                        <ion-text><br/>{{'gtfs.dropOffType.'+horario.tipoBajada | translate}}.</ion-text>
                         <br/>
                       </ng-container>
                       <ng-container *ngIf="horario.recogidaContinua != 1">
-                        <ion-text style="font-weight: bold;">Recogida continua:</ion-text>
-                        <ion-text *ngIf="horario.recogidaContinua === 0"><br/>Recogida continua con paradas.</ion-text>
-                        <ion-text *ngIf="horario.recogidaContinua === 2"><br/>Debe llamar a la agencia para organizar la recogida continua con paradas.</ion-text>
-                        <ion-text *ngIf="horario.recogidaContinua === 3"><br/>Debe coordinar con el conductor para organizar la recogida continua con paradas.</ion-text>
+                        <ion-text style="font-weight: bold;">{{'viaje.recogidaContinua' | translate}}:</ion-text>
+                        <ion-text><br/>{{'gtfs.continuousPickup.'+horario.recogidaContinua | translate}}.</ion-text>
                         <br/>
                       </ng-container>
                       <ng-container *ngIf="horario.bajadaContinua != 1">
-                        <ion-text style="font-weight: bold;">Bajada continua:</ion-text>
-                        <ion-text *ngIf="horario.bajadaContinua === 0"><br/>Bajada continua con paradas.</ion-text>
-                        <ion-text *ngIf="horario.bajadaContinua === 2"><br/>Debe llamar a la agencia para organizar la bajada continua con paradas.</ion-text>
-                        <ion-text *ngIf="horario.bajadaContinua === 3"><br/>Debe coordinar con el conductor para organizar la bajada continua con paradas.</ion-text>
+                        <ion-text style="font-weight: bold;">{{'viaje.bajadaContinua' | translate}}:</ion-text>
+                        <ion-text><br/>{{'gtfs.continuousDropOff.'+horario.bajadaContinua | translate}}.</ion-text>
                         <br/>
                       </ng-container>
                     </ion-content>
@@ -236,38 +205,35 @@
                   <ng-template>
                     <ion-content>
                       <ng-container *ngIf="horario.tiempoReal.arrival">
-                        <ion-text style="font-weight: bold;">Llegada: </ion-text>
+                        <ion-text style="font-weight: bold;">{{'viaje.llegada' | translate}}: </ion-text>
                         <ng-container *ngIf="horario.momentoLlegadaTiempoReal">
                           <ion-text>{{horario.momentoLlegadaTiempoReal | dateFormat:'H:mm'}}</ion-text>
                         </ng-container>
                         <ng-container *ngIf="horario.retrasoLlegadaTiempoReal! < 0">
-                          <ion-text color="danger" style="padding-right: 1em;"> ({{(-horario.retrasoLlegadaTiempoReal! / 3600) - (( -horario.retrasoLlegadaTiempoReal! % 3600 ) / 3600)}}h {{(-horario.retrasoLlegadaTiempoReal! % 3600) / 60 | number: '1.0-0'}}m antes)</ion-text>
+                          <ion-text color="danger" style="padding-right: 1em;"> ({{'viaje.tiempoRealAntes' | translate:({'tiempo': (-horario.retrasoLlegadaTiempoReal! | durationFormat:'seconds':'h[h] m[min]')})}})</ion-text>
                         </ng-container>
                         <ng-container *ngIf="horario.retrasoLlegadaTiempoReal! > 0">
-                          <ion-text color="danger" style="padding-right: 1em;"> ({{(horario.retrasoLlegadaTiempoReal! / 3600) - (( horario.retrasoLlegadaTiempoReal! % 3600 ) / 3600)}}h {{(horario.retrasoLlegadaTiempoReal! % 3600) / 60 | number: '1.0-0'}}m tarde)</ion-text>
+                          <ion-text color="danger" style="padding-right: 1em;"> ({{'viaje.tiempoRealAntes' | translate:({'tiempo': (horario.retrasoLlegadaTiempoReal! | durationFormat:'seconds':'h[h] m[min]')})}})</ion-text>
                         </ng-container>
                         <br/>
                       </ng-container>
                       <ng-container *ngIf="horario.tiempoReal.departure">
-                        <ion-text style="font-weight: bold;">Salida: </ion-text>
+                        <ion-text style="font-weight: bold;">{{'viaje.salida' | translate}}: </ion-text>
                         <ng-container *ngIf="horario.momentoSalidaTiempoReal">
                           <ion-text>{{horario.momentoSalidaTiempoReal | dateFormat:'H:mm'}}</ion-text>
                         </ng-container>
                         <ng-container *ngIf="horario.retrasoSalidaTiempoReal! < 0">
-                          <ion-text color="danger" style="padding-right: 1em;"> ({{(-horario.retrasoSalidaTiempoReal! / 3600) - (( -horario.retrasoSalidaTiempoReal! % 3600 ) / 3600)}}h {{(-horario.retrasoSalidaTiempoReal! % 3600) / 60 | number: '1.0-0'}}m antes)</ion-text>
+                          <ion-text color="danger" style="padding-right: 1em;"> ({{'viaje.tiempoRealAntes' | translate:({'tiempo': (-horario.retrasoSalidaTiempoReal! | durationFormat:'seconds':'h[h] m[min]')})}})</ion-text>
                         </ng-container>
                         <ng-container *ngIf="horario.retrasoSalidaTiempoReal! > 0">
-                          <ion-text color="danger" style="padding-right: 1em;"> ({{(horario.retrasoSalidaTiempoReal! / 3600) - (( horario.retrasoSalidaTiempoReal! % 3600 ) / 3600)}}h {{(horario.retrasoSalidaTiempoReal! % 3600) / 60 | number: '1.0-0'}}m tarde)</ion-text>
+                          <ion-text color="danger" style="padding-right: 1em;"> ({{'viaje.tiempoRealAntes' | translate:({'tiempo': (horario.retrasoSalidaTiempoReal! | durationFormat:'seconds':'h[h] m[min]')})}})</ion-text>
                         </ng-container>
                         <br/>
                       </ng-container>
                       <ng-container *ngIf="horario.tiempoReal.scheduleRelationship">
-                        <ion-text style="font-weight: bold;">Relación con horario: </ion-text>
+                        <ion-text style="font-weight: bold;">{{'viaje.relacionHorario' | translate}}: </ion-text>
                         <ng-container [ngSwitch]="horario.tiempoReal.scheduleRelationship">
-                          <ion-text *ngSwitchCase="stopScheduleRelationshipEnum.SCHEDULED">Programado</ion-text>
-                          <ion-text *ngSwitchCase="stopScheduleRelationshipEnum.SKIPPED">Parada omitida</ion-text>
-                          <ion-text *ngSwitchCase="stopScheduleRelationshipEnum.NO_DATA">Sin datos</ion-text>
-                          <ion-text *ngSwitchCase="stopScheduleRelationshipEnum.UNSCHEDULED">Cancelado</ion-text>
+                          <ion-text>{{'gtfs.stopScheduleRelationship.'+stopScheduleRelationshipEnum[horario.tiempoReal.scheduleRelationship] | translate}}</ion-text>
                         </ng-container>
                         <br/>
                       </ng-container>

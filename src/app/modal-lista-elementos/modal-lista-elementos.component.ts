@@ -11,12 +11,13 @@ import { ActivatedRoute, Route, Router } from '@angular/router';
 import { NavegacionAppService } from '../services/navegacion-app.service';
 import { Viaje, ViajePropiedadesVectoriales } from '../models/viaje.model';
 import { ViajesService } from '../services/viajes.service';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-modal-lista-elementos',
   templateUrl: './modal-lista-elementos.component.html',
   standalone: true,
-  imports: [IonicModule, CommonModule],
+  imports: [IonicModule, CommonModule, TranslateModule],
 })
 export class ModalListaElementosComponent implements OnInit {
   @Input("route") route: ActivatedRoute;
