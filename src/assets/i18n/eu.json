@@ -1,0 +1,248 @@
+{
+    "agencia": {
+        "titulo": "Agentzia",
+        "tarifa": "Tarifak",
+        "email": "Email",
+        "telefono": "Telefonoa"
+    },
+    "atribuciones": {
+        "titulo": "Atribuzioak",
+        "mapaBase": "Oinarrizko mapa",
+        "iconosDe": "Ikonoak",
+        "fuentesDatos": "Datu iturburuak",
+        "informacion": "Informazioa",
+        "nombreEditor": "Argitaratzailearen izena",
+        "urlEditor": "Argitaratzailearen URL-a",
+        "idioma": "Hizkuntza",
+        "idiomaPredeterminado": "Hizkuntza lehenetsia",
+        "rangoFechas": "Data-tartea",
+        "version": "Bertsioa",
+        "email": "Email",
+        "urlContacto": "Kontaktuaren URL-a",
+        "atribuciones": "Atribuzioak",
+        "agencia": "Agentzia",
+        "linea": "Linea",
+        "viajes": "Bidaiak",
+        "relacion": "Harremana",
+        "url": "URLa",
+        "telefono": "Telefonoa",
+        "productor": "Ekoizlea",
+        "operador": "Operadorea",
+        "autoridad": "Autoritatea"
+    },
+    "home": {
+        "tituloFiltro": "Iragazi agentziak",
+        "textoBusqueda": "Agentzia bilatu",
+        "mostrarTodas": "Denak erakutsi"
+    },
+    "linea": {
+        "titulo": "Linea",
+        "recogidaContinua": "Etengabeko igoera",
+        "bajadaContinua": "Etengabeko jaitsiera",
+        "patron": "Patroia",
+        "de": "(e)tik",
+        "a": "(e)ra",
+        "desde": "Hasiera",
+        "hasta": "Helmuga"
+    },
+    "modalAlertas": {
+        "periodo": "{{desde}}-(e)tik {{hasta}}-(e)ra"
+    },
+    "modalLista": {
+        "titulo": "Elementuak",
+        "paradas": "Geltokiak",
+        "lineas": "Lineak",
+        "viajes": "Bidaiak"
+    },
+    "navegacion": {
+        "titulo": "Nabigazioa",
+        "origenSin": "Jatorririk gabe",
+        "clicEnMapa": "Egin klik mapa gainean",
+        "origenEstablecido": "Jatorria ezarrita",
+        "destinoSin": "Helmugarik gabe",
+        "destinoEstablecido": "Helmuga ezarrita",
+        "accesibilidad": "Irisgarritasuna",
+        "salida": "Irteera",
+        "llegada": "Helmuga",
+        "infoVacio": "Jatorria eta helmuga ezarri ibilbideak ikusteko",
+        "infoObteniendo": "Emaitzak lortzen...",
+        "desde": "Jatorria: {{nombre}}",
+        "hacia": "Helmuga: {{nombre}}",
+        "cantidadParadas": "{{cantidad}} geltoki",
+        "cargarMas": "Ibilbide gehiago kargatu"
+    },
+    "paginaNoEncontrada": {
+        "titulo": "Orrialdea ez da aurkitu",
+        "linea1": "Arraioa!",
+        "linea2": "Badirudi bilatzen ari zaren orria ez dela existitzen.",
+        "linea3": "Aurreko orrira itzuli edo orri nagusira joan zaitezke."
+    },
+    "parada": {
+        "titulo": "Geltokia",
+        "zona": "{{zona}}. gunea",
+        "tiempoRestante": "{{tiempo}} barru",
+        "llegada": "{{hora}}an",
+        "llegadaLocal": "{{hora}}an tokiko orduan",
+        "llegadaTiempoReal": "<b>Iritsiera:</b> {{hora}}",
+        "salidaTiempoReal": "<b>Irteera:</b> {{hora}}",
+        "retrasoTiempoReal": "Atzerapena:",
+        "horariosHasta": "Ordutegiak {{hora}} arte",
+        "cargarMas": "Gehiago kargatu"
+    },
+    "viaje": {
+        "titulo": "Bidaia",
+        "otrosLetreros": "Ibilbidean erabilitako beste kartel batzuk",
+        "enHora": "Garaiz",
+        "adelantado": "{{tiempo}} goiz",
+        "atrasado": "{{tiempo}} berandu",
+        "frecuencias": {
+            "desde": "Tik",
+            "hasta": "Arte",
+            "cada": "Tartea"
+        },
+        "relacionHorario": "Ordutegiarekin harremana",
+        "matricula": "Matrikula",
+        "rumbo": "Norabidea",
+        "velocidad": "Abiadura",
+        "estadoActual": "Uneko egoera",
+        "congestion": "Pilaketa",
+        "ocupacion": "Okupazioa",
+        "hace": "duela {{tiempo}} min",
+        "en": "{{tiempo}} min barru",
+        "tipoRecogida": "Igoera mota",
+        "tipoBajada": "Jaitsiera mota",
+        "recogidaContinua": "Etengabeko igoera",
+        "bajadaContinua": "Etengabeko jaitsiera",
+        "llegada": "Helmuga",
+        "salida": "Irteera",
+        "tiempoRealAntes": "{{tiempo}} lehenago",
+        "tiempoRealTarde": "{{tiempo}} atzerapena"
+    },
+    "gtfs": {
+        "pickupType": {
+            "1": "Ez dago igoera posiblerik",
+            "2": "Agentziari deitu igoera eskatzeko",
+            "3": "Igoera gidariarekin koordinatu behar da"
+        },
+        "dropOffType": {
+            "1": "Ez dago jaitsiera posiblerik",
+            "2": "Agentziari deitu jaitsiera eskatzeko",
+            "3": "Jaisteko gidariarekin koordinatu behar da"
+        },
+        "continuousPickup": {
+            "0": "Etengabeko igoera geltokiekin",
+            "2": "Agentziari deitu igoera eskatzeko",
+            "3": "Igoera gidariarekin koordinatu behar da"
+        },
+        "continuousDropOff": {
+            "0": "Etengabeko jaitsiera geltokiekin",
+            "2": "Agentziari deitu jaitsiera eskatzeko",
+            "3": "Jaisteko gidariarekin koordinatu behar da"
+        },
+        "wheelchairBoarding": {
+            "0": "Irisgarritasunari buruzko informaziorik gabe",
+            "1": "Ibilgailu batzuek gurpil-aulkian sartzeko aukera ematen dute",
+            "2": "Ezin da gurpi-aulki batekin sartu"
+        },
+        "timepoint": {
+            "0": "Gutxi gorabeherako ordutegia",
+            "1": "Ordutegi zehatza"
+        },
+        "bikesAllowed": {
+            "0": "Bizikletei buruzko informaziorik ez",
+            "1": "Bizikleta batekin sar daiteke",
+            "2": "Ezin da bizikleta batekin sartu"
+        },
+        "wheelchairAccessible": {
+            "0": "Irisgarritasunari buruzko informaziorik gabe",
+            "1": "Gurpi-aulki batekin sar daiteke",
+            "2": "Ezin da gurpi-aulki batekin sartu"
+        },
+        "alert": {
+            "severityLevel": {
+                "UNKNOWN_CAUSE": "Arrazoi ezezaguna",
+                "OTHER_CAUSE": "Beste arrazoi bat",
+                "TECHNICAL_PROBLEM": "Arazo teknikoa",
+                "STRIKE": "Greba",
+                "DEMONSTRATION": "Manifestazioa",
+                "ACCIDENT": "Istripua",
+                "HOLIDAY": "Jaieguna",
+                "WEATHER": "Eguraldia",
+                "MAINTENANCE": "Mantentze-lanak",
+                "CONSTRUCTION": "Eraikuntza",
+                "POLICE_ACTIVITY": "Polizia jarduera",
+                "MEDICAL_EMERGENCY": "Larrialdi medikoa"
+            },
+            "effect": {
+                "NO_SERVICE": "Zerbitzurik gabe",
+                "REDUCED_SERVICE": "Zerbitzu murriztua",
+                "SIGNIFICANT_DELAYS": "Atzerapen nabarmenak",
+                "DETOUR": "Desbideraketa",
+                "ADDITIONAL_SERVICE": "Zerbitzu gehigarria",
+                "MODIFIED_SERVICE": "Zerbitzu aldatua",
+                "OTHER_EFFECT": "Beste eragin bat",
+                "UNKNOWN_EFFECT": "Eragin ezezaguna",
+                "STOP_MOVED": "Geltokia mugituta",
+                "NO_EFFECT": "Eraginik gabe",
+                "ACCESSIBILITY_ISSUE": "Irisgarritasun arazoa"
+            }
+        },
+        "tripShceduleRelationship": {
+            "SCHEDULED": "Programatua",
+            "ADDED": "Gehitua",
+            "UNSCHEDULED": "Programatu gabea",
+            "CANCELED": "Bertan behera utzia",
+            "DUPLICATED": "Bikoiztua",
+            "DELETED": "Ezabatua"
+        },
+        "stopScheduleRelationship": {
+            "SCHEDULED": "Programatua",
+            "SKIPPED": "Gelditu gabe",
+            "NO_DATA": "Daturik gabe",
+            "UNSCHEDULED": "Programatu gabea"
+        },
+        "currentStatus": {
+            "INCOMING_AT": "Geltokiera iristen",
+            "STOPPED_AT": "Geltokian geldituta",
+            "IN_TRANSIT_TO": "Geltoki baterako bidean"
+        },
+        "congestionLevel": {
+            "UNKNOWN_CONGESTION_LEVEL": "Daturik gabe",
+            "RUNNING_SMOOTHLY": "Arin zirkulatzen",
+            "STOP_AND_GO": "Zirkulazio motela",
+            "CONGESTION": "Kongestioa",
+            "SEVERE_CONGESTION": "Kongestio larria"
+        },
+        "occupancyStatus": {
+            "EMPTY": "Hutsik",
+            "MANY_SEATS_AVAILABLE": "Eserleku asko eskuragarri",
+            "FEW_SEATS_AVAILABLE": "Eserleku gutxi eskuragarri",
+            "STANDING_ROOM_ONLY": "Zutik bakarrik",
+            "CRUSHED_STANDING_ROOM_ONLY": "Zutik bakarrik, oso betea",
+            "FULL": "Beteta",
+            "NOT_ACCEPTING_PASSENGERS": "Ez dira bidaiari gehiago onartzen",
+            "NO_DATA_AVAILABLE": "Daturik gabe",
+            "NOT_BOARDABLE": "Ezin da sartu"
+        }
+    },
+    "otp": {
+        "direcciones": {
+            "DEPART": "<b>{{calle}}</b>-n hasi (<b>{{distancia}}</b> metro)",
+            "HARD_LEFT": "Ezkerrera biratu <b>{{calle}}</b>-n (<b>{{distancia}}</b> metro)",
+            "LEFT": "Ezkerrera biratu <b>{{calle}}</b>-n (<b>{{distancia}}</b> metro)",
+            "SLIGHTLY_LEFT": "Ezkerrera biratu pixka bat <b>{{calle}}</b>-n (<b>{{distancia}}</b> metro)",
+            "CONTINUE": "Jarraitu <b>{{calle}}</b>-tik (<b>{{distancia}}</b> metro)",
+            "HARD_RIGHT": "Eskuinera biratu <b>{{calle}}</b>-n (<b>{{distancia}}</b> metro)",
+            "RIGHT": "Eskuinera biratu <b>{{calle}}</b>-n (<b>{{distancia}}</b> metro)",
+            "SLIGHTLY_RIGHT": "Eskuinera iratu pixka bat <b>{{calle}}</b>-n (<b>{{distancia}}</b> metro)",
+            "CIRCLE_CLOCKWISE": "Biratu zirkuluan <b>{{calle}}</b> norabiderantz (<b>{{distancia}}</b> metro)",
+            "CIRCLE_COUNTERCLOCKWISE": "Biratu zirkuluan <b>{{calle}}</b> norabiderantz (<b>{{distancia}}</b> metro)",
+            "ELEVATOR": "Hartu igogailua",
+            "UTURN_LEFT": "Ezkerrerantz buelta eman <b>{{calle}}</b>-n (<b>{{distancia}}</b> metro)",
+            "UTURN_RIGHT": "Eskuinerrantz buelta eman <b>{{calle}}</b>-n (<b>{{distancia}}</b> metro)",
+            "ENTER_STATION": "Sartu geltokian",
+            "EXIT_STATION": "Geltokitik irten",
+            "FOLLOW_SIGNS": "Jarraitu seinaleak <b>{{calle}}</b> norabidean (<b>{{distancia}}</b> metro)"
+        }
+    }
+}
