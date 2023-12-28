@@ -32,6 +32,11 @@
   </ion-fab-button>
 </ion-fab>
 <ion-fab slot="fixed" vertical="top" horizontal="end">
+  <ion-chip color="primary" id="chip-idioma">
+    <ion-icon src="assets/img/idioma.svg"></ion-icon>
+    <ion-icon src="assets/banderas/{{idiomaSeleccionado}}.svg"></ion-icon>
+  </ion-chip>
+  <br/>
   <ion-chip color="primary">
     <ion-icon src="assets/img/tiemporeal.svg"></ion-icon>
     <ion-toggle [enableOnOffLabels]="true" [checked]="true" (ionChange)="cambiarTiempoReal($event)"></ion-toggle>
@@ -47,3 +52,15 @@
     <ion-icon src="assets/img/info.svg"></ion-icon>
   </ion-fab-button>
 </ion-fab>
+
+<ion-popover trigger="chip-idioma" size="cover" #popoverIdioma>
+  <ng-template>
+    <ion-list>
+      <ion-item *ngFor="let idioma of idiomas" style="--padding-start: 8px; width: fit-content;" [button]="true" (click)="cambiarIdioma($event, idioma)">
+        <ion-icon src="assets/banderas/{{idioma}}.svg"></ion-icon>
+        &nbsp;
+        <ion-label [ngStyle]="{'font-weight': (idioma === idiomaSeleccionado) ? 'bold' : ''}">{{idioma | uppercase}}</ion-label>
+      </ion-item>
+    </ion-list>
+  </ng-template>
+</ion-popover>

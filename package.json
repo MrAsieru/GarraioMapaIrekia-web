@@ -31,6 +31,8 @@
     "@capacitor/status-bar": "^5.0.6",
     "@googlemaps/polyline-codec": "^1.0.28",
     "@ionic/angular": "^7.5.3",
+    "@ngx-translate/core": "^15.0.0",
+    "@ngx-translate/http-loader": "^8.0.0",
     "@types/google-polyline": "^1.0.2",
     "@types/moment-duration-format": "^2.2.6",
     "gtfs-realtime-bindings": "^1.1.1",

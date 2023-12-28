@@ -9,6 +9,8 @@ import { ActivatedRoute, Router, RouterModule} from '@angular/router'
 import { MapaService } from '../services/mapa.service';
 import { NavegacionAppService } from '../services/navegacion-app.service';
 import { TiempoRealService } from '../services/tiemporeal.service';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { first } from 'rxjs';
 
 @Component({
   selector: 'app-home',
@@ -18,11 +20,15 @@ import { TiempoRealService } from '../services/tiemporeal.service';
 })
 export class HomePage implements OnInit {  
   @ViewChild('chkbox_home_menu_agencias', { read: ElementRef }) agenciasCheckbox: IonCheckbox;
+  @ViewChild('popoverIdioma', { read: ElementRef }) popoverIdioma: ElementRef;
 
   listaAgencias: Array<Agencia & {mostrar: boolean}> = [];
   listaAgenciasBusqueda: Array<Agencia & {mostrar: boolean}> = [];
   agenciasCheckboxChecked: boolean = true;
   agenciasCheckboxIndeterminate: boolean = false;
+
+  idiomas: Array<string> = ['eu', 'es', 'en'];
+  idiomaSeleccionado: string = '';
 
   constructor(private menuCtrl: MenuController,
     private agenciasService: AgenciasService,
@@ -30,7 +36,8 @@ export class HomePage implements OnInit {
     private router: Router,
     private mapaService: MapaService,
     private navegacionAppService: NavegacionAppService,
-    private tiempoReal: TiempoRealService) {
+    private tiempoReal: TiempoRealService,
+    private translateService: TranslateService) {
       this.listaAgenciasBusqueda = this.listaAgencias.map(agencia => ({ ...agencia, mostrar: true }));
   }
 
@@ -41,6 +48,9 @@ export class HomePage implements OnInit {
         this.listaAgenciasBusqueda = this.listaAgencias;
       }      
     });
+
+    this.idiomaSeleccionado = this.translateService.currentLang;
+    console.log(this.translateService.currentLang);
   }
 
   abrirMenu() {
@@ -98,5 +108,15 @@ export class HomePage implements OnInit {
   cambiarLocalizacion(event: ToggleCustomEvent) {
     event.stopPropagation();
     this.mapaService.setLocalizacion(event.detail.checked);
+  }
+
+  cambiarIdioma(event: MouseEvent, idioma: string) {
+    event.stopPropagation();
+    this.translateService.onLangChange.pipe(first()).subscribe(() => {
+      this.idiomaSeleccionado = this.translateService.currentLang;
+      console.log(`current ${this.translateService.currentLang}`)
+    });
+    this.translateService.use(idioma);
+    this.popoverIdioma.nativeElement.dismiss();    
   }
 }
