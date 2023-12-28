@@ -1,0 +1,248 @@
+{
+    "agencia": {
+        "titulo": "Agency",
+        "tarifa": "Fares",
+        "email": "Email",
+        "telefono": "Phone"
+    },
+    "atribuciones": {
+        "titulo": "Attributions",
+        "mapaBase": "Base Map",
+        "iconosDe": "Icons by",
+        "fuentesDatos": "Data sources",
+        "informacion": "Information",
+        "nombreEditor": "Editor name",
+        "urlEditor": "Editor URL",
+        "idioma": "Language",
+        "idiomaPredeterminado": "Default language",
+        "rangoFechas": "Date range",
+        "version": "Version",
+        "email": "Email",
+        "urlContacto": "Contact URL",
+        "atribuciones": "Attributions",
+        "agencia": "Agency",
+        "linea": "Line",
+        "viajes": "Trip",
+        "relacion": "Relation",
+        "url": "URL",
+        "telefono": "Phone",
+        "productor": "Producer",
+        "operador": "Operator",
+        "autoridad": "Authority"
+    },
+    "home": {
+        "tituloFiltro": "Filter Agencies",
+        "textoBusqueda": "Search Agency",
+        "mostrarTodas": "Show All"
+    },
+    "linea": {
+        "titulo": "Line",
+        "recogidaContinua": "Continuous Pickup",
+        "bajadaContinua": "Continuous Drop-off",
+        "patron": "Pattern",
+        "de": "From",
+        "a": "To",
+        "desde": "From",
+        "hasta": "To"
+    },
+    "modalAlertas": {
+        "periodo": "From {{desde}} to {{hasta}}"
+    },
+    "modalLista": {
+        "titulo": "Items",
+        "paradas": "Stops",
+        "lineas": "Lines",
+        "viajes": "Trips"
+    },
+    "navegacion": {
+        "titulo": "Navigation",
+        "origenSin": "No origin set",
+        "clicEnMapa": "Click on the map",
+        "origenEstablecido": "Origin set",
+        "destinoSin": "No destination set",
+        "destinoEstablecido": "Destination set",
+        "accesibilidad": "Accessibility",
+        "salida": "Departure",
+        "llegada": "Arrival",
+        "infoVacio": "Select an origin and destination to see available routes",
+        "infoObteniendo": "Fetching results...",
+        "desde": "From: {{nombre}}",
+        "hacia": "To: {{nombre}}",
+        "cantidadParadas": "{{cantidad}} stop(s)",
+        "cargarMas": "Load more routes"
+    },
+    "paginaNoEncontrada": {
+        "titulo": "Page not found",
+        "linea1": "Oops...",
+        "linea2": "It seems the page you are looking for does not exist.",
+        "linea3": "You can go back to the previous page or go to the home page."
+    },
+    "parada": {
+        "titulo": "Stop",
+        "zona": "Zone {{zona}}",
+        "tiempoRestante": "in {{tiempo}}",
+        "llegada": "at {{hora}}",
+        "llegadaLocal": "At {{hora}} local time",
+        "llegadaTiempoReal": "<b>Arrival:</b> {{hora}}",
+        "salidaTiempoReal": "<b>Departure:</b> {{hora}}",
+        "retrasoTiempoReal": "Delay:",
+        "horariosHasta": "Schedules until {{hora}}",
+        "cargarMas": "Load more"
+    },
+    "viaje": {
+        "titulo": "Trip",
+        "otrosLetreros": "Other signs used during the trip",
+        "enHora": "On time",
+        "adelantado": "Ahead {{tiempo}}",
+        "atrasado": "Delay of {{tiempo}}",
+        "frecuencias": {
+            "desde": "From",
+            "hasta": "To",
+            "cada": "Every"
+        },
+        "relacionHorario": "Schedule relation",
+        "matricula": "License Plate",
+        "rumbo": "Direction",
+        "velocidad": "Speed",
+        "estadoActual": "Current status",
+        "congestion": "Congestion",
+        "ocupacion": "Occupancy",
+        "hace": "{{tiempo}} min ago",
+        "en": "in {{tiempo}} min",
+        "tipoRecogida": "Pickup type",
+        "tipoBajada": "Drop-off type",
+        "recogidaContinua": "Continuous pickup",
+        "bajadaContinua": "Continuous drop-off",
+        "llegada": "Arrival",
+        "salida": "Departure",
+        "tiempoRealAntes": "{{tiempo}} before",
+        "tiempoRealTarde": "{{tiempo}} late"
+    },
+    "gtfs": {
+        "pickupType": {
+            "1": "No pickup available",
+            "2": "Must call agency to arrange pickup",
+            "3": "Must coordinate with driver to arrange pickup"
+        },
+        "dropOffType": {
+            "1": "No drop-off available",
+            "2": "Must call agency to arrange drop-off",
+            "3": "Must coordinate with driver to arrange drop-off"
+        },
+        "continuousPickup": {
+            "0": "Continuous pickup with stops",
+            "2": "Must call agency to arrange continuous pickup with stops",
+            "3": "Must coordinate with driver to arrange continuous pickup with stops"
+        },
+        "continuousDropOff": {
+            "0": "Continuous drop-off with stops",
+            "2": "Must call agency to arrange continuous drop-off with stops",
+            "3": "Must coordinate with driver to arrange continuous drop-off with stops"
+        },
+        "wheelchairBoarding": {
+            "0": "No wheelchair accessibility information",
+            "1": "Some vehicles allow wheelchair access",
+            "2": "Wheelchair access not possible"
+        },
+        "timepoint": {
+            "0": "Approximate schedule",
+            "1": "Exact schedule"
+        },
+        "bikesAllowed": {
+            "0": "No bike information",
+            "1": "Bikes allowed",
+            "2": "Bikes not allowed"
+        },
+        "wheelchairAccessible": {
+            "0": "No wheelchair accessibility information",
+            "1": "Wheelchair access possible",
+            "2": "Wheelchair access not possible"
+        },
+        "alert": {
+            "severityLevel": {
+                "UNKNOWN_CAUSE": "Unknown cause",
+                "OTHER_CAUSE": "Other cause",
+                "TECHNICAL_PROBLEM": "Technical problem",
+                "STRIKE": "Strike",
+                "DEMONSTRATION": "Demonstration",
+                "ACCIDENT": "Accident",
+                "HOLIDAY": "Holiday",
+                "WEATHER": "Weather",
+                "MAINTENANCE": "Maintenance",
+                "CONSTRUCTION": "Construction",
+                "POLICE_ACTIVITY": "Police activity",
+                "MEDICAL_EMERGENCY": "Medical emergency"
+            },
+            "effect": {
+                "NO_SERVICE": "No service",
+                "REDUCED_SERVICE": "Reduced service",
+                "SIGNIFICANT_DELAYS": "Significant delays",
+                "DETOUR": "Detour",
+                "ADDITIONAL_SERVICE": "Additional service",
+                "MODIFIED_SERVICE": "Modified service",
+                "OTHER_EFFECT": "Other effect",
+                "UNKNOWN_EFFECT": "Unknown effect",
+                "STOP_MOVED": "Stop moved",
+                "NO_EFFECT": "No effect",
+                "ACCESSIBILITY_ISSUE": "Accessibility issue"
+            }
+        },
+        "tripShceduleRelationship": {
+            "SCHEDULED": "Scheduled",
+            "ADDED": "Added",
+            "UNSCHEDULED": "Unscheduled",
+            "CANCELED": "Canceled",
+            "DUPLICATED": "Duplicated",
+            "DELETED": "Deleted"
+        },
+        "stopScheduleRelationship": {
+            "SCHEDULED": "Scheduled",
+            "SKIPPED": "Stop skipped",
+            "NO_DATA": "No data",
+            "UNSCHEDULED": "Unscheduled"
+        },
+        "currentStatus": {
+            "INCOMING_AT": "Arriving at stop",
+            "STOPPED_AT": "Stopped at stop",
+            "IN_TRANSIT_TO": "In transit to stop"
+        },
+        "congestionLevel": {
+            "UNKNOWN_CONGESTION_LEVEL": "Unknown congestion level",
+            "RUNNING_SMOOTHLY": "Running smoothly",
+            "STOP_AND_GO": "Stop and go",
+            "CONGESTION": "Congestion",
+            "SEVERE_CONGESTION": "Severe congestion"
+        },
+        "occupancyStatus": {
+            "EMPTY": "Empty",
+            "MANY_SEATS_AVAILABLE": "Many seats available",
+            "FEW_SEATS_AVAILABLE": "Few seats available",
+            "STANDING_ROOM_ONLY": "Standing room only",
+            "CRUSHED_STANDING_ROOM_ONLY": "Crushed standing room only",
+            "FULL": "Full",
+            "NOT_ACCEPTING_PASSENGERS": "Not accepting more passengers",
+            "NO_DATA_AVAILABLE": "No data available",
+            "NOT_BOARDABLE": "Not boardable"
+        }
+    },
+    "otp": {
+        "direcciones": {
+            "DEPART": "Start at <b>{{calle}}</b> for <b>{{distancia}}</b> meters",
+            "HARD_LEFT": "Turn hard left on <b>{{calle}}</b> for <b>{{distancia}}</b> meters",
+            "LEFT": "Turn left on <b>{{calle}}</b> for <b>{{distancia}}</b> meters",
+            "SLIGHTLY_LEFT": "Turn slightly left on <b>{{calle}}</b> for <b>{{distancia}}</b> meters",
+            "CONTINUE": "Continue on <b>{{calle}}</b> for <b>{{distancia}}</b> meters",
+            "HARD_RIGHT": "Turn hard right on <b>{{calle}}</b> for <b>{{distancia}}</b> meters",
+            "RIGHT": "Turn right on <b>{{calle}}</b> for <b>{{distancia}}</b> meters",
+            "SLIGHTLY_RIGHT": "Turn slightly right on <b>{{calle}}</b> for <b>{{distancia}}</b> meters",
+            "CIRCLE_CLOCKWISE": "Turn in a circle towards <b>{{calle}}</b> for <b>{{distancia}}</b> meters",
+            "CIRCLE_COUNTERCLOCKWISE": "Turn in a circle towards <b>{{calle}}</b> for <b>{{distancia}}</b> meters",
+            "ELEVATOR": "Take the elevator",
+            "UTURN_LEFT": "Make a U-turn towards <b>{{calle}}</b> for <b>{{distancia}}</b> meters",
+            "UTURN_RIGHT": "Make a U-turn towards <b>{{calle}}</b> for <b>{{distancia}}</b> meters",
+            "ENTER_STATION": "Enter the station",
+            "EXIT_STATION": "Exit the station",
+            "FOLLOW_SIGNS": "Follow signs towards <b>{{calle}}</b> for <b>{{distancia}}</b> meters"
+        }
+    }
+}
