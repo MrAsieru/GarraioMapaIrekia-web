@@ -30,13 +30,16 @@ import { decode } from "@googlemaps/polyline-codec";
   imports: [IonicModule, RouterModule],
 })
 export class MapaComponent implements OnInit, OnDestroy {
-  configuracion = {
+  configuracion: {maxzoom: number, bbox_inicial: [number, number, number, number], centro_inicial: [number, number], zoom_inicial: number} = {
     maxzoom: 19,
+    bbox_inicial: [-3.450912, 42.4713392, -1.7292688, 43.4568595], // Euskadi BBOX
+    centro_inicial: [-2.590090, 42.964099],
+    zoom_inicial: 9
   }
   map: maplibregl.Map;
   controlGeolocalizacion: maplibregl.GeolocateControl;
   modalListaElementosDatos: BehaviorSubject<{lineas: ShapePropiedadesVectoriales[], paradas: StopPropiedadesVectoriales[], viajes: ViajePropiedadesVectoriales[]}> | null;
-  
+
   // iconos_paradas = [
   //   {id: 'tram', url: 'assets/map/tram.png'},
   //   {id: 'subway', url: 'assets/map/subway.png'},
@@ -131,15 +134,16 @@ export class MapaComponent implements OnInit, OnDestroy {
           }
         ]
       },
-      center: [-3, 43.1], // starting position [lng, lat]
-      zoom: 9,
+      center: this.configuracion.centro_inicial,
+      zoom: this.configuracion.zoom_inicial,
       maxZoom: this.configuracion.maxzoom - 1,
       attributionControl: false
     });
 
     this.map.on('load', () => {
       this.map.resize();
-
+      this.map.fitBounds(this.configuracion.bbox_inicial, {padding: 50})
+      
       this.map.addControl(new maplibregl.ScaleControl({unit: 'metric'}), 'bottom-left');
       this.controlGeolocalizacion = new maplibregl.GeolocateControl({positionOptions: {enableHighAccuracy: true}, trackUserLocation: true});
       this.map.addControl(new AttributionControl({compact: false}), 'bottom-right');
